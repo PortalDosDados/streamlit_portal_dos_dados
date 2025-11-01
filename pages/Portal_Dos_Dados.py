@@ -2,9 +2,14 @@ import streamlit as st
 
 
 # Foto no topo
-st.image('assets/portal.png', width=120)
+st.image("../streamlit_portal_dos_dados/assets/portal.png", width=160)
 
-st.title("Portal dos Dados")
+# Configurações da página
+st.set_page_config(
+    page_title="Portal dos Dados",       # Título da aba
+    page_icon="assets/portal.png",   # Ícone da aba (pode ser .ico, .png ou emoji)
+    layout="wide"                        # Layout da página (opcional)
+)
 
 st.markdown("""
 🎬 **Fala, pessoal!** 
