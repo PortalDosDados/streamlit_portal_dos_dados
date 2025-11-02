@@ -9,7 +9,7 @@ st.set_page_config(
 )
 
 st.image('assets/power_bi.png', width= 160)
-st.title('Power BI')
+st.header('Power BI')
 st.markdown('''
 O **Power BI** tem sido a minha principal escolha para visualziação de dados, 
 é uma ferramenta simples de utilizar,além de ser a mais utilizado nesse seguimento.

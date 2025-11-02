@@ -10,9 +10,10 @@ st.set_page_config(
 # Foto no topo
 st.image('../streamlit_portal_dos_dados/assets/fundo.jpg', width=1000)
 
-st.markdown('''
-🎬 **Fala, pessoal!** 
+st.header('🎬 **Fala, pessoal!**')
 
+st.markdown('''
+ 
 Sejam bem-vindos ao **Portal dos Dados**, um canal do Youtube com o objetivo de compartilhar conteúdos práticos sobre:
 
 - 🐍 **Python**: scripts e automações para simplificar tarefas do dia a dia  
