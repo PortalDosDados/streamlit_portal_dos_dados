@@ -2,7 +2,7 @@ import streamlit as st
 
 
 # Foto no topo
-st.image("../streamlit_portal_dos_dados/assets/minha_foto.png", width=160)
+st.image("../streamlit_portal_dos_dados/assets/minha_foto.png", width=200)
 
 # Configurações da página
 st.set_page_config(
@@ -11,12 +11,15 @@ st.set_page_config(
     layout="wide"                        # Layout da página (opcional)
 )
 
-# Texto de introdução
+# Página Sobre no estilo direto, sem mencionar paixão
 st.markdown('''
-Olá! Sou **Dione Nascimento**, um profissional com **15 anos de experiência em Manutenção Industrial**. 
+Olá! Sou **Dione Nascimento**, profissional com **15 anos de experiência em Manutenção Industrial**.  
 
-Tenho um canal no YouTube chamado **Portal dos Dados** , onde produzo conteúdos educativos voltados para **profissionais de engenharia e dados**, mostrando como transformar informações em decisões estratégicas e resultados reais.  
+Durante esse tempo, atuei como **professor no SENAI**, experiências que marcou minha trajetória e reforçou meu compromisso com aprendizado e compartilhamento de conhecimento.  
 
+Nos últimos 10 anos, atuo no **ramo siderúrgico**, desenvolvendo projetos de **confiabilidade mecânica** e aplicando metodologias de manutenção para gerar resultados reais.  
 
-**Meu objetivo é ajudar pessoas compartilhando conhecimento, assim como outros fizeram por mim ao longo da minha trajetória**.  
+No meu tempo livre, gosto de **ler e programar**, atividades que me levaram a criar meu projeto pessoal, o **Portal dos Dados**, integrando Engenharia e Ciência de Dados para capacitar profissionais a usar informações de forma estratégica.
 ''')
+# Foto no topo
+st.image('../streamlit_portal_dos_dados/assets/fundo.jpg', width=1000)

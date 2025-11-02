@@ -2,7 +2,7 @@ import streamlit as st
 
 # Configurações da página
 st.set_page_config(
-    page_title='Portal dos Dados',       # Título da aba
+    page_title='Dione Nascimento - Portal dos Dados',       # Título da aba
     page_icon='assets/portal.png',       # Ícone da aba (pode ser .ico, .png ou emoji)
     layout='wide'                        # Layout da página (opcional)
 )

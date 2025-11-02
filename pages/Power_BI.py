@@ -1,7 +1,15 @@
 import streamlit as st
 
 
-st.title("📈 Power BI")
+# Configurações da página
+st.set_page_config(
+    page_title='Dione Nascimento - Power BI',       # Título da aba
+    page_icon='assets/power_bi.png',   # Ícone da aba (pode ser .ico, .png ou emoji)
+    layout='wide'                        # Layout da página (opcional)
+)
+
+st.image('assets/power_bi.png', width= 160)
+st.title("Power BI")
 st.markdown("""
 O **Power BI** permite visualizar dados de forma clara, interativa e estratégica. Com dashboards inteligentes, você consegue transformar números em decisões.
 """)
