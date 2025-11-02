@@ -12,21 +12,6 @@ st.set_page_config(
     layout="wide"                        # Layout da página (opcional)
 )
 
-# Fundo da página (CSS)
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background-image: url('https://www.example.com/seu_fundo.png');
-        background-size: cover;   /* cobre toda a tela */
-        background-attachment: fixed;  /* mantém fixo ao rolar */
-        background-position: center;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 # Texto de introdução
 st.markdown('''
 Olá! Sou **Dione Nascimento**, um profissional com **15 anos de experiência em Manutenção Industrial**. 
