@@ -33,13 +33,12 @@ st.markdown('''
 
 <p>Olá! Sou <b>Dione Nascimento</b>, profissional com <b>15 anos de experiência em Manutenção Industrial</b>, com foco em <b>Confiabilidade Mecânica e Análise de Dados</b>. Atuo aplicando metodologias de manutenção integradas a soluções de Business Intelligence, transformando dados em informações estratégicas para apoiar a tomada de decisão.</p>
 
-<p>Minha trajetória começou no SENAI, onde fui <b>jovem aprendiz e professor</b>. Essas experiências me ensinaram disciplina, prática e o valor de compartilhar conhecimento de forma objetiva.</p>
+<p>Minha trajetória começou no SENAI, onde fui <b>jovem aprendiz e professor</b>, essas experiências me ensinaram disciplina, prática e o valor de compartilhar conhecimento de forma objetiva.</p>
 
 <p>Nos últimos 10 anos, atuei no <b>ramo siderúrgico</b>, desenvolvendo projetos que combinam <b>confiabilidade de equipamentos, digitalização da manutenção e análise de dados</b>. Transformo informações de campo em indicadores estratégicos, automatizo relatórios e otimizo planos de manutenção, sempre com foco em resultados concretos.</p>
 
-<p>Fora do trabalho, gosto de <b>ler e programar</b>. Foi dessa rotina que nasceu meu projeto pessoal, o <b>Portal dos Dados</b>, que conecta Engenharia e Ciência de Dados, ajudando profissionais a tomar decisões estratégicas usando dados de verdade.</p>
+<p>Fora do trabalho, gosto de <b>ler e programar</b>, foi dessa rotina que nasceu meu projeto pessoal, o <b>Portal dos Dados</b>, que conecta <b>Engenharia</b> e <b>Ciência de Dados</b>, ajudando profissionais a tomar decisões estratégicas usando dados de verdade.</p>
 
-<p>Meu foco é sempre <b>prática, aprendizado contínuo e resultados reais</b>. Aqui compartilho o que funciona no dia a dia e busco ajudar quem quer aplicar dados na manutenção e na engenharia de forma eficiente.</p>
 <br><br>
 <p><b>🗂️ Projetos Relevantes:</b></p>
 
