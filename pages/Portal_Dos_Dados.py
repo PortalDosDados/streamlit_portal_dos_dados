@@ -23,7 +23,7 @@ Sejam bem-vindos ao **Portal dos Dados**, um canal do Youtube com o objetivo de 
 - 🗄️ **SQL**: consultas e manipulação de dados aplicadas à engenharia  
 - ⚡ **Dicas de produtividade**: técnicas para otimizar seu trabalho com dados
 
-Este canal é feito para você que quer **aprender na prática, aplicar conhecimento e gerar resultados reais**.  
+Este canal é feito para você que quer **aprender na prática, aplicar conhecimento e gerar resultados reais**. 
 Se você curte dados, tecnologia e soluções inteligentes, aqui é o seu lugar!  
 
 **Vamos juntos transformar dados em valor real!** 
