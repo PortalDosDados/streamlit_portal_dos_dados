@@ -1,25 +1,71 @@
 import streamlit as st
 
-
-# Foto no topo
-st.image('./assets/minha_foto.png', width=200)
-
 # Configurações da página
 st.set_page_config(
-    page_title="Dione Nascimento",       # Título da aba
-    page_icon="assets/portal.png",   # Ícone da aba (pode ser .ico, .png ou emoji)
-    layout="wide"                        # Layout da página (opcional)
+    page_title='Dione Nascimento',
+    page_icon='assets/portal.png',
+    layout='wide'
 )
 
-# Página Sobre no estilo direto, sem mencionar paixão
+# Cria duas colunas: uma para a imagem e outra para o texto
+col1, col2 = st.columns([1, 2])  # Ajuste os números para proporção desejada
+
+
+st.image('./assets/minha_foto.png', width=300)
+
+
+# Estilo global para parágrafos e listas
 st.markdown('''
-Olá! Sou **Dione Nascimento**, profissional com **15 anos de experiência em Manutenção Industrial**.  
+<style>
+p {
+    margin-bottom: 8px;
+}
+ul {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+</style>
+''', unsafe_allow_html=True)
 
-Durante esse tempo, atuei como **professor no SENAI**, experiências que marcou minha trajetória e reforçou meu compromisso com aprendizado e compartilhamento de conhecimento.  
+# Conteúdo "Sobre mim"
+st.markdown('''
+<div style="text-align: justify;">
 
-Nos últimos 10 anos, atuo no **ramo siderúrgico**, desenvolvendo projetos de **confiabilidade mecânica** e aplicando metodologias de manutenção para gerar resultados reais.  
+<p>Olá! Sou <b>Dione Nascimento</b>, profissional com <b>15 anos de experiência em Manutenção Industrial</b>, com foco em <b>Confiabilidade Mecânica e Análise de Dados</b>. Atuo aplicando metodologias de manutenção integradas a soluções de Business Intelligence, transformando dados em informações estratégicas para apoiar a tomada de decisão.</p>
 
-No meu tempo livre, gosto de **ler e programar**, atividades que me levaram a criar meu projeto pessoal, o **Portal dos Dados**, integrando Engenharia e Ciência de Dados para capacitar profissionais a usar informações de forma estratégica.
-''')
-# Foto no topo
-st.image('../streamlit_portal_dos_dados/assets/fundo.jpg', width=1000)
+<p>Minha trajetória começou no SENAI, onde fui <b>jovem aprendiz e professor</b>. Essas experiências me ensinaram disciplina, prática e o valor de compartilhar conhecimento de forma objetiva.</p>
+
+<p>Nos últimos 10 anos, atuei no <b>ramo siderúrgico</b>, desenvolvendo projetos que combinam <b>confiabilidade de equipamentos, digitalização da manutenção e análise de dados</b>. Transformo informações de campo em indicadores estratégicos, automatizo relatórios e otimizo planos de manutenção, sempre com foco em resultados concretos.</p>
+
+<p>Fora do trabalho, gosto de <b>ler e programar</b>. Foi dessa rotina que nasceu meu projeto pessoal, o <b>Portal dos Dados</b>, que conecta Engenharia e Ciência de Dados, ajudando profissionais a tomar decisões estratégicas usando dados de verdade.</p>
+
+<p>Meu foco é sempre <b>prática, aprendizado contínuo e resultados reais</b>. Aqui compartilho o que funciona no dia a dia e busco ajudar quem quer aplicar dados na manutenção e na engenharia de forma eficiente.</p>
+<br><br>
+<p><b>🗂️ Projetos Relevantes:</b></p>
+
+<p><b>📌 Implantação da Metodologia RCM (Reliability Centered Maintenance)</b></p>
+<ul>
+<li>Classificação da criticidade dos ativos;</li>
+<li>Elaboração de FMEAs para equipamentos críticos;</li>
+<li>Criação e estruturação dos planos de manutenção no SAP PM.</li>
+</ul>
+<p>✅ Resultado: manutenção estruturada e alinhada à criticidade dos equipamentos.</p>
+<br>
+<p><b>📌 Portal de Indicadores de Manutenção</b></p>
+<ul>
+<li>Mapeamento e padronização dos KPIs do setor;</li>
+<li>Integração de dados de múltiplas fontes (SAP, MES, SGI);</li>
+<li>Construção de dashboards gerenciais no Power BI.</li>
+</ul>
+<p>✅ Resultado: centralização das informações e agilidade na tomada de decisão.</p>
+<br>
+<p><b>📌 Aplicativo para Gestão de Demandas (Power Platform)</b></p>
+<ul>
+<li>Levantamento de requisitos junto aos stakeholders;</li>
+<li>Modelagem da base de dados no SharePoint;</li>
+<li>Desenvolvimento do aplicativo no Power Apps e integração com Power BI.</li>
+</ul>
+<p>✅ Resultado: digitalização do processo de gestão de demandas, com maior controle e visibilidade operacional.</p>
+
+</div>
+''', unsafe_allow_html=True)
