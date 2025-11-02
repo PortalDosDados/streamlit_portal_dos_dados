@@ -2,7 +2,7 @@ import streamlit as st
 
 
 # Foto no topo
-st.image("../streamlit_portal_dos_dados/assets/minha_foto.png", width=200)
+st.image('./assets/minha_foto.png', width=200)
 
 # Configurações da página
 st.set_page_config(
