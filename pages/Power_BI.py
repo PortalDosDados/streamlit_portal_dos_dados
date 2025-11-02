@@ -30,13 +30,13 @@ a eficiência operacional.
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.image('./assets/log_01.png', width=450)
+    st.image('./assets/log_01.png', width=400)
 
 with col2:
-    st.image('./assets/log_02.png', width=450)
+    st.image('./assets/log_02.png', width=400)
 
 with col3:
-    st.image('./assets/log_03.png', width=450)
+    st.image('./assets/log_03.png', width=400)
 
 
 st.subheader('Principais Análises e Recursos do Painel')
@@ -55,35 +55,24 @@ st.markdown('''
 
 - **Desempenho Operacional Mensal (Quantidade de Viagens)**:
 
-    O gráfico de barras monitora o volume de viagens mês a mês, permitindo identificar sazonalidades. O pico operacional ocorreu em julho, com 2,9 mil viagens.
+    - O gráfico de barras monitora o volume de viagens mês a mês, permitindo identificar sazonalidades. O pico operacional ocorreu em julho, com 2,9 mil viagens.
 
-    Ao interagir com o gráfico (como visto na imagem 3), é possível ver o detalhamento total de entregas (23.690), segmentadas entre Entregas no Prazo (17.086) e Entregas Atrasadas (6.604).
+    - Ao interagir com o gráfico (como visto na imagem 3), é possível ver o detalhamento total de entregas (23.690), segmentadas entre Entregas no Prazo (17.086) e Entregas Atrasadas (6.604).
 
-    KPI de Eficiência (Entregas no Prazo):
+    - KPI de Eficiência (Entregas no Prazo):
 
-    Um medidor (gauge) dedicado monitora um dos KPIs mais críticos da logística.
+    - Um medidor (gauge) dedicado monitora um dos KPIs mais críticos da logística.
 
-    O desempenho atual é de 72,12% de entregas no prazo, indicando um ponto de atenção, pois está abaixo da meta estabelecida de 85%.
+    - O desempenho atual é de 72,12% de entregas no prazo, indicando um ponto de atenção, pois está abaixo da meta estabelecida de 85%.
 
 - **Análise Detalhada de Custos de Manutenção**:
 
     Esta seção aprofunda a análise de uma das principais fontes de custo variável: a manutenção da frota, que totalizou R$ 194.960,07.
 
-    O dashboard divide esse custo por Marca de Veículo (sendo a Mercedes-Benz a de maior custo, com R$ 59,1 mil) e por Tipo de Veículo (liderado pelo TOCO, com R$ 17,3 mil).
+    O dashboard divide esse custo por Marca de Veículo, (sendo a Mercedes-Benz a de maior custo, com 59,1 mil Reais) e por Tipo de Veículo (liderado pelo TOCO, com 17,3 mil Reais).
 
     Os tooltips interativos (vistos na imagem 2) permitem detalhar ainda mais os custos operacionais, como Combustível e KMs Rodados, para análises mais granulares.
-                
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+               
 ''')
 
 
