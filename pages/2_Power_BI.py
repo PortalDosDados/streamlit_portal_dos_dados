@@ -59,7 +59,7 @@ st.markdown('''
 
     - Ao interagir com o gráfico (como visto na imagem 3), é possível ver o detalhamento total de entregas (23.690), segmentadas entre Entregas no Prazo (17.086) e Entregas Atrasadas (6.604).
 
-    - KPI de Eficiência (Entregas no Prazo):
+- **KPI de Eficiência (Entregas no Prazo)**:
 
     - Um medidor (gauge) dedicado monitora um dos KPIs mais críticos da logística.
 
@@ -83,7 +83,7 @@ Este dashboard oferece uma visão executiva e detalhada da execução financeira
 especificamente para o monitoramento de um grande orçamento (neste caso, público ou corporativo).
 
 O painel centraliza os principais indicadores de compromisso orçamentário (empenho) e pagamento, 
-permitindo que os gestores (representados pela "Equipe A") analisem a performance financeira, 
+permitindo que os gestores analisem a performance financeira, 
 identifiquem gargalos e entendam a distribuição dos gastos.
 ''')
 
@@ -97,8 +97,6 @@ with col2:
     st.image('./assets/fin_02.png', width=700)
 
 st.subheader('Principais Análises e Recursos do Painel')
-
-
 
 
 st.markdown('''

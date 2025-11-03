@@ -7,6 +7,8 @@ st.set_page_config(
     layout='wide'
 )
 
+
+
 # Cria duas colunas: uma para a imagem e outra para o texto
 col1, col2 = st.columns([1, 2])  # Ajuste os números para proporção desejada
 
