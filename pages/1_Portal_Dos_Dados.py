@@ -29,7 +29,7 @@ Se você curte dados, tecnologia e soluções inteligentes, aqui é o seu lugar!
 
 **Vamos juntos transformar dados em valor real!** 
 
-Clique no link abaixo 👇
+Clique no link abaixo para saber mais 👇
 
-[Portal dos Dados no YouTube](https://www.youtube.com/@Portal_dos_Dados)
+🔗[Portal dos Dados no YouTube](https://www.youtube.com/@Portal_dos_Dados)
 ''')
