@@ -126,3 +126,92 @@ st.markdown('''
 ''')
 
 
+st.subheader('Dashboard Análise da Folha de Pagamento')
+st.markdown('''
+Este projeto demonstra a construção de uma solução completa de Business Intelligence, 
+cobrindo todo o pipeline de dados, desde a extração e transformação (ETL) até a 
+modelagem de dados e a visualização final em um dashboard interativo.
+
+O objetivo é analisar a folha de pagamento dos Funcionários Municipais de Fortaleza "PMF", 
+fornecendo transparência e insights acionáveis sobre os custos com pessoal, 
+distribuição salarial e estrutura organizacional.
+''')
+
+# Criando três colunas para as imagens
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.image('./assets/pmf_01.png', width=700)
+
+with col2:
+    st.image('./assets/pmf_02.jpg', width=700)
+
+with col3:
+    st.image('./assets/pmf_03.jpg', width=700)
+    
+
+st.subheader('Principais Análises e Recursos do Painel')
+
+st.markdown('''
+            
+- **ETL (Extract, Transform, Load) com Pentaho**:
+    - A base do projeto começa com a engenharia de dados, utilizando o Pentaho Data Integration (Spoon),
+    foi construído um processo de ETL robusto;
+
+    - Extração: Os dados brutos são lidos de uma fonte primária (Table input);
+
+    - Transformação e Enriquecimento: O fluxo realiza várias operações de Database lookup para buscar 
+    chaves e informações em tabelas auxiliares (como dimensão de cargo, pessoa, órgão, etc.);
+
+    - Carga: Os dados limpos e estruturados são carregados em um Data Warehouse, preenchendo a tabela 
+    fato_pagamento (Tabela Fato) e as tabelas de dimensão que a cercam;     
+       
+- **Modelagem de Dados (Data Warehouse)**:     
+            
+    - Após o ETL, os dados são armazenados de forma otimizada para análise, seguindo as melhores 
+    práticas de modelagem;
+
+    - Banco de Dados: Um banco de dados (PostgreSQL, visível na Imagem 2) armazena 
+    as tabelas limpas. A Imagem 2 mostra a tabela fato_pagamento finalizada, já contendo as chaves 
+    estrangeiras (id_pessoa, id_cargo, id_orgao) e as métricas (proventos, descontos, liquido);
+
+    - Modelo Estrela (Star Schema): Dentro do Power BI (Imagem 3), os dados são organizados em um Modelo 
+    Estrela perfeito;
+
+    - Tabela Fato: A public.fato_pagamento fica no centro, contendo todas as métricas financeiras;
+
+    - Tabelas Dimensão: Ela é cercada por dimensões que dão contexto aos dados (dim_orgao, dim_cargo, 
+    dim_pessoa, dim_grau_de_instrucao, dim_tempo);
+
+    - Este modelo é a fundação que garante a alta performance e a facilidade para criar as análises no dashboard;
+                
+- **Modelagem de Dados (Data Warehouse)**:  
+    
+    - A etapa final é a visualização (Imagem 1), onde os dados modelados são apresentados aos gestores para a 
+    tomada de decisão:
+
+    - KPIs Principais: O dashboard exibe uma visão macro imediata:
+
+    - Total de Órgãos: 81
+
+    - Total de Servidores: 66.310
+
+    - Total de Proventos: R$ 451.963.336
+
+- **Filtros Interativos: O usuário pode segmentar a análise por Ano, Mês, Órgão e Matrícula**.
+
+    - Análises de Média Salarial;
+
+    - Por Grau de Instrução (Treemap): Mostra visualmente a distribuição e a média salarial por 
+    nível de formação, desde "Residência Médica" e "Doutorado" até "Ensino Primário";
+
+    - Por Cargo (Gráfico de Barras): Ranqueia a média salarial por cargo, destacando os maiores valores,
+    como "Consultor Tec Adm" (R\$ 68 mil) e "Procurador Geral" (R\$ 43 mil);
+
+    - Tabela de Detalhes: Fornece uma visão granular em nível de servidor, permitindo a consulta de valores
+    individuais de proventos, descontos e valor líquido, com a data de pagamento;
+            
+            
+            
+            
+''')
