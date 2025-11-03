@@ -6,6 +6,7 @@ import seaborn as sns
 import yfinance as yf
 import warnings
 
+
 # Configurações da página
 st.set_page_config(
     page_title='Dione Nascimento - Python',       # Título da aba
@@ -117,3 +118,4 @@ st.markdown('''
     - Warnings: Utilizada para suprimir avisos e limpar a saída do console.
      
 ''')
+
