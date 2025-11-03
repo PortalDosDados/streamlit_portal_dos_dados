@@ -41,43 +41,7 @@ st.markdown('''
 
 <p>Fora do trabalho, gosto de <b>ler e programar</b>, foi dessa rotina que nasceu meu projeto pessoal, o <b>Portal dos Dados</b>, que conecta <b>Engenharia</b> e <b>Ciência de Dados</b>, ajudando profissionais a tomar decisões estratégicas usando dados de verdade.</p>
 
-<br><br>
-<p><b>🗂️ Projetos Relevantes:</b></p>
-
-
-<p><b>📌 Portal de Indicadores de Manutenção</b></p>
-<ul>
-<li>Mapeamento e padronização dos KPIs do setor;</li>
-<li>Integração de dados de múltiplas fontes (SAP, MES, SGI);</li>
-<li>Construção de dashboards gerenciais no Power BI.</li>
-</ul>
-<p>✅ Resultado: centralização das informações e agilidade na tomada de decisão.</p>
-<br>
-<p><b>📌 Aplicativo para Gestão de Demandas (Power Apps)</b></p>
-<ul>
-<li>Levantamento de requisitos junto aos stakeholders;</li>
-<li>Modelagem da base de dados no SharePoint;</li>
-<li>Desenvolvimento do aplicativo no Power Apps e integração com Power BI.</li>
-</ul>
-<p>✅ Resultado: digitalização do processo de gestão de demandas, com maior controle e visibilidade operacional.</p>
-<p>
-<br>
-<p><b>📌 Aplicativo para Gerenciamento de Resíduos (Power Apps)</b></p>
-<ul>
-<li>Levantamento de requisitos junto aos responsáveis pelo setor de resíduos;</li>
-<li>Modelagem da base de dados no SharePoint, contemplando categorias, volumes e fluxos;</li>
-<li>Desenvolvimento do aplicativo no Power Apps e integração com dashboards no Power BI.</li>
-</ul>
-<p>✅ Resultado: controle e monitoramento eficiente dos resíduos, com maior rastreabilidade e tomada de decisão baseada em dados.</p>
-
-<br>
-<b>📌 Implantação da Metodologia RCM (Reliability Centered Maintenance)</b></p>
-<ul>
-<li>Classificação da criticidade dos ativos;</li>
-<li>Elaboração de FMEAs para equipamentos críticos;</li>
-<li>Criação e estruturação dos planos de manutenção no SAP PM.</li>
-</ul>
-<p>✅ Resultado: manutenção estruturada e alinhada à criticidade dos equipamentos.</p>
-<br>
 </div>
 ''', unsafe_allow_html=True)
+
+st.markdown('''🔗[Clique aqui para saber mais](https://www.linkedin.com/in/dione-nascimento-37287a233)''')
