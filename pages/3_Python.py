@@ -60,7 +60,6 @@ if st.button('Gerar gráfico'):
 
         # Médias móveis
         df['MA_21'] = df['Close'].rolling(window=21).mean()
-        df['MA_50'] = df['Close'].rolling(window=50).mean()
         df['MA_200'] = df['Close'].rolling(window=200).mean()
 
         # ---------------------------
@@ -70,8 +69,7 @@ if st.button('Gerar gráfico'):
         plt.figure(figsize=(12, 6))
 
         sns.lineplot(x=df['Date'], y=df['Close'], label='Preço de Fechamento', color='blue', linewidth=2)
-        sns.lineplot(x=df['Date'], y=df['MA_21'], label='Média Móvel 21 dias', color='orange', linewidth=2)
-        sns.lineplot(x=df['Date'], y=df['MA_50'], label='Média Móvel 50 dias', color='green', linewidth=2)
+        sns.lineplot(x=df['Date'], y=df['MA_21'], label='Média Móvel 21 dias', color='green', linewidth=2)
         sns.lineplot(x=df['Date'], y=df['MA_200'], label='Média Móvel 200 dias', color='red', linewidth=2)
 
         plt.title(f'Preço de Fechamento e Médias Móveis de {ticker}', fontsize=16)
