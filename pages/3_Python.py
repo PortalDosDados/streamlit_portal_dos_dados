@@ -21,7 +21,7 @@ st.header('Python')
 # Título do dashboard
 # ---------------------------
 st.markdown('''
-    <h2 style='color:#00E0B8; font-family: Montserrat, sans-serif;'>🧠 Análise Técnica de Séries Temporais com Python</h2>
+    <h3 style='color:#00E0B8; font-family: Montserrat, sans-serif;'> Análise Técnica de Séries Temporais com Python</h3>
 ''', unsafe_allow_html=True)
 
 st.markdown('''
