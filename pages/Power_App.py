@@ -1,26 +1,35 @@
 import streamlit as st
 
-# Configurações da página (deve ser o primeiro comando Streamlit)
+# Configurações da página 
 st.set_page_config(
-    page_title='Portfólio - Controle de Ferramentaria',  # Título da aba
-    page_icon='🧰',  # Ícone (emoji é mais simples)
+    page_title='Dione Nascimento - Power Apps',  
+    page_icon='assets/power_apps.png',  
     layout='wide'     # Layout da página
 )
 
 # --- Seção do Header ---
 st.image('assets/power_apps.png', width=160)
-st.title('Aplicativo de Controle de Ferramentaria (Power Apps)')
+st.header('Power Apps')
 st.markdown('''
-Com o **Power Apps**, é possível criar aplicativos corporativos de forma rápida, intuitiva e sem necessidade de programação avançada.
+O Power Apps é o meu 'canivete suíço' para digitalização de processos, quando 
+vejo uma rotina que pode ser otimizada, como um formulário de papel ou uma planilha 
+confusa, eu vejo uma oportunidade para um app.
+Gosto da plataforma pela sua rapidez em criar soluções robustas que se integram perfeitamente
+ao ecossistema Microsoft. O objetivo é sempre o mesmo: 
+
+"Facilitar a vida do usuário na ponta
+e gerar dados mais limpos para a gestão".
+
+Abaixo estão alguns projetos que construí.
 ''')
+
+st.divider()
 
 st.subheader('Controle de Ferramentaria')
 st.markdown('''
 O objetivo principal do aplicativo é rastrear o inventário de ferramentas, 
 gerenciar quem as utiliza e saber seu status atual.
 ''')
-
-st.divider()
 
 # --- Galeria de Imagens ---
 st.subheader('Visão Geral do Aplicativo')
@@ -116,7 +125,7 @@ st.divider()
 
 # --- PROJETO 2: GERENCIAMENTO DE PENDÊNCIAS ---
 
-st.title('Aplicativo de Gerenciamento de Pendências (Power Apps)')
+st.header('Aplicativo de Gerenciamento de Pendências')
 st.markdown('''
 Este aplicativo funciona como um sistema de rastreamento de tarefas ou problemas 
 (como ordens de serviço) para equipes operacionais ou de manutenção.
