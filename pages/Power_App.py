@@ -56,7 +56,6 @@ with col4:
         
     )
 
-st.divider()
 
 # --- Descrição Detalhada ---
 st.subheader('Funcionalidades de Cada Tela')
@@ -151,7 +150,6 @@ with col3:
     )
 
 
-st.divider()
 
 # --- Descrição Detalhada App 2 ---
 st.subheader('Funcionalidades de Cada Tela')
