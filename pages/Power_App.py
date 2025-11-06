@@ -26,4 +26,4 @@ with col3:
     st.image('./assets/app_ferr_03.jpeg', width=700)
 
 with col4:
-    st.image('./assets/app_ferr_04.jpeg', width=700)
+    st.image('./assets/app_ferr_04.jpeg', width=500)
