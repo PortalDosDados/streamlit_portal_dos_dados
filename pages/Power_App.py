@@ -74,9 +74,9 @@ with st.expander("**1. Tela Inicial (Boas-vindas)**"):
     st.markdown('''
     * **Propósito:** É a tela de entrada do aplicativo.
     * **Recursos:**
-        * Mostra uma saudação personalizada ao usuário logado ("Olá, Alcine Moreira...").
+        * Mostra uma saudação personalizada ao usuário logado ("Olá + nome do usuário").
         * Possui um botão claro ("Toque para Começar") para navegar para a próxima tela.
-        * Identifica o desenvolvedor ("Desenvolvido por: Diogo Nascimento").
+        * Identifica o desenvolvedor ("Desenvolvido por: Dione Nascimento (esse aqui escrevendo)").
     ''')
 
 with st.expander("**2. Tela de Lista (Inventário)**"):
@@ -88,7 +88,7 @@ with st.expander("**2. Tela de Lista (Inventário)**"):
             * Uma imagem da ferramenta.
             * O nome da ferramenta (ex: "Chave de boca", "Marreta", "Máquina de solda").
             * O **Status** atual (ex: "Disponível", "Em conserto", "Queimado").
-        * **Botão de Adicionar ("+"):** Provavelmente usado para cadastrar novas ferramentas no inventário.
+        * **Botão de Adicionar ("+"):** Usado para cadastrar novas ferramentas no inventário.
     ''')
 
 with st.expander("**3. Tela de Detalhes (Modo de Visualização)**"):
@@ -100,7 +100,7 @@ with st.expander("**3. Tela de Detalhes (Modo de Visualização)**"):
             * Status: Disponível
             * Modelo: 5Kgs
             * Data de empréstimo: 25/11/2024
-            * Nome do solicitante: Ferramentaria (indicando que está "em casa" ou no local de origem).
+            * Nome do solicitante: Ferramentaria (indicando que esta no estoque).
             * Observações da condição: (vazio)
     ''')
 
@@ -110,7 +110,7 @@ with st.expander("**4. Tela de Edição (Modo de Empréstimo/Devolução)**"):
     * **Recursos:**
         * Os campos agora são editáveis (caixas de texto, listas suspensas, seletores de data/hora).
         * **Controle de Empréstimo:** O usuário pode:
-            * Mudar o Status (provavelmente de "Disponível" para "Emprestado").
+            * Mudar o Status ("Disponível" para "Emprestado").
             * Digitar o Nome do solicitante.
             * Registrar a Data de empréstimo e a Data de devolução prevista.
             * Adicionar Observações (ex: "ferramenta com pequena avaria").
@@ -167,7 +167,7 @@ with st.expander("**1. Tela Inicial (Boas-vindas)**"):
     st.markdown('''
     * **Propósito:** Tela de entrada padrão do aplicativo.
     * **Recursos:**
-        * Saúda o usuário logado ("Olá, Dione Morrone...").
+        * Saúda o usuário logado ("Olá + Nome do usuário").
         * Título claro: "Gerenciamento de Pendências".
         * Botão "Toque para começar" para navegar à tela principal.
     ''')
