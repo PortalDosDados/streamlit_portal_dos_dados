@@ -215,3 +215,10 @@ st.markdown('''
             
             
 ''')
+
+
+st.title("Meu Dashboard Power BI")
+
+powerbi_url = "https://app.powerbi.com/reportEmbed?reportId=d472eaa0-bed3-49e5-80ab-c6778977d0c6&autoAuth=true&ctid=da49a844-e2e3-40af-86a6-c3819d704f49"
+
+st.components.v1.iframe(powerbi_url, height=800, scrolling=True)
