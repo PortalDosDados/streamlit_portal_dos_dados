@@ -81,20 +81,7 @@ a eficiência operacional.
 
 powerbi_url = "https://app.powerbi.com/reportEmbed?reportId=b40c8b5e-e562-4591-b920-61884a06ae3e&autoAuth=true&ctid=da49a844-e2e3-40af-86a6-c3819d704f49"
 st.components.v1.iframe(powerbi_url, height=900, scrolling=True)
-'''
-# Criando três colunas para as imagens
-col1, col2, col3 = st.columns(3)
 
-with col1:
-    st.image('./assets/log_01.png', width=700)
-
-with col2:
-    st.image('./assets/log_02.png', width=700)
-
-with col3:
-    st.image('./assets/log_03.png', width=700)
-
-'''
 st.subheader('Principais Análises e Recursos do Painel')
 
 st.markdown('''
