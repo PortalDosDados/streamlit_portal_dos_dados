@@ -8,6 +8,16 @@ st.set_page_config(
     layout='wide'                        # Layout da página (opcional)
 )
 
+
+st.image('assets/power_bi.png', width= 160)
+st.header('Power BI')
+st.markdown('''
+O **Power BI** tem sido a minha principal escolha para visualziação de dados, 
+é uma ferramenta simples de utilizar,além de ser a mais utilizado nesse seguimento.
+Seguem alguns projetos que fiz e que posso compatilhar, a maior parte dos meus trabalhos foram realizados 
+para a empresa que atuo hoje, não podendo compartilhar aqui.
+''')
+
 st.subheader('Dashboard Eleições Presidenciais')
 
 st.markdown('''
@@ -59,15 +69,6 @@ Este painel transforma dados brutos das eleições em visualizações simples, r
 ''')
 
 
-
-st.image('assets/power_bi.png', width= 160)
-st.header('Power BI')
-st.markdown('''
-O **Power BI** tem sido a minha principal escolha para visualziação de dados, 
-é uma ferramenta simples de utilizar,além de ser a mais utilizado nesse seguimento.
-Seguem alguns projetos que fiz e que posso compatilhar, a maior parte dos meus trabalhos foram realizados 
-para a empresa que atuo hoje, não podendo compartilhar aqui.
-''')
 
 st.subheader('Dashboard Logístico Interativo')
 st.markdown('''
