@@ -217,8 +217,52 @@ st.markdown('''
 ''')
 
 
-st.title("Meu Dashboard Power BI")
+st.subheader('Dashboard Eleições Presidenciais')
+
+st.markdown('''
+Este projeto apresenta uma análise completa das eleições presidenciais no Brasil.
+A ideia é transformar dados dispersos em uma visualização clara, organizada e útil para entender o comportamento do eleitorado em cada estado.
+
+O painel mostra como os votos se distribuem pelo país, compara candidatos, destaca quem lidera em cada região e oferece uma visão geral dos números que realmente importam.
+''')
+
+st.subheader('Visualização do Dashboard')
+st.markdown('''
+Abaixo está o relatório interativo publicado no Power BI.
+Ele permite explorar filtros de ano, turno e estado, além de analisar o desempenho de cada candidato ao longo do país.
+''')
 
 powerbi_url = "https://app.powerbi.com/reportEmbed?reportId=d472eaa0-bed3-49e5-80ab-c6778977d0c6&autoAuth=true&ctid=da49a844-e2e3-40af-86a6-c3819d704f49"
+st.components.v1.iframe(powerbi_url, height=900, scrolling=True)
 
-st.components.v1.iframe(powerbi_url, height=800, scrolling=True)
+st.subheader('Principais recursos e análises do painel')
+
+st.markdown('''
+- **Visão nacional de votos**  
+  A distribuição dos votos por estado é apresentada em um mapa interativo.
+  Facilita entender onde cada candidato performou melhor e como o voto se espalhou pelo país.
+
+- **Comparação entre candidatos**  
+  Um gráfico de barras mostra rapidamente quem lidera a disputa e com qual porcentagem.
+  Ideal para comparar desempenho lado a lado.
+
+- **Candidato mais votado**  
+  O painel destaca automaticamente o mais votado com sua foto, partido e percentual de votos.
+
+- **Ranking detalhado**  
+  Uma tabela lista todos os candidatos, com número, partido e ano da eleição.
+  Transparência total sobre quem concorreu e como ficou posicionado.
+
+- **Treemap por estado**  
+  Exibe o peso relativo de cada estado no total de votos.
+  Mostra quem realmente puxa a eleição e onde estão os maiores colégios eleitorais.
+
+- **Filtros interativos**  
+  Permitem navegar por:
+  - Ano  
+  - Turno  
+  - Estado  
+  Tornando a análise dinâmica e ajustável ao cenário desejado.
+
+Este painel transforma dados brutos das eleições em visualizações simples, rápidas e úteis, dando clareza ao processo eleitoral e permitindo explorar o comportamento do eleitor em cada canto do país.
+''')
