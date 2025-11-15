@@ -130,7 +130,7 @@ permitindo que os gestores analisem a performance financeira,
 identifiquem gargalos e entendam a distribuição dos gastos.
 ''')
 
-powerbi_url = "https://app.powerbi.com/reportEmbed?reportId=d3528f3c-173a-415d-b3f5-e58fe0bd73c2&autoAuth=true&ctid=da49a844-e2e3-40af-86a6-c3819d704f49"
+powerbi_url = "https://www.youtube.com/watch?v=hQVrG6j-OMs"
 st.components.v1.iframe(powerbi_url, height=900, scrolling=True)
 
 
