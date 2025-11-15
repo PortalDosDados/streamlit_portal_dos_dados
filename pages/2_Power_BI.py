@@ -130,8 +130,14 @@ permitindo que os gestores analisem a performance financeira,
 identifiquem gargalos e entendam a distribuição dos gastos.
 ''')
 
-powerbi_url = ""
-st.components.v1.iframe(powerbi_url, height=900, scrolling=True)
+# Criando três colunas para as imagens
+col1, col2 = st.columns(2)
+
+with col1:
+    st.image('./assets/fin_01.png', width=700)
+
+with col2:
+    st.image('./assets/fin_02.png', width=700)
 
 
 st.subheader('Principais Análises e Recursos do Painel')
