@@ -79,8 +79,8 @@ permitindo uma tomada de decisão rápida e baseada em dados para otimizar custo
 a eficiência operacional.
 ''')
 
-powerbi_url = "https://app.powerbi.com/reportEmbed?reportId=b40c8b5e-e562-4591-b920-61884a06ae3e&autoAuth=true&ctid=da49a844-e2e3-40af-86a6-c3819d704f49"
-st.components.v1.iframe(powerbi_url, height=900, scrolling=True)
+url = "https://www.youtube.com/watch?v=V6D1s--n_oA&t=12s"
+st.video(url)
 
 st.subheader('Principais Análises e Recursos do Painel')
 
