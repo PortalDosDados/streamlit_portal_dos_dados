@@ -33,8 +33,9 @@ Abaixo está o relatório interativo publicado no Power BI.
 Ele permite explorar filtros de ano, turno e estado, além de analisar o desempenho de cada candidato ao longo do país.
 ''')
 
-powerbi_url = "https://app.powerbi.com/reportEmbed?reportId=d472eaa0-bed3-49e5-80ab-c6778977d0c6&autoAuth=true&ctid=da49a844-e2e3-40af-86a6-c3819d704f49"
-st.components.v1.iframe(powerbi_url, height=900, scrolling=True)
+st.title("Vídeo Exemplo no Streamlit")
+url = "https://www.youtube.com/watch?v=hQVrG6j-OMs"
+st.video(url)
 
 st.subheader('Principais recursos e análises do painel')
 
@@ -130,7 +131,7 @@ permitindo que os gestores analisem a performance financeira,
 identifiquem gargalos e entendam a distribuição dos gastos.
 ''')
 
-powerbi_url = "https://www.youtube.com/watch?v=hQVrG6j-OMs"
+powerbi_url = ""
 st.components.v1.iframe(powerbi_url, height=900, scrolling=True)
 
 
