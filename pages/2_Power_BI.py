@@ -33,7 +33,6 @@ Abaixo está o relatório interativo publicado no Power BI.
 Ele permite explorar filtros de ano, turno e estado, além de analisar o desempenho de cada candidato ao longo do país.
 ''')
 
-st.title("Vídeo Exemplo no Streamlit")
 url = "https://www.youtube.com/watch?v=hQVrG6j-OMs"
 st.video(url)
 
