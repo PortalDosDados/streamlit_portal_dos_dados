@@ -194,11 +194,21 @@ if uploaded_file is not None:
 
 else:
     # Tela de Boas-vindas
-    st.info("👋 Bem-vindo, Lorde Soberano. Aguardando o carregamento do ficheiro de dados na barra lateral.")
+    st.info("👋 Bem-vindo ao Analisador de Confiabilidade. Por favor, carregue um ficheiro na barra lateral para iniciar.")
     st.markdown("""
     ### Formato Esperado do Ficheiro:
-    O seu ficheiro Excel ou CSV deve conter colunas para:
-    * **Identificação:** Nome ou Tag do equipamento.
-    * **Início:** Data e Hora do início da falha.
-    * **Fim:** Data e Hora da conclusão do reparo.
+    O seu ficheiro Excel ou CSV deve conter colunas que possam ser mapeadas para os seguintes conceitos. 
+    A aplicação reconhece automaticamente a maioria dos formatos de data e hora.
+
+    **Exemplo da estrutura dos dados:**
+
+    | Equipamento | Inicio_Falha | Fim_Reparo |
+    | :--- | :--- | :--- |
+    | BOMBA-01 | 01/10/2025 08:30 | 01/10/2025 10:45 |
+    | PENEIRA-A | 2025-10-02 15:00 | 2025-10-02 18:20 |
+    | BOMBA-01 | 2025-10-05 03:15 | 2025-10-05 09:00 |
+
+    * **Identificação (Coluna 1):** O nome ou tag do ativo (ex: `BOMBA-01`).
+    * **Início (Coluna 2):** A data e hora exata do início da falha.
+    * **Fim (Coluna 3):** A data e hora exata da conclusão do reparo.
     """)
