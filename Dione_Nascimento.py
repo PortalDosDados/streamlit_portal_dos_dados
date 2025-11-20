@@ -44,9 +44,9 @@ with col2:
 <p>Minha trajetória começou no SENAI, onde atuei como <b>jovem aprendiz</b> e depois como <b>professor</b>. Nos últimos 10 anos, venho trabalhando no <b>setor siderúrgico</b>, desenvolvendo projetos focados em:</p>
 
 <ul>
-<li><b>Confiabilidade de equipamentos</b></li>
-<li><b>Digitalização da manutenção</b></li>
-<li><b>Automação de análises e indicadores</b></li>
+<li>Confiabilidade de equipamentos</li>
+<li>Digitalização da manutenção</li>
+<li>Automação de análises e indicadores</li>
 </ul>
 
 <p>Converto dados de campo em inteligência aplicada, melhoro planos de manutenção e estruturo processos que elevam desempenho e reduzem custos.</p>
