@@ -39,7 +39,17 @@ with col2:
 
 <p>Fora do ambiente corporativo, gosto de <b>ler</b> e <b>programar</b>, dessa rotina nasceu o <b>Portal dos Dados</b>, meu projeto pessoal que conecta <b>Engenharia</b> e <b>Ciência de Dados</b>, ajudando profissionais a tomar decisões estratégicas baseadas em dados reais e aplicáveis ao dia a dia da manutenção.</p>
 
+
 </div>
 ''', unsafe_allow_html=True)
 
-st.markdown('''🔗[Clique aqui para saber mais](https://www.linkedin.com/in/dione-nascimento-37287a233)''')
+st.markdown("""
+<p style='font-size: 20px; font-weight: bold;'>
+🔗 <a href='https://www.linkedin.com/in/dione-nascimento-37287a233' target='_blank'>
+Clique aqui para saber mais
+</a>
+</p>
+""", unsafe_allow_html=True)
+
+st.image('../streamlit_portal_dos_dados/assets/fundo.jpg', width=1000)
+
