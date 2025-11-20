@@ -8,13 +8,13 @@ st.set_page_config(
 )
 
 
-
-# Cria duas colunas: uma para a imagem e outra para o texto
+# Cria duas colunas
 col1, col2 = st.columns([1, 2])  # Ajuste os números para proporção desejada
 
-
-st.image('./assets/minha_foto.png', width=300)
-
+with col1:
+    st.image('./assets/minha_foto.png', width=300)
+with col2:
+    st.image('./assets/fundo.jpg', width=300)
 
 # Estilo global para parágrafos e listas
 st.markdown('''
