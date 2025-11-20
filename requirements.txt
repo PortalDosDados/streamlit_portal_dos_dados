@@ -4,3 +4,4 @@ matplotlib
 seaborn
 yfinance
 plotly.express
+warnings

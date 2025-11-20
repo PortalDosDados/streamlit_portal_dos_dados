@@ -6,116 +6,79 @@ import seaborn as sns
 import yfinance as yf
 import warnings
 
-
-# Configurações da página
+# ============  
+# Configuração da página  
+# ============  
 st.set_page_config(
-    page_title='Dione Nascimento - Python',       # Título da aba
-    page_icon='assets/python.gif',       # Ícone da aba (pode ser .ico, .png ou emoji)
-    layout='wide'                        # Layout da página (opcional)
+    page_title='Dione Nascimento - Python',
+    page_icon='assets/python.gif',
+    layout='wide'
 )
 
-st.image('assets/python.gif', width= 160)
+# ============  
+# Carregar CSS externo (UTF-8 para evitar erro de decodificação)  
+# ============  
+with open("style.css", "r", encoding="utf-8") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-st.header('Python')
+# Logo  
+st.image('assets/python.gif', width=160)
 
-# ---------------------------
-# Título do dashboard
-# ---------------------------
-st.markdown('''
-    <h3 style='color:#00E0B8; font-family: Montserrat, sans-serif;'> Análise Técnica de Séries Temporais com Python</h3>
-''', unsafe_allow_html=True)
+st.subheader('Análise Técnica de Séries Temporais com Python')
 
-st.markdown('''
-Este script é um projeto prático que demonstra o pipeline completo de uma análise de dados financeiros,
-desde a aquisição de dados da web até a visualização de indicadores técnicos.
-O objetivo é analisar a tendência de preço dos ativos, calculando e plotando 
-Médias Móveis Simples (MMS) para identificar tendências de curto e longo prazo.         
-            
-            
-''')
+st.markdown("""
+Este script demonstra um pipeline completo de análise de dados financeiros,
+incluindo aquisição de dados, tratamento, criação de indicadores e visualização
+de séries temporais para análise de tendência.
+""")
 
-# ---------------------------
-# Entradas do usuário
-# ---------------------------
+# ============  
+# Entradas  
+# ============  
 ticker = st.text_input('Digite o ticker: (Ex:BBAS3.SA)', value='BBAS3.SA')
-start_date = st.date_input('Data de início: (Ex: ANO-MES-DIA)', value=pd.to_datetime('2020-01-01'))
-end_date = st.date_input('Data de fim: (Ex: ANO-MES-DIA)', value=pd.to_datetime('2025-12-31'))
+start_date = st.date_input('Data de início:', value=pd.to_datetime('2020-01-01'))
+end_date = st.date_input('Data de fim:', value=pd.to_datetime('2025-12-31'))
 
-# ---------------------------
-# Botão para rodar análise
-# ---------------------------
-if st.button('Gerar gráfico'):
+# ============  
+# Botão estilizado herdado via CSS  
+# ============  
+if st.button('Gerar gráfico', key="grafico-btn"):
 
-    # Baixando dados
     df = yf.download(ticker, start=start_date, end=end_date)
 
     if df.empty:
         st.error('Nenhum dado encontrado para este período.')
     else:
-        # Remove o nível superior do MultiIndex, se existir
         df.columns = df.columns.get_level_values(0)
         df.reset_index(inplace=True)
 
         df['Ticker'] = ticker
         df = df[['Date', 'Ticker', 'Open', 'Close', 'Low', 'High', 'Volume']]
 
-        # Médias móveis
-        df['MA_21'] = df['Close'].rolling(window=21).mean()
-        df['MA_200'] = df['Close'].rolling(window=200).mean()
+        df['MA_21'] = df['Close'].rolling(21).mean()
+        df['MA_200'] = df['Close'].rolling(200).mean()
 
-        # ---------------------------
-        # Plot com Seaborn e Matplotlib
-        # ---------------------------
         sns.set_style('whitegrid')
         plt.figure(figsize=(12, 6))
 
-        sns.lineplot(x=df['Date'], y=df['Close'], label='Preço de Fechamento', color='blue', linewidth=2)
-        sns.lineplot(x=df['Date'], y=df['MA_21'], label='Média Móvel 21 dias', color='green', linewidth=2)
-        sns.lineplot(x=df['Date'], y=df['MA_200'], label='Média Móvel 200 dias', color='red', linewidth=2)
+        sns.lineplot(x=df['Date'], y=df['Close'], label='Preço de Fechamento')
+        sns.lineplot(x=df['Date'], y=df['MA_21'], label='Média Móvel 21 dias')
+        sns.lineplot(x=df['Date'], y=df['MA_200'], label='Média Móvel 200 dias')
 
-        plt.title(f'Preço de Fechamento e Médias Móveis de {ticker}', fontsize=16)
-        plt.xlabel('Data', fontsize=12)
-        plt.ylabel('Preço de Fechamento (USD)', fontsize=12)
+        plt.title(f'Preço e Médias Móveis de {ticker}', fontsize=16)
+        plt.xlabel('Data')
+        plt.ylabel('Preço')
         plt.legend()
         plt.tight_layout()
 
-        # Exibir o gráfico no Streamlit
         st.pyplot(plt)
-        
-st.markdown('''
 
-- Aquisição de Dados:
-
-    - A biblioteca yfinance é utilizada para se conectar à API do Yahoo Finance e baixar o histórico de cotações do ticker.
-
-- Tratamento e Preparação (Data Wrangling):
-
-    - A biblioteca pandas é usada para organizar os dados, o DataFrame baixado é limpo, o índice é redefinido e as colunas são reestruturadas para focar apenas nas informações essenciais (Data, Ticker, Preços de Abertura/Fechamento, etc.).
-
-- Engenharia de Features (Criação de Indicadores):
-
-    - Para entender as tendências, novas colunas são criadas usando a função .rolling() do pandas:
-
-    - Média Móvel de 21 dias (MA_21): Um indicador de tendência de curto prazo.
-
-    - Média Móvel de 200 dias (MA_200): Um indicador de tendência de longo prazo.
-
-- Visualização de Dados:
-
-    - Utilizando matplotlib e seaborn, um gráfico de linha é gerado para visualizar a análise.
-
-    - O gráfico plota o Preço de Fechamento diário (em azul) sobreposto pelas duas médias móveis (em laranja e vermelho).
-
-    - Esta visualização permite identificar rapidamente a tendência principal do ativo (se a MA_200 está subindo ou descendo) e sinais de momentum de curto prazo (se o preço está acima ou abaixo da MA_21).
-
-- Bibliotecas Utilizadas (Tech Stack)
-    - yfinance: Para aquisição de dados financeiros de forma automatizada.
-
-    - Pandas: Para manipulação, limpeza e análise dos dados (cálculo das médias móveis).
-
-    - Matplotlib & Seaborn: Para a criação da visualização de dados.
-
-    - Warnings: Utilizada para suprimir avisos e limpar a saída do console.
-     
-''')
-
+# ============  
+# Explicação  
+# ============  
+st.markdown("""
+- Aquisição com **yfinance**
+- Limpeza, reestruturação e criação de indicadores com **pandas**
+- Gráficos com **matplotlib** e **seaborn**
+- Médias Móveis de 21 e 200 períodos para análise de tendência
+""")
