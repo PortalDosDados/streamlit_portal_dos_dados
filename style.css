@@ -1,11 +1,11 @@
-/* Estilos gerais */
+/* Área principal */
 .main {
     max-width: 1100px;
     margin: 0 auto;
 }
 
-/* Botão padrão Portal dos Dados */
-.btn-portal {
+/* BOTÃO LINKEDIN */
+.btn-linkedin {
     background-color: #0A66C2;
     color: white;
     padding: 12px 22px;
@@ -14,9 +14,44 @@
     font-size: 17px;
     cursor: pointer;
     transition: 0.2s ease-in-out;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
 }
 
-/* Hover (efeito ao passar o mouse) */
-.btn-portal:hover {
+.btn-linkedin svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+}
+
+.btn-linkedin:hover {
     background-color: #084B8C;
+}
+
+/* BOTÃO YOUTUBE */
+.btn-youtube {
+    background-color: #FF0000;
+    color: white;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 6px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-youtube svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+}
+
+.btn-youtube:hover {
+    background-color: #CC0000;
 }
