@@ -1,0 +1,22 @@
+/* Estilos gerais */
+.main {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Botão padrão Portal dos Dados */
+.btn-portal {
+    background-color: #0A66C2;
+    color: white;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 6px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+}
+
+/* Hover (efeito ao passar o mouse) */
+.btn-portal:hover {
+    background-color: #084B8C;
+}
