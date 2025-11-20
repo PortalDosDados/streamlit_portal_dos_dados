@@ -1,0 +1,14 @@
+.main {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+p {
+    margin-bottom: 10px;
+    line-height: 1.45;
+}
+
+ul {
+    margin-top: 0;
+    margin-bottom: 12px;
+}
