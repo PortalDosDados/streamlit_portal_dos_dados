@@ -32,14 +32,12 @@ ul {
 # Conteúdo "Sobre mim"
 st.markdown('''
 <div style="text-align: justify;">
+<p>Olá! Sou <b>Dione Nascimento</b>, profissional com <b>15 anos de experiência em Manutenção Industrial</b>, especializado em <b>Gestão de Ativos</b> e <b>Análise de Dados</b>. Trabalho integrando metodologias de manutenção com soluções de Business Intelligence, transformando dados operacionais em informações estratégicas para decisões rápidas e precisas.</p>
 
-<p>Olá! Sou <b>Dione Nascimento</b>, profissional com <b>15 anos de experiência em Manutenção Industrial</b>, com foco em <b>Confiabilidade Mecânica e Análise de Dados</b>. Atuo aplicando metodologias de manutenção integradas a soluções de Business Intelligence, transformando dados em informações estratégicas para apoiar a tomada de decisão.</p>
+<p>Minha trajetória começou no SENAI, onde atuei como <b>jovem aprendiz</b> e posteriormente como <b>professor</b>, nos últimos 10 anos venho atuando no <b>setor siderúrgico</b>, desenvolvendo projetos voltados à <b>confiabilidade de equipamentos</b>, <b>digitalização da manutenção</b> e <b>automação de análises</b>. 
+<p>Converto dados de campo em indicadores, aprimoro planos de manutenção e estruturo processos que elevam desempenho e reduzem custos.</p>
 
-<p>Minha trajetória começou no SENAI, onde fui <b>jovem aprendiz e professor</b>, essas experiências me ensinaram disciplina, prática e o valor de compartilhar conhecimento de forma objetiva.</p>
-
-<p>Nos últimos 10 anos, atuei no <b>ramo siderúrgico</b>, desenvolvendo projetos que combinam <b>confiabilidade de equipamentos, digitalização da manutenção e análise de dados</b>. Transformo informações de campo em indicadores estratégicos, automatizo relatórios e otimizo planos de manutenção, sempre com foco em resultados concretos.</p>
-
-<p>Fora do trabalho, gosto de <b>ler e programar</b>, foi dessa rotina que nasceu meu projeto pessoal, o <b>Portal dos Dados</b>, que conecta <b>Engenharia</b> e <b>Ciência de Dados</b>, ajudando profissionais a tomar decisões estratégicas usando dados de verdade.</p>
+<p>Fora do ambiente corporativo, gosto de <b>ler</b> e <b>programar</b>, dessa rotina nasceu o <b>Portal dos Dados</b>, meu projeto pessoal que conecta <b>Engenharia</b> e <b>Ciência de Dados</b>, ajudando profissionais a tomar decisões estratégicas baseadas em dados reais e aplicáveis ao dia a dia da manutenção.</p>
 
 </div>
 ''', unsafe_allow_html=True)
