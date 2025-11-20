@@ -1,10 +1,5 @@
 import streamlit as st
 
-# Função para carregar CSS externo
-def load_css(file_path: str):
-    with open(file_path, "r", encoding="utf-8") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
 # Configurações da página
 st.set_page_config(
     page_title='Dione Nascimento',
@@ -12,14 +7,34 @@ st.set_page_config(
     layout='wide'
 )
 
-# Carrega o CSS do arquivo style.css
-load_css("style.css")
+# Estilo para centralizar o conteúdo e melhorar layout
+st.markdown("""
+<style>
+.main {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+p {
+    margin-bottom: 10px;
+    line-height: 1.45;
+}
+
+ul {
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 
 # Criação das colunas com proporção mais impactante
 col1, col2 = st.columns([1.2, 3])
 
 with col1:
     st.image('./assets/minha_foto.png', use_container_width=True)
+
 
 with col2:
     st.markdown('''
@@ -40,6 +55,7 @@ with col2:
 </div>
 ''', unsafe_allow_html=True)
 
+
 # CTA mais destacado
 st.markdown("""
 <div style="margin-top: 20px; margin-bottom: 25px;">
@@ -59,5 +75,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Banner com largura total
+
+# Banner com largura total alinhada ao conteúdo principal
 st.image('./assets/fundo.jpg', use_container_width=True)
