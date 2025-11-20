@@ -8,7 +8,7 @@ st.set_page_config(
 )
 
 # Foto no topo
-st.image('../streamlit_portal_dos_dados/assets/fundo.jpg', width=1000)
+st.image('../streamlit_portal_dos_dados/assets/fundo.jpg', use_container_width=True)
 
 st.header('🎬 **Fala, pessoal!**')
 

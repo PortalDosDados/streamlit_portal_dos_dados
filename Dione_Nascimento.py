@@ -9,12 +9,11 @@ st.set_page_config(
 
 
 # Cria duas colunas
-col1, col2 = st.columns([1, 2])  # Ajuste os números para proporção desejada
+col1, col2 = st.columns([1, 4])  # Ajuste os números para proporção desejada
 
 with col1:
-    st.image('./assets/minha_foto.png', width=300)
-with col2:
-    st.image('./assets/fundo.jpg', width=300)
+    st.image('./assets/minha_foto.png', use_container_width=True)
+
 
 # Estilo global para parágrafos e listas
 st.markdown('''
@@ -29,8 +28,9 @@ ul {
 </style>
 ''', unsafe_allow_html=True)
 
+with col2:
 # Conteúdo "Sobre mim"
-st.markdown('''
+    st.markdown('''
 <div style="text-align: justify;">
 <p>Olá! Sou <b>Dione Nascimento</b>, profissional com <b>15 anos de experiência em Manutenção Industrial</b>, especializado em <b>Gestão de Ativos</b> e <b>Análise de Dados</b>. Trabalho integrando metodologias de manutenção com soluções de Business Intelligence, transformando dados operacionais em informações estratégicas para decisões rápidas e precisas.</p>
 
