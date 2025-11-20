@@ -62,10 +62,5 @@ with col2:
 </div>
 ''', unsafe_allow_html=True)
 
-
-
-
-
-
 # Banner com largura total alinhada ao conteúdo principal
 st.image('./assets/fundo.jpg', use_container_width=True)
