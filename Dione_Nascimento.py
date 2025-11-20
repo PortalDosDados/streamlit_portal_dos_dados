@@ -63,20 +63,8 @@ with col2:
 ''', unsafe_allow_html=True)
 
 
-# Botão do Link
-st.markdown("""
-<a href='https://www.linkedin.com/in/dione-nascimento-37287a233' target='_blank'>
-    <button class="btn-linkedin">
-        <svg viewBox="0 0 448 512">
-            <path d="M100.28 448H7.4V148.9h92.88zm-46.44-338C24 110 0 85.77 0 56.54A56.52 56.52 0 0 1 53.83 0C82.65 0 106 23.31 
-            106 52.13c0 29.23-23.35 53.57-52.16 53.57zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.72 
-            37.7-55.72 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.68-48.3 87.88-48.3 
-            94 0 111.28 61.9 111.28 142.3z"/>
-        </svg>
-        Conheça meu LinkedIn
-    </button>
-</a><p>
-""", unsafe_allow_html=True)
+
+
 
 
 # Banner com largura total alinhada ao conteúdo principal
