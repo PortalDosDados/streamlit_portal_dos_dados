@@ -44,7 +44,7 @@ with col2:
 ''', unsafe_allow_html=True)
 
 st.markdown("""
-<p style='font-size: 20px; font-weight: bold;'>
+<p style='font-size: 18px; font-weight: bold;'>
 🔗 <a href='https://www.linkedin.com/in/dione-nascimento-37287a233' target='_blank'>
 Clique aqui para saber mais
 </a>
