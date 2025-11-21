@@ -11,6 +11,7 @@ st.set_page_config(
 st.image('assets/power_apps.png', width=160)
 st.header('Power Apps')
 st.markdown('''
+<div class="justificado">
 O Power Apps é o meu 'canivete suíço' para digitalização de processos, quando 
 vejo uma rotina que pode ser otimizada, como um formulário de papel ou uma planilha 
 confusa, eu vejo uma oportunidade para um app.
@@ -21,7 +22,8 @@ ao ecossistema Microsoft. O objetivo é sempre o mesmo:
 e gerar dados mais limpos para a gestão".
 
 Abaixo estão alguns projetos que construí.
-''')
+</div>
+''', unsafe_allow_html=True)
 
 st.divider()
 
