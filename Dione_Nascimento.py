@@ -7,7 +7,7 @@ def load_css(file_path: str):
 load_css("style.css")
 
 
-# Configurações da página
+# Configures da página
 st.set_page_config(
     page_title='Dione Nascimento',
     page_icon='assets/portal.png',
