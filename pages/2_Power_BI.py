@@ -17,11 +17,12 @@ st.image('assets/power_bi.png', width=160)
 st.header('Power BI')
 
 st.markdown("""
-O **Power BI** tem sido a minha principal ferramenta para visualização de dados.
+<div class="justificado">
+O <b>Power BI</b> tem sido a minha principal ferramenta para visualização de dados.
 É simples de utilizar e amplamente adotado no mercado.
-
 Aqui apresento alguns projetos que posso compartilhar publicamente.
-""")
+</div>
+""", unsafe_allow_html=True)
 
 # -----------------------------------------------------------
 # SEÇÃO 1 — ELEIÇÕES

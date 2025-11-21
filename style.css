@@ -9,25 +9,26 @@
 }
 
 /* ============================
-   Justificação Global de Texto
+   Classe de justificação
    ----------------------------
-   Aplica alinhamento justificado apenas
-   nos elementos usados para conteúdo textual
-   renderizado pelo Streamlit, evitando impacto
-   em botões, ícones e componentes visuais.
+   Aplicada somente quando o texto
+   deve ser explicitamente justificado.
+   Evita interferência em botões, cards
+   e elementos visuais do framework.
 */
-.block-container,
-.stMarkdown p,
-.stMarkdown div,
-.stMarkdown li {
+.justificado {
     text-align: justify;
+    line-height: 1.6;        /* Aumenta a legibilidade */
+    letter-spacing: 0.2px;   /* Microajuste elegante */
+    margin-bottom: 16px;     /* Espaço entre parágrafos */
 }
 
 
 /* ============================
    Botão LinkedIn
    ----------------------------
-   Estilização conforme identidade visual oficial.
+   Estilização baseada na identidade
+   visual oficial da plataforma.
 */
 .btn-linkedin {
     background-color: #0A66C2;
@@ -54,11 +55,12 @@
     background-color: #084B8C;
 }
 
-
 /* ============================
    Botão YouTube
    ----------------------------
-   Layout seguindo o padrão oficial.
+   Layout seguindo o padrão visual
+   do YouTube, preservando contraste,
+   proporções e clareza do ícone.
 */
 .btn-youtube {
     background-color: #FF0000;
