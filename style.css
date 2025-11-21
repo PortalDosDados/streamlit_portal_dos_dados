@@ -1,10 +1,34 @@
-/* Área principal */
+/* ============================
+   Área principal da página
+   ----------------------------
+   Define limites e centraliza o conteúdo.
+*/
 .main {
     max-width: 1100px;
     margin: 0 auto;
 }
 
-/* BOTÃO LINKEDIN */
+/* ============================
+   Justificação Global de Texto
+   ----------------------------
+   Aplica alinhamento justificado apenas
+   nos elementos usados para conteúdo textual
+   renderizado pelo Streamlit, evitando impacto
+   em botões, ícones e componentes visuais.
+*/
+.block-container,
+.stMarkdown p,
+.stMarkdown div,
+.stMarkdown li {
+    text-align: justify;
+}
+
+
+/* ============================
+   Botão LinkedIn
+   ----------------------------
+   Estilização conforme identidade visual oficial.
+*/
 .btn-linkedin {
     background-color: #0A66C2;
     color: white;
@@ -30,7 +54,12 @@
     background-color: #084B8C;
 }
 
-/* BOTÃO YOUTUBE */
+
+/* ============================
+   Botão YouTube
+   ----------------------------
+   Layout seguindo o padrão oficial.
+*/
 .btn-youtube {
     background-color: #FF0000;
     color: white;
