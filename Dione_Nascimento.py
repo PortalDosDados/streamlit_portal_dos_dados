@@ -1,8 +1,10 @@
 import streamlit as st
 
+
 def load_css(file_path: str):
     with open(file_path, "r", encoding="utf-8") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 
 load_css("style.css")
 
@@ -77,7 +79,3 @@ st.markdown("""
     </button>
 </a><p>
 """, unsafe_allow_html=True)
-
-
-# Banner com largura total alinhada ao conteúdo principal
-st.image('./assets/fundo.jpg', use_container_width=True)
