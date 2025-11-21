@@ -1,11 +1,11 @@
 import streamlit as st
 
+# Função para carregar estilos personalizados
 def load_css(file_path: str):
     with open(file_path, "r", encoding="utf-8") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 load_css("style.css")
-
 
 # Configurações da página
 st.set_page_config(
@@ -14,13 +14,11 @@ st.set_page_config(
     layout='wide'
 )
 
-
-# Criação das colunas com proporção mais impactante
+# Layout com colunas proporcionais
 col1, col2 = st.columns([1.2, 3])
 
 with col1:
     st.image('./assets/minha_foto.png', use_container_width=True)
-
 
 with col2:
     st.markdown('''
@@ -41,10 +39,10 @@ with col2:
 </div>
 ''', unsafe_allow_html=True)
 
-
-# Banner com largura total alinhada ao conteúdo principal
+# Banner principal
 st.image('./assets/fundo.jpg', use_container_width=True)
 
+# Apresentação do canal
 st.markdown('''
 **Portal dos Dados**, um canal do Youtube com o objetivo de compartilhar conteúdos práticos sobre:
 - 🐍 **Python**: scripts e automações para simplificar tarefas do dia a dia  
@@ -61,10 +59,9 @@ Se você curte dados, tecnologia e soluções inteligentes, aqui é o seu lugar!
 **Vamos juntos transformar dados em valor real!**
 
 Clique no link abaixo para saber mais 👇
-
 ''')
 
-#Botão do Canal
+# Botão do Canal
 st.markdown("""
 <a href='https://www.youtube.com/@Portal_dos_Dados' target='_blank'>
     <button class="btn-youtube">
@@ -78,4 +75,3 @@ st.markdown("""
     </button>
 </a>
 """, unsafe_allow_html=True)
-
