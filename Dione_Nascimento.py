@@ -1,49 +1,24 @@
 import streamlit as st
 
-
+# Função para carregar estilos personalizados
 def load_css(file_path: str):
     with open(file_path, "r", encoding="utf-8") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-
 load_css("style.css")
 
-
-# Configures da página
+# Configurações da página
 st.set_page_config(
     page_title='Dione Nascimento',
     page_icon='assets/portal.png',
     layout='wide'
 )
 
-# Estilo para centralizar o conteúdo e melhorar layout
-st.markdown("""
-<style>
-.main {
-    max-width: 1100px;
-    margin: 0 auto;
-}
-
-p {
-    margin-bottom: 10px;
-    line-height: 1.45;
-}
-
-ul {
-    margin-top: 0;
-    margin-bottom: 12px;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-
-# Criação das colunas com proporção mais impactante
+# Layout com colunas proporcionais
 col1, col2 = st.columns([1.2, 3])
 
 with col1:
     st.image('./assets/minha_foto.png', use_container_width=True)
-
 
 with col2:
     st.markdown('''
@@ -53,9 +28,9 @@ with col2:
 <p>Minha trajetória começou no SENAI, onde atuei como <b>jovem aprendiz</b> e depois como <b>professor</b>. Nos últimos 10 anos, venho trabalhando no <b>setor siderúrgico</b>, desenvolvendo projetos focados em:</p>
 
 <ul>
-<li>Confiabilidade de equipamentos</li>
-<li>Digitalização da manutenção</li>
-<li>Automação de análises e indicadores</li>
+<li><b>Confiabilidade de equipamentos</b></li>
+<li><b>Digitalização da manutenção</b></li>
+<li><b>Automação de análises e indicadores</b></li>
 </ul>
 
 <p>Converto dados de campo em inteligência aplicada, melhoro planos de manutenção e estruturo processos que elevam desempenho e reduzem custos.</p>
@@ -64,18 +39,39 @@ with col2:
 </div>
 ''', unsafe_allow_html=True)
 
+# Banner principal
+st.image('./assets/fundo.jpg', use_container_width=True)
 
-# Botão do Link
+# Apresentação do canal
+st.markdown('''
+**Portal dos Dados**, um canal do Youtube com o objetivo de compartilhar conteúdos práticos sobre:
+- 🐍 **Python**: scripts e automações para simplificar tarefas do dia a dia  
+- 📊 **Power BI**: dashboards e análises interativas que dão visão estratégica  
+- 📱 **Power Apps**: criação de aplicativos corporativos de forma rápida e prática  
+- 🔄 **Power Automate**: automação de processos e integração de dados  
+- 🗄️ **SQL**: consultas e manipulação de dados aplicadas à engenharia  
+- ⚡ **Dicas de produtividade**: técnicas para otimizar seu trabalho com dados
+
+Este canal é feito para você que quer **aprender na prática, aplicar conhecimento e gerar resultados reais**.
+
+Se você curte dados, tecnologia e soluções inteligentes, aqui é o seu lugar!
+
+**Vamos juntos transformar dados em valor real!**
+
+Clique no link abaixo para saber mais 👇
+''')
+
+# Botão do Canal
 st.markdown("""
-<a href='https://www.linkedin.com/in/dione-nascimento-37287a233' target='_blank'>
-    <button class="btn-linkedin">
-        <svg viewBox="0 0 448 512">
-            <path d="M100.28 448H7.4V148.9h92.88zm-46.44-338C24 110 0 85.77 0 56.54A56.52 56.52 0 0 1 53.83 0C82.65 0 106 23.31 
-            106 52.13c0 29.23-23.35 53.57-52.16 53.57zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.72 
-            37.7-55.72 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.68-48.3 87.88-48.3 
-            94 0 111.28 61.9 111.28 142.3z"/>
+<a href='https://www.youtube.com/@Portal_dos_Dados' target='_blank'>
+    <button class="btn-youtube">
+        <svg viewBox="0 0 24 24">
+            <path d="M23.5 6.2s-.2-1.7-.8-2.4c-.8-.9-1.7-.9-2.1-1C17.4 2.5 12 2.5 12 2.5h-.1s-5.4 0-8.6.3c-.4.1-1.3.1-2.1 1C1.5 
+            4.5 1.3 6.2 1.3 6.2S1 8.3 1 10.5v1.9c0 2.2.3 4.3.3 4.3s.2 1.7.8 2.4c.8.9 1.9.9 2.4 
+            1C7 20 12 20 12 20s5.4 0 8.6-.3c.4-.1 1.3-.1 2.1-1 .6-.7.8-2.4.8-2.4s.3-2.1.3-4.3v-1.9c0-2.2-.3-4.3-.3-4.3zM9.8 15.3V8.7l6.4 
+            3.3-6.4 3.3z"/>
         </svg>
-        Conheça meu LinkedIn
+        Conheça meu Canal
     </button>
-</a><p>
+</a>
 """, unsafe_allow_html=True)
