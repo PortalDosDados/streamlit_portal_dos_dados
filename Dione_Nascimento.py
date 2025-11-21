@@ -30,9 +30,9 @@ with col2:
 <p>Minha trajetória começou no SENAI, onde atuei como <b>jovem aprendiz</b> e depois como <b>professor</b>. Nos últimos 10 anos, venho trabalhando no <b>setor siderúrgico</b>, desenvolvendo projetos focados em:</p>
 
 <ul>
-<li>Confiabilidade de equipamentos</li>
-<li>Digitalização da manutenção</li>
-<li>Automação de análises e indicadores</li>
+<li><b>Confiabilidade de equipamentos</b></li>
+<li><b>Digitalização da manutenção</b></li>
+<li><b>Automação de análises e indicadores</b></li>
 </ul>
 
 <p>Converto dados de campo em inteligência aplicada, melhoro planos de manutenção e estruturo processos que elevam desempenho e reduzem custos.</p>
@@ -41,13 +41,12 @@ with col2:
 </div>
 ''', unsafe_allow_html=True)
 
+
 # Banner com largura total alinhada ao conteúdo principal
 st.image('./assets/fundo.jpg', use_container_width=True)
 
-# Conteúdo principal
 st.markdown('''
-Sejam bem-vindos ao **Portal dos Dados**, um canal do Youtube com o objetivo de compartilhar conteúdos práticos sobre:
-
+**Portal dos Dados**, um canal do Youtube com o objetivo de compartilhar conteúdos práticos sobre:
 - 🐍 **Python**: scripts e automações para simplificar tarefas do dia a dia  
 - 📊 **Power BI**: dashboards e análises interativas que dão visão estratégica  
 - 📱 **Power Apps**: criação de aplicativos corporativos de forma rápida e prática  
