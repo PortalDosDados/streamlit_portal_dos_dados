@@ -1,5 +1,6 @@
 import streamlit as st
 
+# Função para carregar estilos personalizados
 def load_css(file_path: str):
     with open(file_path, "r", encoding="utf-8") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -43,10 +44,10 @@ with col2:
 </div>
     ''', unsafe_allow_html=True)
 
-
-# Banner com largura total alinhada ao conteúdo principal
+# Banner principal
 st.image('./assets/fundo.jpg', use_container_width=True)
 
+# Apresentação do canal
 st.markdown('''
 **Portal dos Dados**, um canal do Youtube com o objetivo de compartilhar conteúdos práticos sobre:
 - 🐍 **Python**: scripts e automações para simplificar tarefas do dia a dia  
