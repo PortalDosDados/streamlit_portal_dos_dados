@@ -1,0 +1,20 @@
+# --- Ambinete Virtual (O peso morto) ---
+.venv/
+venv/
+env/
+/Scripts/
+
+# --- Lixo do Python (Compilados) ---
+__pycache__/
+*.py[cod]
+
+# --- Variáveis de Ambiente e Segredos (SEGURANÇA MÁXIMA) ---
+.env
+.env.local
+
+# --- Configurações do VS Code (Isso é pessoal seu, não do projeto) ---
+.vscode/
+
+# --- Arquivos do Sistema Operacional ---
+.DS_Store
+Thumbs.db
