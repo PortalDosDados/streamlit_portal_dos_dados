@@ -1,8 +1,8 @@
 
 
-````markdown
+```markdown
 # 📊 Portal dos Dados - Portfólio Profissional
-
+```
 > **"Quando não se agrega valor, se agrega custo."**
 
 ![Python](https://img.shields.io/badge/Python-3.12%2B-blue?style=for-the-badge&logo=python&logoColor=white)
