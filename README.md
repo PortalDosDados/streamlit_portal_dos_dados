@@ -36,65 +36,20 @@ Esta aplicação não é apenas um currículo, é uma demonstração técnica de
 
 ## 📂 Estrutura do Repositório
 
-A organização segue as melhores práticas para aplicações *Streamlit Multipage*:
+A organização dos arquivos reflete o ambiente de desenvolvimento atual:
 
 ```text
-/
-├── .venv/                  # Ambiente Virtual (Isolamento de dependências)
-├── assets/                 # Imagens estáticas, logos e banners
-├── data/                   # Bases de dados (CSV/Excel) para os dashboards
-├── pages/                  # Sub-páginas da aplicação (Dashboards, Ferramentas)
-├── .gitignore              # Arquivo de segurança
-├── Dione_Nascimento.py     # 🏠 ARQUIVO PRINCIPAL (Home)
-├── requirements.txt        # Lista de bibliotecas necessárias
-├── style.css               # Folha de estilos personalizada
-└── README.md               # Documentação
-````
-
------
-
-## 🚀 Como Executar Localmente
-
-Se você deseja rodar este portfólio na sua máquina para estudo ou contribuição:
-
-1.  **Clone o repositório**
-
-    ```bash
-    git clone [https://github.com/PortalDosDados/portfolio_dados.git](https://github.com/PortalDosDados/portfolio_dados.git)
-    cd portfolio_dados
-    ```
-
-    *(Nota: Substitua 'portfolio\_dados' pelo nome exato do seu repositório se for diferente)*
-
-2.  **Prepare o ambiente**
-
-    ```bash
-    # Windows
-    python -m venv .venv
-    .venv\Scripts\activate
-
-    # Instale as dependências
-    pip install -r requirements.txt
-    ```
-
-3.  **Execute a aplicação**
-    *Nota: O arquivo principal leva o nome do autor.*
-
-    ```bash
-    streamlit run Dione_Nascimento.py
-    ```
-
------
-
-## 🔗 Conecte-se
-
-  * **LinkedIn:** [Dione Nascimento](https://www.google.com/search?q=https://www.linkedin.com/in/dionenascimento)
-  * **YouTube:** [Portal dos Dados](https://www.google.com/search?q=https://www.youtube.com/%40portaldosdados)
-  * **Comunidade:** Junte-se a nós para discutir Manutenção e Dados.
-
------
-
-**Desenvolvido com 💙 por [Portal dos Dados](https://www.google.com/search?q=https://github.com/PortalDosDados).**
-
-```
-```
+STREAMLIT_PORTAL_DOS_DADOS/
+├── .venv/                  # Ambiente Virtual (Ignorado no Git)
+├── assets/                 # Recursos estáticos (Imagens, Logos, Banners)
+├── data/                   # Bases de dados para os dashboards
+├── pages/                  # Páginas da aplicação (Multipage)
+│   ├── 2_Power_BI.py       # Dashboard de Power BI
+│   ├── 3_Power_App.py      # Integração com Power Apps
+│   └── 4_Python.py         # Scripts e Ferramentas Python
+├── .gitattributes          # Configurações de atributos do Git
+├── .gitignore              # Arquivo de exclusão do Git
+├── Dione_Nascimento.py     # 🏠 SCRIPT PRINCIPAL (Home Page)
+├── README.md               # Documentação do projeto
+├── requirements.txt        # Lista de dependências
+└── style.css               # Customização visual (CSS)
