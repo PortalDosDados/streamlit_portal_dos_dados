@@ -70,8 +70,8 @@ st.markdown("### Conecte-se comigo:")
 col_btn1, col_btn2, col_btn3, col_vazia = st.columns([1, 1, 1, 2])
 
 with col_btn1:
-    # Botão do LinkedIn (NOVO)
-    st.markdown("""
+    # Botão do LinkedIn
+    st.html("""
     <a href='https://www.linkedin.com/in/dione-nascimento-37287a233/' target='_blank' style='text-decoration: none;'>
         <button class="btn-linkedin">
             <svg viewBox="0 0 24 24" width="24" height="24">
@@ -80,11 +80,11 @@ with col_btn1:
             <span>LinkedIn</span>
         </button>
     </a>
-    """, unsafe_allow_html=True)
+    """)
 
 with col_btn2:
     # Botão do YouTube
-    st.markdown("""
+    st.html("""
     <a href='https://www.youtube.com/@Portal_dos_Dados' target='_blank' style='text-decoration: none;'>
         <button class="btn-youtube">
             <svg viewBox="0 0 24 24" width="24" height="24">
@@ -96,11 +96,11 @@ with col_btn2:
             <span>YouTube</span>
         </button>
     </a>
-    """, unsafe_allow_html=True)
+    """)
 
 with col_btn3:
     # Botão do GitHub
-    st.markdown("""
+    st.html("""
     <a href='https://github.com/PortalDosDados' target='_blank' style='text-decoration: none;'>
         <button class="btn-github">
             <svg viewBox="0 0 24 24" width="24" height="24">
@@ -109,4 +109,4 @@ with col_btn3:
             <span>GitHub</span>
         </button>
     </a>
-    """, unsafe_allow_html=True)
+    """)
