@@ -50,15 +50,24 @@ st.image('./assets/fundo.jpg', use_container_width=True)
 
 # Seção institucional
 st.markdown("""
-**Portal dos Dados**, um canal do Youtube com o objetivo de compartilhar conteúdos práticos sobre:
+<div class="justificado">
 
-- 🐍 **Python**
-- 📊 **Power BI**
-- 📱 **Power Apps**
-- 🔄 **Power Automate**
-- 🗄️ **SQL**
-- ⚡ **Produtividade**
-""")
+<p><b>PORTAL DOS DADOS</b> é um canal no YouTube criado para compartilhar conteúdos práticos e aplicáveis ao dia a dia da engenharia e da manutenção. O foco é ensinar como usar tecnologia, dados e automação para aumentar a produtividade e acelerar decisões.</p>
+
+<p>Os temas abordados são:</p>
+
+<ul>
+    <li>🐍 <b>Python</b>: automações, scripts úteis e análises para manutenção</li>
+    <li>📊 <b>Power BI</b>: dashboards operacionais e indicadores de performance</li>
+    <li>📱 <b>Power Apps</b>: criação de aplicativos rápidos para o chão de fábrica</li>
+    <li>🔄 <b>Power Automate</b>: integração de processos e eliminação de tarefas manuais</li>
+    <li>🗄️ <b>SQL</b>: consultas práticas para extrair e analisar dados do SAP e de bancos industriais</li>
+    <li>⚡ <b>Produtividade</b>: métodos e ferramentas para melhorar desempenho profissional</li>
+</ul>
+
+</div>
+""", unsafe_allow_html=True)
+
 
 # Título redes sociais
 st.markdown("### Conecte-se comigo:")
