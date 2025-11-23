@@ -1,115 +1,133 @@
+"""
+PORTAL DOS DADOS - PORTFÓLIO PROFISSIONAL
+Autor: Dione Nascimento
+Versão: 1.0.0
+Descrição: Aplicação web desenvolvida em Streamlit para apresentação profissional
+e centralização de conteúdos de Engenharia de Dados e Manutenção.
+"""
+
 import streamlit as st
 
-# Configurações iniciais da aplicação.
+# ============================================================
+# 1. CONFIGURAÇÃO DA PÁGINA
+# ============================================================
+# Deve ser sempre o primeiro comando Streamlit do script.
 st.set_page_config(
-    page_title='Dione Nascimento',
+    page_title='Dione Nascimento | Portal dos Dados',
     page_icon='assets/portal.png',
-    layout='wide'
+    layout='wide',
+    initial_sidebar_state='expanded'
 )
 
-# Carrega o arquivo de estilos CSS externo.
+# ============================================================
+# 2. FUNÇÕES UTILITÁRIAS
+# ============================================================
 def load_css(file_path: str):
+    """
+    Carrega um arquivo CSS local e injeta na aplicação.
+    
+    Args:
+        file_path (str): Caminho relativo do arquivo .css
+    """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     except FileNotFoundError:
-        st.error(f"Erro: Arquivo de estilos '{file_path}' não encontrado.")
+        st.error(f"Erro Crítico: O arquivo de estilos '{file_path}' não foi encontrado.")
 
+# Carrega a estilização personalizada
 load_css("style.css")
 
-# Layout principal
-col1, col2 = st.columns([1, 4])
+# ============================================================
+# 3. SEÇÃO DE PERFIL (HEADER)
+# ============================================================
+col_foto, col_bio = st.columns([1, 4], gap="medium")
 
-with col1:
+with col_foto:
     st.image('./assets/minha_foto.png', use_container_width=True)
 
-with col2:
+with col_bio:
+    # Utiliza HTML/CSS injetado para justificar o texto, algo que o st.write padrão não faz.
     st.markdown("""
-    <div class="justificado">
-
-    <p>Olá! Sou <b>Dione Nascimento</b>, profissional com <b>15 anos de experiência em Manutenção Industrial</b>, especializado em <b>Gestão de Ativos</b> e <b>Análise de Dados</b>. Minha atuação combina metodologias de manutenção com soluções de Business Intelligence para transformar dados operacionais em decisões rápidas e precisas.</p>
-
-    <p>Minha trajetória começou no SENAI, onde atuei como <b>jovem aprendiz</b> e depois como <b>professor</b>. Nos últimos 10 anos, venho trabalhando no <b>setor siderúrgico</b>, desenvolvendo projetos focados em:</p>
-
-    <ul>
-        <li><b>Confiabilidade de equipamentos</b></li>
-        <li><b>Digitalização da manutenção</b></li>
-        <li><b>Automação de análises e indicadores</b></li>
-    </ul>
-
-    <p>Converto dados de campo em inteligência aplicada, melhoro planos de manutenção e estruturo processos que elevam desempenho e reduzem custos.</p>
-
-    <p>Sou também o criador do <b>Portal dos Dados</b>, projeto que conecta <b>Engenharia</b> e <b>Ciência de Dados</b> para ajudar profissionais a tomar decisões orientadas por dados reais e aplicáveis ao dia a dia da manutenção.</p>
-
-    </div>
+        <div class="justificado">
+            <p>Olá! Sou <b>Dione Nascimento</b>, profissional com <b>15 anos de experiência em Manutenção Industrial</b>, 
+            especializado em <b>Gestão de Ativos</b> e <b>Análise de Dados</b>. Minha atuação combina metodologias 
+            de engenharia com soluções de Business Intelligence para transformar dados operacionais em decisões estratégicas.</p>
+            <p>Minha trajetória iniciou no SENAI (como aprendiz e professor) e consolidou-se no <b>setor siderúrgico</b>, 
+            onde desenvolvo projetos de:</p>
+            <ul>
+                <li><b>Confiabilidade de equipamentos</b></li>
+                <li><b>Digitalização da manutenção</b></li>
+                <li><b>Automação de indicadores (KPIs)</b></li>
+            </ul>
+            <p>Sou fundador do <b>Portal dos Dados</b>, uma iniciativa que conecta a Engenharia de Manutenção à Ciência de Dados, 
+            capacitando profissionais a eliminarem o "achismo" através de dados reais.</p>
+        </div>
     """, unsafe_allow_html=True)
 
-
-# Banner
+# ============================================================
+# 4. BANNER E PROPOSTA DE VALOR
+# ============================================================
 st.image('./assets/fundo.jpg', use_container_width=True)
 
-# Seção institucional
 st.markdown("""
 <div class="justificado">
-
-<p><b>PORTAL DOS DADOS</b> é um canal no YouTube criado para compartilhar conteúdos práticos e aplicáveis ao dia a dia da engenharia e da manutenção. O foco é ensinar como usar tecnologia, dados e automação para aumentar a produtividade e acelerar decisões.</p>
-
-<p>Os temas abordados são:</p>
-
-<ul>
-    <li>🐍 <b>Python</b>: automações, scripts úteis e análises para manutenção</li>
-    <li>📊 <b>Power BI</b>: dashboards operacionais e indicadores de performance</li>
-    <li>📱 <b>Power Apps</b>: criação de aplicativos rápidos para o chão de fábrica</li>
-    <li>🔄 <b>Power Automate</b>: integração de processos e eliminação de tarefas manuais</li>
-    <li>🗄️ <b>SQL</b>: consultas práticas para extrair e analisar dados do SAP e de bancos industriais</li>
-    <li>⚡ <b>Produtividade</b>: métodos e ferramentas para melhorar desempenho profissional</li>
-</ul>
-
+    <p><b>PORTAL DOS DADOS</b> é um hub de conhecimento focado em produtividade técnica. 
+    Aqui, a teoria encontra a prática do chão de fábrica.</p>
+    <p><b>Pilares de Conteúdo:</b></p>
+    <ul>
+        <li>🐍 <b>Python & Automação:</b> Scripts para eliminar tarefas repetitivas.</li>
+        <li>📊 <b>Power BI & Analytics:</b> Dashboards para gestão à vista.</li>
+        <li>📱 <b>Power Platform:</b> Apps (Power Apps) e Fluxos (Automate) corporativos.</li>
+        <li>🗄️ <b>Engenharia de Dados:</b> SQL e estruturação de bancos industriais.</li>
+    </ul>
 </div>
 """, unsafe_allow_html=True)
 
+# ============================================================
+# 5. CONEXÕES (CALL TO ACTION)
+# ============================================================
+st.markdown("### 🤝 Vamos nos conectar?")
+st.markdown("Explore meus projetos ou entre em contato profissionalmente:")
 
-# Título redes sociais
-st.markdown("### Conecte-se comigo:")
+# Layout de botões: 3 colunas iguais para os botões e 1 coluna vazia para ajuste visual
+col_btn1, col_btn2, col_btn3, _ = st.columns([1, 1, 1, 2], gap="small")
 
-# Botões nas 3 colunas
-col_btn1, col_btn2, col_btn3, _ = st.columns([1, 1, 1, 2])
-
-# LINKEDIN
+# --- Botão LinkedIn ---
 with col_btn1:
-    st.html("""
-    <a href='https://www.linkedin.com/in/dione-nascimento-37287a233/' target='_blank' style='text-decoration: none;'>
+    st.markdown("""
+    <a href="https://www.linkedin.com/in/dionenascimento" target="_blank" style="text-decoration: none;">
         <button class="btn-linkedin">
-            <svg viewBox="0 0 24 24" width="24" height="24">
-                <path d="M19 0h-14c-2.761... (mesmo SVG) ..." fill="white"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
             </svg>
             <span>LinkedIn</span>
         </button>
     </a>
-    """)
+    """, unsafe_allow_html=True)
 
-# YOUTUBE
+# --- Botão YouTube ---
 with col_btn2:
-    st.html("""
-    <a href='https://www.youtube.com/@Portal_dos_Dados' target='_blank' style='text-decoration: none;'>
+    st.markdown("""
+    <a href="https://www.youtube.com/@Portal_dos_Dados" target="_blank" style="text-decoration: none;">
         <button class="btn-youtube">
-            <svg viewBox="0 0 24 24" width="24" height="24">
-                <path d="M23.5 6.2s-.2-1.7... (mesmo SVG) ..." fill="white"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
             </svg>
             <span>YouTube</span>
         </button>
     </a>
-    """)
+    """, unsafe_allow_html=True)
 
-# GITHUB
+# --- Botão GitHub ---
 with col_btn3:
-    st.html("""
-    <a href='https://github.com/PortalDosDados' target='_blank' style='text-decoration: none;'>
+    st.markdown("""
+    <a href="https://github.com/PortalDosDados" target="_blank" style="text-decoration: none;">
         <button class="btn-github">
-            <svg viewBox="0 0 24 24" width="24" height="24">
-                <path d="M12 .297c-6.63 0-12... (mesmo SVG) ..." fill="white"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
             </svg>
             <span>GitHub</span>
         </button>
     </a>
-    """)
+    """, unsafe_allow_html=True)
