@@ -1,88 +1,79 @@
 /* ============================
-   Área principal da página
-   ----------------------------
-   Define limites e centraliza o conteúdo.
-*/
+   1. ESTRUTURA GERAL
+   ============================ */
 .main {
     max-width: 1100px;
     margin: 0 auto;
 }
 
-/* ============================
-   Classe de justificação
-   ----------------------------
-   Aplicada somente quando o texto
-   deve ser explicitamente justificado.
-   Evita interferência em botões, cards
-   e elementos visuais do framework.
-*/
 .justificado {
     text-align: justify;
-    line-height: 1.6;        /* Aumenta a legibilidade */
-    letter-spacing: 0.2px;   /* Microajuste elegante */
-    margin-bottom: 16px;     /* Espaço entre parágrafos */
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+    margin-bottom: 16px;
 }
-
 
 /* ============================
-   Botão LinkedIn
-   ----------------------------
-   Estilização baseada na identidade
-   visual oficial da plataforma.
-*/
-.btn-linkedin {
-    background-color: #0A66C2;
-    color: white;
-    padding: 12px 22px;
-    border: none;
-    border-radius: 6px;
-    font-size: 17px;
-    cursor: pointer;
-    transition: 0.2s ease-in-out;
+   2. BOTÕES DE REDES SOCIAIS
+   ============================ */
 
-    display: inline-flex;
+/* ESTILO BASE (Compartilhado por todos os botões)
+   Isso evita repetir código de alinhamento e tamanho. */
+.btn-linkedin, .btn-youtube, .btn-github {
+    display: flex;
     align-items: center;
+    justify-content: center; /* Centraliza conteúdo */
     gap: 10px;
+    width: 100%;             /* Preenche a coluna */
+    padding: 10px 20px;
+    
+    border: none;
+    border-radius: 8px;
+    
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.btn-linkedin svg {
+/* ÍCONES (SVG) */
+.btn-linkedin svg, .btn-youtube svg, .btn-github svg {
     width: 20px;
     height: 20px;
     fill: white;
 }
 
+/* EFEITO DE CLIQUE (Opcional: leve movimento) */
+.btn-linkedin:active, .btn-youtube:active, .btn-github:active {
+    transform: scale(0.98);
+}
+
+/* ============================
+   3. CORES ESPECÍFICAS
+   ============================ */
+
+/* --- LinkedIn --- */
+.btn-linkedin {
+    background-color: #0A66C2;
+}
 .btn-linkedin:hover {
     background-color: #084B8C;
 }
 
-/* ============================
-   Botão YouTube
-   ----------------------------
-   Layout seguindo o padrão visual
-   do YouTube, preservando contraste,
-   proporções e clareza do ícone.
-*/
+/* --- YouTube --- */
 .btn-youtube {
     background-color: #FF0000;
-    color: white;
-    padding: 12px 22px;
-    border: none;
-    border-radius: 6px;
-    font-size: 17px;
-    cursor: pointer;
-    transition: 0.2s ease-in-out;
-
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
 }
-
-.btn-youtube svg {
-    width: 20px;
-    height: 20px;
-    fill: white;
-}
-
 .btn-youtube:hover {
     background-color: #CC0000;
+}
+
+/* --- GitHub --- */
+.btn-github {
+    background-color: #24292e;
+}
+.btn-github:hover {
+    background-color: #1b1f23;
 }
