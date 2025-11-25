@@ -7,10 +7,9 @@ import io
 # --- 1. CONFIGURAÇÃO ---
 st.set_page_config(page_title="WeekFlow | Gestão de Paradas", page_icon="🔧", layout="wide")
 
-# --- 2. CSS CENTRALIZADO E LIMPO ---
+# --- 2. CSS ---
 st.markdown("""
     <style>
-    /* Estilo do Card (Metric) */
     div[data-testid="stMetric"] {
         background-color: var(--secondary-background-color);
         border: 1px solid rgba(128, 128, 128, 0.2);
@@ -28,7 +27,6 @@ st.markdown("""
         justify-content: center;
         width: 100%;
     }
-    /* Botão de Download ocupando largura total da coluna */
     div.stButton > button:first-child {
         width: 100%;
     }
@@ -39,15 +37,16 @@ st.markdown("""
 
 def gerar_template_excel():
     df_exemplo = pd.DataFrame({
-        'Parada': ['Caldeira', 'Mecânica Geral', 'Elétrica', 'Lubrificação'],
+        'Parada': ['Caldeira', 'Mecânica Geral', 'Elétrica', 'Lubrificação', 'Caldeira'],
         'Data Planejada': [
             datetime.now(), 
             datetime.now() + timedelta(days=5), 
             datetime.now() + timedelta(days=20),
-            datetime.now() + timedelta(days=25)
+            datetime.now() + timedelta(days=25),
+            datetime.now() + timedelta(days=60)
         ],
-        'Data Realizada': [None, None, None, None],
-        'Comentário': ['Crítico', 'Equipe A', 'Equipe B', 'Rotina']
+        'Data Realizada': [None, None, None, None, None],
+        'Comentário': ['Crítico', 'Equipe A', 'Equipe B', 'Rotina', 'Revisão Trimestral']
     })
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
@@ -63,12 +62,10 @@ def converter_df_para_excel(df):
     return buffer
 
 def estilizar_tabela(df):
-    """Centraliza texto e cabeçalhos."""
     return df.style.set_properties(**{'text-align': 'center'}) \
                    .set_table_styles([dict(selector='th', props=[('text-align', 'center')])])
 
 def traduzir_datas(df, col_data):
-    """Tradução forçada PT-BR."""
     mapa_meses = {
         1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril', 5: 'Maio', 6: 'Junho',
         7: 'Julho', 8: 'Agosto', 9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
@@ -84,14 +81,14 @@ def traduzir_datas(df, col_data):
     return df
 
 def processar_grid_completo(df, col_data, col_nome, col_comentario):
-    """Gera o grid anual e agrupa as paradas."""
     df_input = df.copy()
     df_input[col_data] = pd.to_datetime(df_input[col_data], errors='coerce')
     df_input = df_input.dropna(subset=[col_data])
     df_input[col_data] = df_input[col_data].dt.normalize()
     
-    df_input[col_nome] = df_input[col_nome].astype(str)
-    df_input[col_comentario] = df_input[col_comentario].fillna('').astype(str)
+    # Padronização de nomes (Trim)
+    df_input[col_nome] = df_input[col_nome].astype(str).str.strip()
+    df_input[col_comentario] = df_input[col_comentario].fillna('').astype(str).str.strip()
     
     if len(df_input) == 0:
         return df_input, datetime.now().year, col_nome
@@ -101,8 +98,8 @@ def processar_grid_completo(df, col_data, col_nome, col_comentario):
     df_grid = pd.DataFrame({col_data: datas_ano})
     
     df_agrupado = df_input.groupby(col_data).agg({
-        col_nome: lambda x: ' | '.join(x),
-        col_comentario: lambda x: ' | '.join(x),
+        col_nome: lambda x: ' | '.join(sorted(list(set(x)))),
+        col_comentario: lambda x: ' | '.join(list(set(x))),
         col_data: 'count'
     }).rename(columns={col_data: 'Qtd_Paradas'}).reset_index()
     
@@ -122,6 +119,8 @@ def criar_calendario_full(df_completo, col_data, nome_col_parada):
         'Sexta-feira', 'Sábado', 'Domingo'
     ]
     
+    domain_cores = sorted(df_completo[df_completo['Qtd_Paradas'] > 0][nome_col_parada].unique().tolist())
+    
     chart = alt.Chart(df_completo).mark_rect(
         cornerRadius=2,
         strokeOpacity=0
@@ -132,8 +131,8 @@ def criar_calendario_full(df_completo, col_data, nome_col_parada):
         color=alt.condition(
             alt.datum.Qtd_Paradas > 0,
             alt.Color(f'{nome_col_parada}:N', 
-                      title='Tipo de Parada', 
-                      scale=alt.Scale(scheme='category20'),
+                      title='Tipo de Parada',
+                      scale=alt.Scale(domain=domain_cores, scheme='category20'),
                       legend=alt.Legend(
                           orient='bottom', 
                           columns=4,       
@@ -172,15 +171,41 @@ st.divider()
 
 aba1, aba2 = st.tabs(["🔎 Calculadora Rápida", "📂 Mapa de Paradas (Anual)"])
 
+# --- ABA 1: RESTAURADA (CALCULADORA) ---
 with aba1:
-    st.caption("Auxiliar de Planejamento")
-    c1, c2, c3 = st.columns(3)
-    d = c1.date_input("Data da Parada:", datetime.now())
-    a, s, _ = d.isocalendar()
-    c2.metric("Semana de Execução", f"S{s}")
-    c3.metric("Dia do Ano", d.timetuple().tm_yday)
+    st.caption("Ferramenta para consultar datas futuras ou passadas.")
+    col_input, col_res1, col_res2 = st.columns([1, 1, 1])
+    
+    with col_input:
+        data_input = st.date_input("Selecione a Data:", datetime.now(), format="DD/MM/YYYY")
+    
+    # Lógica Instantânea
+    ano_iso, semana_iso, dia_iso = data_input.isocalendar()
+    
+    with col_res1:
+        st.metric("Semana ISO", f"S{semana_iso:02d}")
+    with col_res2:
+        dia_do_ano = data_input.timetuple().tm_yday
+        st.metric("Dia do Ano", f"{dia_do_ano}")
 
+# --- ABA 2: MAPA DE PARADAS (COM STATUS ATUAL) ---
 with aba2:
+    # 1. CARDS DE STATUS ATUAL (Topo da Aba 2)
+    # Mostra sempre a data de HOJE, independente do arquivo
+    hoje = datetime.now()
+    _, sem_atual, _ = hoje.isocalendar()
+    dia_ano_atual = hoje.timetuple().tm_yday
+    
+    st.markdown("##### 📍 Status Atual")
+    c_status1, c_status2 = st.columns(2)
+    with c_status1:
+        st.metric("Semana Atual (Hoje)", f"S{sem_atual:02d}")
+    with c_status2:
+        st.metric("Dia do Ano (Hoje)", f"{dia_ano_atual}")
+    
+    st.divider()
+
+    # 2. ÁREA DE UPLOAD
     col_dl, col_up = st.columns([1, 2])
     with col_dl:
         st.info("Passo 1")
@@ -212,15 +237,10 @@ with aba2:
                 grafico = criar_calendario_full(df_grid, col_data, col_nome_final)
                 st.altair_chart(grafico, use_container_width=True)
                 
-                # Métricas
-                total = df_grid['Qtd_Paradas'].sum()
-                ocupacao = len(df_grid[df_grid['Qtd_Paradas'] > 0])
-                m1, m2, m3 = st.columns(3)
-                m1.metric("Total Intervenções", int(total))
-                m2.metric("Dias Bloqueados", ocupacao)
-                m3.metric("Máximo Diário", int(df_grid['Qtd_Paradas'].max()))
-
-                with st.expander("📋 Ver Detalhes"):
+                # REMOVIDAS AS MÉTRICAS ESTATÍSTICAS (TOTAL, OCUPAÇÃO)
+                # O usuário pediu APENAS Semana Atual e Dia Atual nos cards dessa aba.
+                
+                with st.expander("📋 Ver Detalhes (Tabela)"):
                     cols_show = [col_data, 'Dia_Semana', col_nome_final]
                     df_exibir = df_grid[df_grid['Qtd_Paradas'] > 0][cols_show].sort_values(col_data)
                     df_exibir[col_data] = df_exibir[col_data].dt.strftime('%d/%m/%Y')
@@ -228,7 +248,6 @@ with aba2:
                 
                 st.divider()
                 
-                # Botão único e limpo
                 st.download_button(
                     label="✅ Baixar Relatório (Excel)",
                     data=converter_df_para_excel(df_grid),
