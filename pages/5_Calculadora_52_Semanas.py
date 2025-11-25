@@ -7,7 +7,7 @@ import io
 # --- 1. CONFIGURAÇÃO ---
 st.set_page_config(page_title="WeekFlow | Gestão de Paradas", page_icon="🔧", layout="wide")
 
-# --- 2. CSS THEME-AWARE & CENTRALIZADO ---
+# --- 2. CSS CENTRALIZADO E LIMPO ---
 st.markdown("""
     <style>
     /* Estilo do Card (Metric) */
@@ -28,13 +28,16 @@ st.markdown("""
         justify-content: center;
         width: 100%;
     }
+    /* Botão de Download ocupando largura total da coluna */
+    div.stButton > button:first-child {
+        width: 100%;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 # --- 3. FUNÇÕES CORE ---
 
 def gerar_template_excel():
-    """Gera Excel com colunas de Manutenção."""
     df_exemplo = pd.DataFrame({
         'Parada': ['Caldeira', 'Mecânica Geral', 'Elétrica', 'Lubrificação'],
         'Data Planejada': [
@@ -62,9 +65,7 @@ def converter_df_para_excel(df):
 def estilizar_tabela(df):
     """Centraliza texto e cabeçalhos."""
     return df.style.set_properties(**{'text-align': 'center'}) \
-                   .set_table_styles([
-                       dict(selector='th', props=[('text-align', 'center')])
-                   ])
+                   .set_table_styles([dict(selector='th', props=[('text-align', 'center')])])
 
 def traduzir_datas(df, col_data):
     """Tradução forçada PT-BR."""
@@ -76,13 +77,10 @@ def traduzir_datas(df, col_data):
         0: 'Segunda-feira', 1: 'Terça-feira', 2: 'Quarta-feira', 3: 'Quinta-feira', 
         4: 'Sexta-feira', 5: 'Sábado', 6: 'Domingo'
     }
-
     df['Mes_Num'] = df[col_data].dt.month
     df['Dia_Num'] = df[col_data].dt.weekday
-    
     df['Mes_Nome'] = df['Mes_Num'].map(mapa_meses)
     df['Dia_Semana'] = df['Dia_Num'].map(mapa_dias)
-    
     return df
 
 def processar_grid_completo(df, col_data, col_nome, col_comentario):
@@ -99,11 +97,9 @@ def processar_grid_completo(df, col_data, col_nome, col_comentario):
         return df_input, datetime.now().year, col_nome
     
     ano_foco = df_input[col_data].dt.year.mode()[0]
-    
     datas_ano = pd.date_range(start=f'{ano_foco}-01-01', end=f'{ano_foco}-12-31', freq='D')
     df_grid = pd.DataFrame({col_data: datas_ano})
     
-    # Agrupamento
     df_agrupado = df_input.groupby(col_data).agg({
         col_nome: lambda x: ' | '.join(x),
         col_comentario: lambda x: ' | '.join(x),
@@ -111,12 +107,10 @@ def processar_grid_completo(df, col_data, col_nome, col_comentario):
     }).rename(columns={col_data: 'Qtd_Paradas'}).reset_index()
     
     df_final = pd.merge(df_grid, df_agrupado, on=col_data, how='left')
-    
     df_final['Qtd_Paradas'] = df_final['Qtd_Paradas'].fillna(0)
     df_final[col_nome] = df_final[col_nome].fillna('-')
     
     df_final = traduzir_datas(df_final, col_data)
-    
     iso = df_final[col_data].dt.isocalendar()
     df_final['Semana_Ano'] = iso.week
     
@@ -135,20 +129,19 @@ def criar_calendario_full(df_completo, col_data, nome_col_parada):
         x=alt.X('Semana_Ano:O', title='Semana do Ano (1-52)', axis=alt.Axis(labelAngle=0)),
         y=alt.Y('Dia_Semana:O', sort=dias_ordenados_pt, title=None),
         
-        # --- AQUI ESTÁ A LÓGICA DE COR POR TIPO ---
         color=alt.condition(
-            alt.datum.Qtd_Paradas > 0, # Se tiver parada...
-            alt.Color(f'{nome_col_parada}:N', # ...Usa o Nome da Parada para colorir
+            alt.datum.Qtd_Paradas > 0,
+            alt.Color(f'{nome_col_parada}:N', 
                       title='Tipo de Parada', 
-                      scale=alt.Scale(scheme='category20'), # Paleta para categorias distintas
+                      scale=alt.Scale(scheme='category20'),
                       legend=alt.Legend(
-                          orient='bottom', # Legenda em baixo
-                          columns=4,       # Divide em colunas para não ficar comprida
-                          symbolLimit=0,   # Mostra todos os simbolos
+                          orient='bottom', 
+                          columns=4,       
+                          symbolLimit=0,
                           labelFontSize=12,
                           titleFontSize=13
                       )),
-            alt.value('rgba(128, 128, 128, 0.1)') # Se vazio, cinza transparente
+            alt.value('rgba(128, 128, 128, 0.1)')
         ),
         
         tooltip=[
@@ -191,12 +184,7 @@ with aba2:
     col_dl, col_up = st.columns([1, 2])
     with col_dl:
         st.info("Passo 1")
-        st.download_button(
-            "📥 Baixar Template Paradas", 
-            gerar_template_excel(), 
-            "template_paradas.xlsx",
-            use_container_width=True
-        )
+        st.download_button("📥 Baixar Template", gerar_template_excel(), "template_paradas.xlsx", use_container_width=True)
     with col_up:
         st.info("Passo 2")
         arquivo = st.file_uploader("Upload Cronograma (.xlsx)", type=['xlsx'], label_visibility="collapsed")
@@ -205,7 +193,6 @@ with aba2:
         st.divider()
         try:
             df_raw = pd.read_excel(arquivo)
-            
             cols = df_raw.columns.tolist()
             idx_data = cols.index('Data Planejada') if 'Data Planejada' in cols else 0
             idx_nome = cols.index('Parada') if 'Parada' in cols else 0
@@ -217,7 +204,6 @@ with aba2:
             col_com = c_sel3.selectbox("Coluna COMENTÁRIO:", cols, index=idx_com)
             
             if st.button("🚀 Gerar Mapa Colorido", type="primary"):
-                # Processamento
                 df_grid, ano, col_nome_final = processar_grid_completo(df_raw, col_data, col_nome, col_com)
                 
                 st.markdown(f"### 📅 Cronograma de Paradas - {ano}")
@@ -226,33 +212,30 @@ with aba2:
                 grafico = criar_calendario_full(df_grid, col_data, col_nome_final)
                 st.altair_chart(grafico, use_container_width=True)
                 
-                # Resumo
-                total_paradas = df_grid['Qtd_Paradas'].sum()
-                dias_com_parada = len(df_grid[df_grid['Qtd_Paradas'] > 0])
-                
+                # Métricas
+                total = df_grid['Qtd_Paradas'].sum()
+                ocupacao = len(df_grid[df_grid['Qtd_Paradas'] > 0])
                 m1, m2, m3 = st.columns(3)
-                m1.metric("Total de Intervenções", int(total_paradas))
-                m2.metric("Dias Bloqueados", dias_com_parada)
-                m3.metric("Maior acúmulo em 1 dia", int(df_grid['Qtd_Paradas'].max()))
+                m1.metric("Total Intervenções", int(total))
+                m2.metric("Dias Bloqueados", ocupacao)
+                m3.metric("Máximo Diário", int(df_grid['Qtd_Paradas'].max()))
 
-                # Tabela Filtrada
-                with st.expander("📋 Ver Detalhes das Paradas"):
+                with st.expander("📋 Ver Detalhes"):
                     cols_show = [col_data, 'Dia_Semana', col_nome_final]
                     df_exibir = df_grid[df_grid['Qtd_Paradas'] > 0][cols_show].sort_values(col_data)
-                    
                     df_exibir[col_data] = df_exibir[col_data].dt.strftime('%d/%m/%Y')
-                    
-                    st.dataframe(
-                        estilizar_tabela(df_exibir), 
-                        use_container_width=True,
-                        hide_index=True
-                    )
+                    st.dataframe(estilizar_tabela(df_exibir), use_container_width=True, hide_index=True)
                 
+                st.divider()
+                
+                # Botão único e limpo
                 st.download_button(
-                    "✅ Baixar Relatório Processado", 
-                    converter_df_para_excel(df_grid), 
-                    "relatorio_paradas.xlsx"
+                    label="✅ Baixar Relatório (Excel)",
+                    data=converter_df_para_excel(df_grid),
+                    file_name=f"relatorio_paradas_{ano}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True
                 )
                 
         except Exception as e:
-            st.error(f"Erro na leitura ou processamento: {e}")
+            st.error(f"Erro: {e}")
