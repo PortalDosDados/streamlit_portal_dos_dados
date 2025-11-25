@@ -7,15 +7,27 @@ import io
 # --- 1. CONFIGURAÇÃO ---
 st.set_page_config(page_title="WeekFlow | Gestão de Paradas", page_icon="🔧", layout="wide")
 
-# --- 2. CSS THEME-AWARE ---
+# --- 2. CSS THEME-AWARE & CENTRALIZADO ---
 st.markdown("""
     <style>
+    /* Estilo do Card (Metric) */
     div[data-testid="stMetric"] {
         background-color: var(--secondary-background-color);
         border: 1px solid rgba(128, 128, 128, 0.2);
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        text-align: center;
     }
-    div[data-testid="stMetricValue"] { color: var(--primary-color); font-weight: 700; }
+    div[data-testid="stMetricValue"] { 
+        color: var(--primary-color); 
+        font-weight: 700; 
+        text-align: center;
+        width: 100%;
+    }
+    div[data-testid="stMetricLabel"] {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -24,15 +36,15 @@ st.markdown("""
 def gerar_template_excel():
     """Gera Excel com colunas de Manutenção."""
     df_exemplo = pd.DataFrame({
-        'Parada': ['Manutenção Caldeira', 'Troca Rolamentos', 'Inspeção Elétrica', 'Lubrificação Geral'],
+        'Parada': ['Caldeira', 'Mecânica Geral', 'Elétrica', 'Lubrificação'],
         'Data Planejada': [
             datetime.now(), 
             datetime.now() + timedelta(days=5), 
             datetime.now() + timedelta(days=20),
-            datetime.now() 
+            datetime.now() + timedelta(days=25)
         ],
         'Data Realizada': [None, None, None, None],
-        'Comentário': ['Crítico - Parar setor A', 'Equipe Mecânica', 'Equipe Elétrica', 'Rotina']
+        'Comentário': ['Crítico', 'Equipe A', 'Equipe B', 'Rotina']
     })
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
@@ -46,6 +58,13 @@ def converter_df_para_excel(df):
         df.to_excel(writer, index=False, sheet_name='Paradas_Processadas')
     buffer.seek(0)
     return buffer
+
+def estilizar_tabela(df):
+    """Centraliza texto e cabeçalhos."""
+    return df.style.set_properties(**{'text-align': 'center'}) \
+                   .set_table_styles([
+                       dict(selector='th', props=[('text-align', 'center')])
+                   ])
 
 def traduzir_datas(df, col_data):
     """Tradução forçada PT-BR."""
@@ -84,7 +103,7 @@ def processar_grid_completo(df, col_data, col_nome, col_comentario):
     datas_ano = pd.date_range(start=f'{ano_foco}-01-01', end=f'{ano_foco}-12-31', freq='D')
     df_grid = pd.DataFrame({col_data: datas_ano})
     
-    # Agrupamento (Concatena nomes se houver mais de um no dia)
+    # Agrupamento
     df_agrupado = df_input.groupby(col_data).agg({
         col_nome: lambda x: ' | '.join(x),
         col_comentario: lambda x: ' | '.join(x),
@@ -116,24 +135,27 @@ def criar_calendario_full(df_completo, col_data, nome_col_parada):
         x=alt.X('Semana_Ano:O', title='Semana do Ano (1-52)', axis=alt.Axis(labelAngle=0)),
         y=alt.Y('Dia_Semana:O', sort=dias_ordenados_pt, title=None),
         
+        # --- AQUI ESTÁ A LÓGICA DE COR POR TIPO ---
         color=alt.condition(
-            alt.datum.Qtd_Paradas > 0,
-            alt.Color('Mes_Nome:N', 
-                      title='Mês', 
-                      sort=alt.EncodingSortField(field="Mes_Num", order="ascending"), 
-                      scale=alt.Scale(scheme='tableau20'),
-                      legend=None),
-            alt.value('rgba(128, 128, 128, 0.1)')
+            alt.datum.Qtd_Paradas > 0, # Se tiver parada...
+            alt.Color(f'{nome_col_parada}:N', # ...Usa o Nome da Parada para colorir
+                      title='Tipo de Parada', 
+                      scale=alt.Scale(scheme='category20'), # Paleta para categorias distintas
+                      legend=alt.Legend(
+                          orient='bottom', # Legenda em baixo
+                          columns=4,       # Divide em colunas para não ficar comprida
+                          symbolLimit=0,   # Mostra todos os simbolos
+                          labelFontSize=12,
+                          titleFontSize=13
+                      )),
+            alt.value('rgba(128, 128, 128, 0.1)') # Se vazio, cinza transparente
         ),
         
-        # --- AQUI ESTÁ A MUDANÇA ---
-        # Removi o Tooltip de Quantidade. Agora só mostra Data, Mês, Dia e O NOME.
         tooltip=[
             alt.Tooltip(col_data, title='Data', format='%d/%m/%Y'),
             alt.Tooltip('Mes_Nome', title='Mês'),
             alt.Tooltip('Dia_Semana', title='Dia'),
-            # Linha removida: alt.Tooltip('Qtd_Paradas', title='Qtd'),
-            alt.Tooltip(nome_col_parada, title='Equipamento/Parada')
+            alt.Tooltip(nome_col_parada, title='Parada/Equipamento')
         ]
     ).properties(
         width='container',
@@ -152,7 +174,7 @@ def criar_calendario_full(df_completo, col_data, nome_col_parada):
 
 # --- 4. INTERFACE ---
 st.title("🔧 WeekFlow | Gestão de Paradas")
-st.markdown("Mapa Visual de **Cronograma de Manutenção** (Planejado).")
+st.markdown("Mapa Visual de **Cronograma de Manutenção** (Por Tipo de Parada).")
 st.divider()
 
 aba1, aba2 = st.tabs(["🔎 Calculadora Rápida", "📂 Mapa de Paradas (Anual)"])
@@ -194,7 +216,7 @@ with aba2:
             col_nome = c_sel2.selectbox("Coluna NOME DA PARADA:", cols, index=idx_nome)
             col_com = c_sel3.selectbox("Coluna COMENTÁRIO:", cols, index=idx_com)
             
-            if st.button("🚀 Gerar Mapa de Manutenção", type="primary"):
+            if st.button("🚀 Gerar Mapa Colorido", type="primary"):
                 # Processamento
                 df_grid, ano, col_nome_final = processar_grid_completo(df_raw, col_data, col_nome, col_com)
                 
@@ -215,11 +237,15 @@ with aba2:
 
                 # Tabela Filtrada
                 with st.expander("📋 Ver Detalhes das Paradas"):
-                    # Seleciona e renomeia para ficar bonito na tabela
-                    cols_show = [col_data, 'Dia_Semana', col_nome_final] # Removi Qtd aqui também pra ficar coerente
+                    cols_show = [col_data, 'Dia_Semana', col_nome_final]
+                    df_exibir = df_grid[df_grid['Qtd_Paradas'] > 0][cols_show].sort_values(col_data)
+                    
+                    df_exibir[col_data] = df_exibir[col_data].dt.strftime('%d/%m/%Y')
+                    
                     st.dataframe(
-                        df_grid[df_grid['Qtd_Paradas'] > 0][cols_show].sort_values(col_data), 
-                        use_container_width=True
+                        estilizar_tabela(df_exibir), 
+                        use_container_width=True,
+                        hide_index=True
                     )
                 
                 st.download_button(
