@@ -1,46 +1,28 @@
-"""
-PORTAL DOS DADOS - PORTFÓLIO PROFISSIONAL
-Autor: Dione Nascimento
-Versão: 1.0.0
-Descrição: Aplicação web desenvolvida em Streamlit para apresentação profissional
-e centralização de conteúdos de Engenharia de Dados e Manutenção.
-"""
-
 import streamlit as st
-from analytics import inject_ga
-
-# Configuração da página
-st.set_page_config(page_title="Portal dos Dados")
-
-# Recupera o ID diretamente dos segredos
-# Se a chave não existir, o app avisará do erro (bom para debug)
-ga_id = st.secrets["GOOGLE_ANALYTICS_ID"]
-
-# Injeta o código
-inject_ga(ga_id)
-
+from analytics import inject_analytics  # Importando apenas a função de injeção
 
 # ============================================================
-# 1. CONFIGURAÇÃO DA PÁGINA
+# 1. CONFIGURAÇÃO DA PÁGINA (OBRIGATÓRIO SER A PRIMEIRA LINHA)
 # ============================================================
-# Deve ser sempre o primeiro comando Streamlit do script.
 st.set_page_config(
     page_title='Dione Nascimento | Portal dos Dados',
     page_icon='assets/portal.png',
     layout='wide',
     initial_sidebar_state='expanded'
-    
 )
 
 # ============================================================
-# 2. FUNÇÕES UTILITÁRIAS
+# 2. INJEÇÃO DO GOOGLE ANALYTICS
+# ============================================================
+# Executa logo após a configuração para garantir a captura
+inject_analytics()
+
+# ============================================================
+# 3. FUNÇÕES UTILITÁRIAS (Mantendo sua função load_css original)
 # ============================================================
 def load_css(file_path: str):
     """
     Carrega um arquivo CSS local e injeta na aplicação.
-    
-    Args:
-        file_path (str): Caminho relativo do arquivo .css
     """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -52,15 +34,20 @@ def load_css(file_path: str):
 load_css("style.css")
 
 # ============================================================
-# 3. SEÇÃO DE PERFIL (HEADER)
+# 4. SEÇÃO DE PERFIL (HEADER)
 # ============================================================
+st.title('Página Inicial')
+
 col_foto, col_bio = st.columns([1, 4], gap="medium")
 
 with col_foto:
-    st.image('./assets/minha_foto.png', use_container_width=True)
+    # Ajustei apenas o tratamento de erro caso a imagem não exista, para não quebrar o app
+    try:
+        st.image('./assets/minha_foto.png', use_container_width=True)
+    except:
+        st.warning("Imagem 'minha_foto.png' não encontrada.")
 
 with col_bio:
-    # Utiliza HTML/CSS injetado para justificar o texto, algo que o st.write padrão não faz.
     st.markdown("""
         <div class="justificado">
             <p>Olá! Sou <b>Dione Nascimento</b>, profissional com <b>15 anos de experiência em Manutenção Industrial</b>, 
@@ -79,9 +66,12 @@ with col_bio:
     """, unsafe_allow_html=True)
 
 # ============================================================
-# 4. BANNER E PROPOSTA DE VALOR
+# 5. BANNER E PROPOSTA DE VALOR
 # ============================================================
-st.image('./assets/fundo.jpg', use_container_width=True)
+try:
+    st.image('./assets/fundo.jpg', use_container_width=True)
+except:
+    pass # Se não tiver fundo, apenas segue
 
 st.markdown("""
 <div class="justificado">
@@ -98,12 +88,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================================
-# 5. CONEXÕES (CALL TO ACTION)
+# 6. CONEXÕES (CALL TO ACTION)
 # ============================================================
 st.markdown("### 🤝 Vamos nos conectar?")
 st.markdown("Explore meus projetos ou entre em contato profissionalmente:")
 
-# Layout de botões: 3 colunas iguais para os botões e 1 coluna vazia para ajuste visual
 col_btn1, col_btn2, col_btn3, _ = st.columns([1, 1, 1, 2], gap="small")
 
 # --- Botão LinkedIn ---
