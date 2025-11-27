@@ -23,7 +23,7 @@ st.markdown("Converta datas para **Padrões de Negócio** instantaneamente.")
 st.divider()
 
 with st.container():
-    col_input, col_vazia = st.columns([2, 1])
+    col_input, col_vazia = st.columns([0.5, 1])
     
     with col_input:
         data_input = st.date_input(
