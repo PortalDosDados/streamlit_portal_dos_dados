@@ -33,9 +33,21 @@ st.markdown('''
 
 st.divider()
 
+st.subheader('Aplicativo de Catálogo para Lubrificantes')
+st.video('https://www.youtube.com/watch?v=MNXcNj8PiOU')
+
+
+
+
+st.divider()
+
+st.subheader('Aplicativo de Inspeção em Equipamentos')
+st.video('https://www.youtube.com/watch?v=ZH-m1hMfzvM&t=23s')
+
+
 st.subheader('Controle de Ferramentaria')
 st.markdown('''
-<div class="justificado">
+<div class='justificado'>
 O objetivo principal do aplicativo é rastrear o inventário de ferramentas, 
 gerenciar quem as utiliza e saber seu status atual.
 </div>
