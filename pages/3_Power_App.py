@@ -35,9 +35,11 @@ st.divider()
 
 st.subheader('Controle de Ferramentaria')
 st.markdown('''
+<div class="justificado">
 O objetivo principal do aplicativo é rastrear o inventário de ferramentas, 
 gerenciar quem as utiliza e saber seu status atual.
-''')
+</div>
+''', unsafe_allow_html=True)
 
 # --- Galeria de Imagens ---
 st.subheader('Visão Geral do Aplicativo')
