@@ -7,6 +7,10 @@ st.set_page_config(
     layout='wide'     # Layout da página
 )
 
+#CSS
+with open("style.css", "r", encoding="utf-8") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 # --- Seção do Header ---
 st.image('assets/power_apps.png', width=160)
 st.header('Power Apps')
