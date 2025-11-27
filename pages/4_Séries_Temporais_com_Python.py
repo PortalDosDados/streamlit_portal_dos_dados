@@ -27,10 +27,11 @@ st.image('assets/python.gif', width=160)
 st.subheader('Análise Técnica de Séries Temporais com Python')
 
 st.markdown("""
+<div class="justificado">
 Este script demonstra um pipeline completo de análise de dados financeiros,
 incluindo aquisição de dados, tratamento, criação de indicadores e visualização
 de séries temporais para análise de tendência.
-""")
+""", unsafe_allow_html=True)
 
 # ============  
 # Entradas  
