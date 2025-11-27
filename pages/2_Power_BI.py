@@ -77,8 +77,9 @@ st.markdown("""
 st.subheader('Dashboard de Execução Financeira (Setor Público)')
 
 st.markdown("""
+<div class="justificado"> 
 Dashboard executivo para análise de empenho, pagamento e evolução histórica do orçamento.
-""")
+""", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
