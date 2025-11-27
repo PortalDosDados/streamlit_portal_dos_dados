@@ -1,13 +1,18 @@
 import streamlit as st
+from analytics import inject_analytics
 
-# -----------------------------------------------------------
-# CONFIGURAÇÕES DA PÁGINA
-# -----------------------------------------------------------
+# 1. CONFIGURAÇÃO (Sempre a primeira linha do Streamlit)
 st.set_page_config(
     page_title='Dione Nascimento - Power BI',
     page_icon='assets/power_bi.png',
     layout='wide'
 )
+
+# 2. INJEÇÃO DO ANALYTICS (Logo após o config)
+inject_analytics()
+
+# --- Resto do código ---
+st.title("Análise de Dados")
 
 #CSS
 with open("style.css", "r", encoding="utf-8") as f:
