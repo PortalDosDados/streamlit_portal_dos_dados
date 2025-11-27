@@ -17,6 +17,7 @@ st.set_page_config(
     page_icon='assets/portal.png',
     layout='wide',
     initial_sidebar_state='expanded'
+    
 )
 
 # ============================================================
