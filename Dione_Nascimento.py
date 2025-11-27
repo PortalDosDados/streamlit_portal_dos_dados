@@ -7,6 +7,18 @@ e centralização de conteúdos de Engenharia de Dados e Manutenção.
 """
 
 import streamlit as st
+from analytics import inject_ga
+
+# Configuração da página
+st.set_page_config(page_title="Portal dos Dados")
+
+# Recupera o ID diretamente dos segredos
+# Se a chave não existir, o app avisará do erro (bom para debug)
+ga_id = st.secrets["GOOGLE_ANALYTICS_ID"]
+
+# Injeta o código
+inject_ga(ga_id)
+
 
 # ============================================================
 # 1. CONFIGURAÇÃO DA PÁGINA
@@ -17,6 +29,7 @@ st.set_page_config(
     page_icon='assets/portal.png',
     layout='wide',
     initial_sidebar_state='expanded'
+    
 )
 
 # ============================================================
