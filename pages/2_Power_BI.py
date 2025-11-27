@@ -103,9 +103,11 @@ st.markdown("""
 st.subheader('Dashboard Análise da Folha de Pagamento')
 
 st.markdown("""
+<div class="justificado"> 
 Pipeline completo de BI: ETL, modelagem em Data Warehouse e visualização interativa
 para análise da folha de pagamento da Prefeitura.
-""")
+</div>
+""", unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
 
