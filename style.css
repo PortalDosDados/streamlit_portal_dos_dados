@@ -17,7 +17,7 @@
    2. BOTÕES DE REDES SOCIAIS
    ============================ */
 
-/* ESTILO BASE (Compartilhado por todos os botões) */
+/* ESTILO BASE */
 .btn-linkedin, .btn-youtube, .btn-github {
     display: flex;
     align-items: center;
@@ -36,8 +36,7 @@
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
 
-    /* --- A CORREÇÃO MOBILE ESTÁ AQUI --- */
-    margin-bottom: 15px; /* Cria um espaço seguro abaixo de cada botão */
+    margin-bottom: 15px; 
 }
 
 /* ÍCONES (SVG) */
@@ -47,7 +46,7 @@
     fill: white;
 }
 
-/* EFEITO DE CLIQUE (Opcional: leve movimento) */
+/* EFEITO DE CLIQUE */
 .btn-linkedin:active, .btn-youtube:active, .btn-github:active {
     transform: scale(0.98);
 }
@@ -78,4 +77,38 @@
 }
 .btn-github:hover {
     background-color: #1b1f23;
+}
+
+/* ============================
+   4. ELEMENTOS STREAMLIT (Métricas & Cards)
+   ============================ */
+
+/* Container da Métrica (O cartãozinho) */
+div[data-testid="stMetric"] {
+    background-color: #f0f2f6;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+/* Adaptação para Modo Escuro */
+@media (prefers-color-scheme: dark) {
+    div[data-testid="stMetric"] {
+        background-color: #262730;
+    }
+}
+
+/* O Valor Numérico/Texto Principal */
+div[data-testid="stMetricValue"] { 
+    font-size: 1.8rem !important;
+    font-weight: 700; 
+}
+
+/* O Rótulo (Label) acima do valor */
+div[data-testid="stMetricLabel"] {
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }

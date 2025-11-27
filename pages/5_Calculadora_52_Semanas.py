@@ -5,31 +5,17 @@ from datetime import datetime
 st.set_page_config(
     page_title="WeekFlow | Calculadora",
     page_icon="📅",
-    layout="centered"
+    layout="wide"  # <--- MUDANÇA AQUI (era "centered")
 )
 
-# --- 2. ESTILIZAÇÃO (CSS) ---
-st.markdown("""
-    <style>
-    div[data-testid="stMetric"] {
-        background-color: #f0f2f6;
-        border: 1px solid rgba(128, 128, 128, 0.2);
-        border-radius: 8px;
-        padding: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        text-align: center;
-    }
-    @media (prefers-color-scheme: dark) {
-        div[data-testid="stMetric"] {
-            background-color: #262730;
-        }
-    }
-    div[data-testid="stMetricValue"] { 
-        font-size: 1.8rem !important; /* Leve ajuste para caber nomes longos */
-        font-weight: 700; 
-    }
-    </style>
-""", unsafe_allow_html=True)
+# --- 2. IMPORTAÇÃO DO CSS EXTERNO ---
+def carregar_css(nome_arquivo):
+    # A MUDANÇA ESTÁ AQUI: adicionamos encoding='utf-8'
+    with open(nome_arquivo, encoding='utf-8') as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+# Chamada da função (certifique-se que style.css está na mesma pasta)
+carregar_css('style.css')
 
 # --- 3. INTERFACE E LÓGICA ---
 st.title("📅 Calculadora de Datas")
@@ -47,28 +33,18 @@ with st.container():
         )
 
     # --- LÓGICA DE CÁLCULO ---
-    # 1. Semana ISO
     ano_iso, semana_iso, dia_num_iso = data_input.isocalendar()
-    
-    # 2. Dia do Ano
     dia_do_ano = data_input.timetuple().tm_yday
     
-    # 3. Dia da Semana (Tradução Manual)
-    # .weekday() retorna 0 para Segunda e 6 para Domingo
     dias_pt = {
-        0: 'Segunda-feira',
-        1: 'Terça-feira',
-        2: 'Quarta-feira',
-        3: 'Quinta-feira',
-        4: 'Sexta-feira',
-        5: 'Sábado',
-        6: 'Domingo'
+        0: 'Segunda-feira', 1: 'Terça-feira', 2: 'Quarta-feira',
+        3: 'Quinta-feira', 4: 'Sexta-feira', 5: 'Sábado', 6: 'Domingo'
     }
     nome_dia_semana = dias_pt[data_input.weekday()]
 
     st.write("") 
     
-    # Exibição dos Resultados
+    # Exibição dos Resultados (O CSS externo vai estilizar isso aqui)
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -78,8 +54,10 @@ with st.container():
         st.metric(label="Dia do Ano", value=f"Dia {dia_do_ano}")
         
     with col3:
-        # AQUI ESTÁ A MUDANÇA
         st.metric(label="Dia da Semana", value=nome_dia_semana)
 
 # --- 4. RODAPÉ ---
 st.caption("Nota: Semana ISO inicia na segunda-feira. Útil para planejamento de sprints e logística.")
+
+# Imagem de fundo (certifique-se que a pasta assets existe)
+st.image('./assets/fundo.jpg', use_container_width=True)
