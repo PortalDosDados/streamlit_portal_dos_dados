@@ -30,9 +30,11 @@ Aqui apresento alguns projetos que posso compartilhar publicamente.
 st.subheader('Dashboard Eleições Presidenciais')
 
 st.markdown("""
+<div class="justificado"> 
 Análise completa das eleições presidenciais no Brasil, transformando dados dispersos
 em visualizações claras e úteis para entender o comportamento do eleitorado.
-""")
+</div>
+""", unsafe_allow_html=True)
 
 st.subheader('Visualização do Dashboard')
 st.video("https://www.youtube.com/watch?v=hQVrG6j-OMs")
@@ -53,9 +55,11 @@ st.markdown("""
 st.subheader('Dashboard Logístico Interativo')
 
 st.markdown("""
+<div class="justificado"> 
 Análise consolidada do desempenho logístico e financeiro da operação de transporte.
 Inclui KPIs, custos, viagens, eficiência e manutenção por marca e tipo de veículo.
-""")
+</div>
+""", unsafe_allow_html=True)
 
 st.video("https://www.youtube.com/watch?v=V6D1s--n_oA&t=12s")
 
