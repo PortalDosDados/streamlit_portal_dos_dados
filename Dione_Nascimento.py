@@ -36,34 +36,35 @@ load_css("style.css")
 # ============================================================
 # 4. SEÇÃO DE PERFIL (HEADER)
 # ============================================================
-st.title('Página Inicial')
 
-col_foto, col_bio = st.columns([1, 4], gap="medium")
+# Cria um container com borda para agrupar visualmente o perfil
+with st.container(border=True):
+    col_foto, col_bio = st.columns([1, 4], gap="medium")
 
-with col_foto:
-    # Ajustei apenas o tratamento de erro caso a imagem não exista, para não quebrar o app
-    try:
-        st.image('./assets/minha_foto.png', use_container_width=True)
-    except:
-        st.warning("Imagem 'minha_foto.png' não encontrada.")
+    with col_foto:
+        try:
+            # Dica: Adicionei um style inline simples para garantir bordas arredondadas na imagem se desejar
+            st.image('./assets/minha_foto.png', use_container_width=True)
+        except:
+            st.warning("Foto não encontrada.")
 
-with col_bio:
-    st.markdown("""
-        <div class="justificado">
-            <p>Olá! Sou <b>Dione Nascimento</b>, profissional com <b>15 anos de experiência em Manutenção Industrial</b>, 
-            especializado em <b>Gestão de Ativos</b> e <b>Análise de Dados</b>. Minha atuação combina metodologias 
-            de engenharia com soluções de Business Intelligence para transformar dados operacionais em decisões estratégicas.</p>
-            <p>Minha trajetória iniciou no SENAI (como aprendiz e professor) e consolidou-se no <b>setor siderúrgico</b>, 
-            onde desenvolvo projetos de:</p>
-            <ul>
-                <li><b>Confiabilidade de equipamentos</b></li>
-                <li><b>Digitalização da manutenção</b></li>
-                <li><b>Automação de indicadores (KPIs)</b></li>
-            </ul>
-            <p>Sou fundador do <b>Portal dos Dados</b>, uma iniciativa que conecta a Engenharia de Manutenção à Ciência de Dados, 
-            capacitando profissionais a eliminarem o "achismo" através de dados reais.</p>
-        </div>
-    """, unsafe_allow_html=True)
+    with col_bio:
+        st.markdown("""
+            <div class="justificado" style="padding-right: 10px;">
+                <p style="margin-top: 0;">Olá! Sou <b>Dione Nascimento</b>, profissional com <b>15 anos de experiência em Manutenção Industrial</b>, 
+                especializado em <b>Gestão de Ativos</b> e <b>Análise de Dados</b>. Minha atuação combina metodologias 
+                de engenharia com soluções de Business Intelligence para transformar dados operacionais em decisões estratégicas.</p>
+                <p>Minha trajetória iniciou no SENAI (como aprendiz e professor) e consolidou-se no <b>setor siderúrgico</b>, 
+                onde desenvolvo projetos de:</p>
+                <ul>
+                    <li><b>Confiabilidade de equipamentos</b></li>
+                    <li><b>Digitalização da manutenção</b></li>
+                    <li><b>Automação de indicadores (KPIs)</b></li>
+                </ul>
+                <p>Sou fundador do <b>Portal dos Dados</b>, uma iniciativa que conecta a Engenharia de Manutenção à Ciência de Dados, 
+                capacitando profissionais a eliminarem o "achismo" através de dados reais.</p>
+            </div>
+        """, unsafe_allow_html=True)
 
 # ============================================================
 # 5. BANNER E PROPOSTA DE VALOR
