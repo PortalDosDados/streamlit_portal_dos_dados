@@ -11,9 +11,6 @@ st.set_page_config(
 # 2. INJEÇÃO DO ANALYTICS (Logo após o config)
 inject_analytics()
 
-# --- Resto do código ---
-st.title("Análise de Dados")
-
 #CSS
 with open("style.css", "r", encoding="utf-8") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
