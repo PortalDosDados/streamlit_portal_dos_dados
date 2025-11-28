@@ -38,7 +38,7 @@ load_css("style.css")
 # ============================================================
 
 # Cria um container com borda para agrupar visualmente o perfil
-with st.container(border=True):
+with st.container():
     col_foto, col_bio = st.columns([1, 4], gap="medium")
 
     with col_foto:
