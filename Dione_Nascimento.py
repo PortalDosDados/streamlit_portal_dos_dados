@@ -140,3 +140,6 @@ with streamlit_analytics.track():
             </button>
         </a>
         """, unsafe_allow_html=True)
+        
+# Contador de visitas simples e eterno
+st.markdown("![Visitantes](https://visitor-badge.laobi.io/badge?page_id=dione_nascimento_portal_dados)")
