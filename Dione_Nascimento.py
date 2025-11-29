@@ -26,6 +26,8 @@ def load_css(file_path: str):
 # Carregamento dos estilos globais
 load_css("style.css")
 
+
+
 # --------------------------------------------------------------------------
 # Seção: Header e Perfil Profissional
 # --------------------------------------------------------------------------
@@ -124,3 +126,16 @@ with col_btn3:
         </button>
     </a>
     """, unsafe_allow_html=True)
+    
+# ==============================================================================
+# Contador de visitantes
+# ==============================================================================
+st.write("---") # Linha divisória para separar
+st.markdown(
+    """
+    <div style="display: flex; justify-content: center;">
+        <img src="https://visitor-badge.laobi.io/badge?page_id=dione_nascimento_portal_dados&left_color=gray&right_color=orange" alt="Visitantes">
+    </div>
+    """, 
+    unsafe_allow_html=True
+)
