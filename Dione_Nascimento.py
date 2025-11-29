@@ -124,29 +124,3 @@ with col_btn3:
         </button>
     </a>
     """, unsafe_allow_html=True)
-
-# ==============================================================================
-# CONTADOR DE VISITANTES (Com filtro: Só aparece na nuvem)
-# ==============================================================================
-st.write("---") 
-
-# Verifica se é ambiente local ou nuvem
-# Se a URL base tiver "localhost" ou IP local, consideramos ambiente de desenvolvimento
-try:
-    query_params = st.query_params
-    base_url = query_params.get("base_url", "") if query_params else ""
-    is_local = "localhost" in base_url or "127.0.0.1" in base_url
-except:
-    is_local = False # Na dúvida, assume que não é local
-
-if not is_local:
-    # MOSTRA O CONTADOR (Ambiente de Produção)
-    _, col_centro, _ = st.columns([5, 2, 5])
-    with col_centro:
-        try:
-            st.image("https://api.visitorbadge.io/api/visitors?path=dione-nascimento-portal-dados&label=VISITANTES&countColor=%23263759", use_container_width=True)
-        except:
-            pass
-else:
-    # ESCONDE O CONTADOR (Ambiente Local) - Para não contar seus testes
-    st.caption("🔒 Contador oculto em Localhost")
