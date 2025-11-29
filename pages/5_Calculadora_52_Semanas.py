@@ -61,3 +61,4 @@ st.caption("Nota: Semana ISO inicia na segunda-feira. Útil para planejamento de
 
 # Imagem de fundo (certifique-se que a pasta assets existe)
 st.image('./assets/fundo.jpg', use_container_width=True)
+
