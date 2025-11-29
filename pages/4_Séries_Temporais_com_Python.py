@@ -83,3 +83,4 @@ st.markdown("""
 - Gráficos com **matplotlib** e **seaborn**
 - Médias Móveis de 21 e 200 períodos para análise de tendência
 """)
+
