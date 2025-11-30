@@ -13,7 +13,7 @@ with open('style.css', 'r', encoding='utf-8') as f:
 
 # --- Seção do Header ---
 st.image('assets/power_apps.png', width=160)
-st.header('Power Apps')
+st.title('Power Apps')
 st.markdown('''
 <div class='justificado'>
     O Power Apps é o meu 'canivete suíço' para digitalização de processos. Quando

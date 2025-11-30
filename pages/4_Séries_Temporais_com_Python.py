@@ -24,7 +24,7 @@ with open('style.css', 'r', encoding='utf-8') as f:
 # Logo
 st.image('assets/python.gif', width=160)
 
-st.subheader('Análise Técnica de Séries Temporais com Python')
+st.title('Análise Técnica de Séries Temporais com Python')
 
 st.markdown('''
 <div class='justificado'>

@@ -12,7 +12,7 @@ with open('style.css', 'r', encoding='utf-8') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 st.image('assets/power_bi.png', width=160)
-st.header('Power BI')
+st.title('Power BI')
 
 st.markdown('''
 <div class='justificado'>
