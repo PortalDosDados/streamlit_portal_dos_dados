@@ -126,3 +126,10 @@ st.markdown('''
 - Análises por grau de instrução e cargo
 - Tabela detalhada por servidor
 ''')
+
+# ============================================================================
+# RODAPÉ E NOTAS
+# ============================================================================
+st.space()
+# Imagem de fundo (certifique-se que a pasta assets existe)
+st.image('./assets/fundo.jpg', use_container_width=True)

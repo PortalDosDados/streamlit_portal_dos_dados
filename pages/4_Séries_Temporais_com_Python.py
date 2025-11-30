@@ -84,3 +84,10 @@ st.markdown('''
 - Médias Móveis de 21 e 200 períodos para análise de tendência
 ''')
 
+# ============================================================================
+# RODAPÉ E NOTAS
+# ============================================================================
+st.space()
+# Imagem de fundo (certifique-se que a pasta assets existe)
+st.image('./assets/fundo.jpg', use_container_width=True)
+
