@@ -199,20 +199,16 @@ if calcular:
                 '>
                     Ação Recomendada: {texto_status}
                 </div>
-
                 <div style='display: flex; justify-content: center; align-items: baseline; gap: 10px;'>
                     <span style='font-size: 4rem; font-weight: 800; color: #333;'>
                         {horas_decimais:.2f}
                     </span>
                     <span style='font-size: 1.2rem; color: #666;'>horas</span>
                 </div>
-
                 <div style='margin-top: 10px; font-weight: bold; color: #555;'>
                     ⏱️ Total: {minutos_totais} minutos
                 </div>
-
                 <hr style='margin: 20px 0; border: 0; border-top: 1px solid #eee;'>
-
                 <div style='font-size: 0.85rem; color: #999;'>
                     Período Registrado: {str_t_ini} às {str_t_fim}
                 </div>
@@ -225,5 +221,6 @@ if calcular:
 # ============================================================================
 # 6. RODAPÉ E NOTAS
 # ============================================================================
+st.space()
 # Imagem de fundo (certifique-se que a pasta assets existe)
 st.image('./assets/fundo.jpg', use_container_width=True)
