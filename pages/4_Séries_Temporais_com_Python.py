@@ -6,44 +6,44 @@ import seaborn as sns
 import yfinance as yf
 import warnings
 
-# ============  
-# Configuração da página  
-# ============  
+# ============
+# Configuração da página
+# ============
 st.set_page_config(
-    page_title='Dione Nascimento - Python',
+    page_title='Portal dos Dados - Séries Temporais',
     page_icon='assets/python.gif',
     layout='wide'
 )
 
-# ============  
-# Carregar CSS externo (UTF-8 para evitar erro de decodificação)  
-# ============  
-with open("style.css", "r", encoding="utf-8") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+# ============
+# Carregar CSS externo (UTF-8 para evitar erro de decodificação)
+# ============
+with open('style.css', 'r', encoding='utf-8') as f:
+    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-# Logo  
+# Logo
 st.image('assets/python.gif', width=160)
 
 st.subheader('Análise Técnica de Séries Temporais com Python')
 
-st.markdown("""
-<div class="justificado">
+st.markdown('''
+<div class='justificado'>
 Este script demonstra um pipeline completo de análise de dados financeiros,
 incluindo aquisição de dados, tratamento, criação de indicadores e visualização
 de séries temporais para análise de tendência.
-""", unsafe_allow_html=True)
+''', unsafe_allow_html=True)
 
-# ============  
-# Entradas  
-# ============  
+# ============
+# Entradas
+# ============
 ticker = st.text_input('Digite o ticker: (Ex:BBAS3.SA)', value='BBAS3.SA')
 start_date = st.date_input('Data de início:', value=pd.to_datetime('2020-01-01'))
 end_date = st.date_input('Data de fim:', value=pd.to_datetime('2025-12-31'))
 
-# ============  
-# Botão estilizado herdado via CSS  
-# ============  
-if st.button('Gerar gráfico', key="grafico-btn"):
+# ============
+# Botão estilizado herdado via CSS
+# ============
+if st.button('Gerar gráfico', key='grafico-btn'):
 
     df = yf.download(ticker, start=start_date, end=end_date)
 
@@ -74,13 +74,13 @@ if st.button('Gerar gráfico', key="grafico-btn"):
 
         st.pyplot(plt)
 
-# ============  
-# Explicação  
-# ============  
-st.markdown("""
+# ============
+# Explicação
+# ============
+st.markdown('''
 - Aquisição com **yfinance**
 - Limpeza, reestruturação e criação de indicadores com **pandas**
 - Gráficos com **matplotlib** e **seaborn**
 - Médias Móveis de 21 e 200 períodos para análise de tendência
-""")
+''')
 
