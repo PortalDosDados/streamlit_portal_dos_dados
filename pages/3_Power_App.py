@@ -222,3 +222,10 @@ with st.expander('**3. Tela de Formulário (Solicitações Operacionais)**'):
             * `Data de registro` e `Prazo`.
         * **Ícones de Ação:** 'X' (Cancelar) e '✓' (Salvar) para confirmar o registro no banco de dados.
     ''')
+
+# ============================================================================
+# RODAPÉ E NOTAS
+# ============================================================================
+st.space()
+# Imagem de fundo (certifique-se que a pasta assets existe)
+st.image('./assets/fundo.jpg', use_container_width=True)
