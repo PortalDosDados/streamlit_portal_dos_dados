@@ -25,10 +25,10 @@
     gap: 10px;
     width: 100%;
     padding: 10px 20px;
-    
+
     border: none;
     border-radius: 8px;
-    
+
     color: white;
     font-size: 16px;
     font-weight: bold;
@@ -36,7 +36,7 @@
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
 
-    margin-bottom: 15px; 
+    margin-bottom: 15px;
 }
 
 /* ÍCONES (SVG) */
@@ -101,9 +101,9 @@ div[data-testid="stMetric"] {
 }
 
 /* O Valor Numérico/Texto Principal */
-div[data-testid="stMetricValue"] { 
+div[data-testid="stMetricValue"] {
     font-size: 1.8rem !important;
-    font-weight: 700; 
+    font-weight: 700;
 }
 
 /* O Rótulo (Label) acima do valor */
@@ -111,4 +111,65 @@ div[data-testid="stMetricLabel"] {
     display: flex;
     justify-content: center;
     width: 100%;
+}
+
+/* ============================
+   5. RESPONSIVIDADE (Mobile / Tablet)
+   ============================ */
+@media (max-width: 768px) {
+    .main {
+        max-width: 95%;
+        margin: 0 auto;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .justificado {
+        font-size: 0.95rem;
+        line-height: 1.45;
+    }
+
+    .btn-linkedin, .btn-youtube, .btn-github {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    .btn-linkedin svg, .btn-youtube svg, .btn-github svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    img, .stImage img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* Tornar dataframes e tabelas roláveis horizontalmente em telas pequenas */
+    .stDataFrame, table {
+        width: 100% !important;
+        overflow-x: auto;
+        display: block;
+    }
+
+    div[data-testid="stMetricValue"] {
+        font-size: 1.4rem !important;
+    }
+
+    /* Forçar empilhamento vertical nas colunas do Streamlit quando houver pouco espaço */
+    .stColumns, .stColumns > div, .row-widget.stColumns, .css-1l02zno > div {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* Espaçamento geral reduzido para caber melhor em telas pequenas */
+    .block-container {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .justificado { font-size: 0.92rem; }
+    .btn-linkedin, .btn-youtube, .btn-github { font-size: 13px; padding: 7px 10px; }
+    div[data-testid="stMetricValue"] { font-size: 1.2rem !important; }
 }
