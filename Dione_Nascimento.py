@@ -4,42 +4,47 @@ import streamlit as st
 # 1. CONFIGURAÇÃO DA PÁGINA
 # ==============================================================================
 st.set_page_config(
-    page_title='Portal dos Dados - Dione Nascimento',
-    page_icon='assets/portal.png',
-    layout='wide',
-    initial_sidebar_state='expanded'
+    page_title="Portal dos Dados - Dione Nascimento",
+    page_icon="assets/portal.png",
+    layout="wide",
+    initial_sidebar_state="expanded",
 )
+
 
 # --------------------------------------------------------------------------
 # Funções Utilitárias
 # --------------------------------------------------------------------------
 def load_css(file_path: str):
-    '''
+    """
     Lê um arquivo CSS local e injeta os estilos na aplicação Streamlit.
-    '''
+    """
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+        with open(file_path, "r", encoding="utf-8") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     except FileNotFoundError:
-        st.error(f"Erro Crítico: O arquivo de estilos '{file_path}' não foi encontrado.")
+        st.error(
+            f"Erro Crítico: O arquivo de estilos '{file_path}' não foi encontrado."
+        )
+
 
 # Carregamento dos estilos globais
-load_css('style.css')
+load_css("style.css")
 
 # --------------------------------------------------------------------------
 # Seção: Header e Perfil Profissional
 # --------------------------------------------------------------------------
 with st.container():
-    col_foto, col_bio = st.columns([1, 4], gap='medium')
+    col_foto, col_bio = st.columns([1, 4], gap="medium")
 
     with col_foto:
         try:
-            st.image('./assets/minha_foto.png', use_container_width=True)
+            st.image("./assets/minha_foto.png", use_container_width=True)
         except Exception:
-            st.warning('Imagem de perfil não disponível.')
+            st.warning("Imagem de perfil não disponível.")
 
     with col_bio:
-        st.markdown('''
+        st.markdown(
+            """
             <div class='justificado' style='padding-right: 10px;'>
                 <p style='margin-top: 0;'>Olá! Sou <b>Dione Nascimento</b>, profissional com <b>15 anos de experiência em Manutenção Industrial</b>,
                 especializado em <b>Gestão de Ativos</b> e <b>Análise de Dados</b>. Minha atuação combina metodologias
@@ -54,17 +59,20 @@ with st.container():
                 <p>Sou fundador do <b>Portal dos Dados</b>, uma iniciativa que conecta a Engenharia de Manutenção à Ciência de Dados,
                 capacitando profissionais a eliminarem o 'achismo' através de dados reais.</p>
             </div>
-        ''', unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
 # --------------------------------------------------------------------------
 # Seção: Banner e Proposta de Valor
 # --------------------------------------------------------------------------
 try:
-    st.image('./assets/fundo.jpg', use_container_width=True)
+    st.image("./assets/fundo.jpg", use_container_width=True)
 except Exception:
     pass
 
-st.markdown('''
+st.markdown(
+    """
 <div class='justificado'>
     <p><b>PORTAL DOS DADOS</b> é um hub de conhecimento focado em produtividade técnica.
     Aqui, a teoria encontra a prática do chão de fábrica.</p>
@@ -76,19 +84,22 @@ st.markdown('''
         <li>🗄️ <b>Engenharia de Dados:</b> SQL e estruturação de bancos industriais.</li>
     </ul>
 </div>
-''', unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # --------------------------------------------------------------------------
 # Seção: Rodapé e Redes Sociais (Call to Action)
 # --------------------------------------------------------------------------
-st.markdown('### 🤝 Vamos nos conectar?')
-st.markdown('Explore meus projetos ou entre em contato profissionalmente:')
+st.markdown("### 🤝 Vamos nos conectar?")
+st.markdown("Explore meus projetos ou entre em contato profissionalmente:")
 
-col_btn1, col_btn2, col_btn3, _ = st.columns([1, 1, 1, 2], gap='small')
+col_btn1, col_btn2, col_btn3, _ = st.columns([1, 1, 1, 2], gap="small")
 
 # Botão: LinkedIn
 with col_btn1:
-    st.markdown('''
+    st.markdown(
+        """
     <a href='https://www.linkedin.com/in/dione-nascimento-37287a233/' target='_blank' style='text-decoration: none;'>
         <button class='btn-linkedin'>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
@@ -97,11 +108,14 @@ with col_btn1:
             <span>LinkedIn</span>
         </button>
     </a>
-    ''', unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 # Botão: YouTube
 with col_btn2:
-    st.markdown('''
+    st.markdown(
+        """
     <a href='https://www.youtube.com/@Portal_dos_Dados' target='_blank' style='text-decoration: none;'>
         <button class='btn-youtube'>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
@@ -110,11 +124,14 @@ with col_btn2:
             <span>YouTube</span>
         </button>
     </a>
-    ''', unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 # Botão: GitHub
 with col_btn3:
-    st.markdown('''
+    st.markdown(
+        """
     <a href='https://github.com/PortalDosDados' target='_blank' style='text-decoration: none;'>
         <button class='btn-github'>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
@@ -123,4 +140,6 @@ with col_btn3:
             <span>GitHub</span>
         </button>
     </a>
-    ''', unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
