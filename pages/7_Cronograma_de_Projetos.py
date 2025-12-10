@@ -1,18 +1,21 @@
-from io import BytesIO
-import streamlit as st
-import pandas as pd
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 
 
-# Página limpa e canônica para o dashboard MS Project
-import streamlit as st
-import pandas as pd
-import plotly.express as px
+# ============================================================================
+# 1. CONFIGURAÇÃO GERAL DA PÁGINA
+# ============================================================================
+st.set_page_config(
+    page_title="Portal dos Dados - Cronograma de Projetos",
+    page_icon="📅",
+    layout="wide",
+)
 
 
-st.set_page_config(page_title="Cronograma de Projetos", layout="wide")
+# ============================================================================
+# 2. FUNÇÕES AUXILIARES
+# ============================================================================
 
 
 def carregar_dados_exemplo():
@@ -135,10 +138,13 @@ def main():
     col1, col2, col3, col4 = st.columns(4)
     total_tarefas = len(df)
     inicio_projeto = (
-        df["Inicio"].min().strftime("%d/%m/%Y") if "Inicio" in df.columns else "-"
+        df["Inicio"].min().strftime(
+            "%d/%m/%Y") if "Inicio" in df.columns else "-"
     )
-    fim_projeto = df["Fim"].max().strftime("%d/%m/%Y") if "Fim" in df.columns else "-"
-    media_conclusao = df["Conclusao"].mean() if "Conclusao" in df.columns else 0
+    fim_projeto = df["Fim"].max().strftime(
+        "%d/%m/%Y") if "Fim" in df.columns else "-"
+    media_conclusao = df["Conclusao"].mean(
+    ) if "Conclusao" in df.columns else 0
 
     col1.metric("Total de Tarefas", total_tarefas)
     col2.metric("Início do Projeto", inicio_projeto)
@@ -160,15 +166,18 @@ def main():
         title="Cronograma de Execução",
     )
     fig_gantt.update_yaxes(autorange="reversed")
-    st.plotly_chart(fig_gantt, use_container_width=True, key="gantt_7_cronograma")
+    st.plotly_chart(fig_gantt, use_container_width=True,
+                    key="gantt_7_cronograma")
 
     # Carga por recurso
     st.subheader("👥 Carga de Trabalho por Recurso")
     if "Recurso" in df.columns:
         recursos_df = df["Recurso"].value_counts().reset_index()
         recursos_df.columns = ["Recurso", "Qtd Tarefas"]
-        fig_bar = px.bar(recursos_df, x="Recurso", y="Qtd Tarefas", color="Qtd Tarefas")
-        st.plotly_chart(fig_bar, use_container_width=True, key="bar_7_cronograma")
+        fig_bar = px.bar(recursos_df, x="Recurso",
+                         y="Qtd Tarefas", color="Qtd Tarefas")
+        st.plotly_chart(fig_bar, use_container_width=True,
+                        key="bar_7_cronograma")
     else:
         st.info("Coluna 'Recurso' não encontrada nos dados.")
 
