@@ -88,7 +88,7 @@ if st.button('Gerar gráfico', key='grafico-btn'):
 
     fig.update_layout(
         title=f"Preço e Médias Móveis de {ticker}",
-        xaxis_title="Ano",
+        xaxis_title="",
         yaxis_title="Preço",
         template="plotly_white",
         plot_bgcolor="#0B1933",
