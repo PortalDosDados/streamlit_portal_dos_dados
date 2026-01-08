@@ -94,6 +94,7 @@ if st.button('Gerar gráfico', key='grafico-btn'):
         plot_bgcolor="#0B1933",
         paper_bgcolor="#0B1933",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(l=40, r=40, t=60, b=40)
     )
 
     st.plotly_chart(fig, use_container_width=True)
