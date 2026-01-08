@@ -107,8 +107,8 @@ st.markdown(
     '''
 - Aquisição com **yfinance**
 - Limpeza, reestruturação e criação de indicadores com **pandas**
-- Gráficos com **matplotlib** e **seaborn**
-- Médias Móveis de 21 e 200 períodos para análise de tendência
+- Gráficos com **Plotly**
+- Médias Móveis de 21 e 200 períodos para análise de tendência (Preço de Fechamento)
 '''
 )
 
