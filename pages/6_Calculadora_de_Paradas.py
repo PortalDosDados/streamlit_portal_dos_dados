@@ -5,9 +5,9 @@ from datetime import datetime, timedelta, time
 # 1. CONFIGURAÇÃO GERAL DA PÁGINA
 # ============================================================================
 st.set_page_config(
-    page_title="Portal dos Dados - Calculadora de Paradas",
-    page_icon="🏭",
-    layout="wide",
+    page_title='Portal dos Dados - Calculadora de Paradas',
+    page_icon='🏭',
+    layout='wide',
 )
 
 # ============================================================================
@@ -16,28 +16,28 @@ st.set_page_config(
 
 
 def carregar_css(nome_arquivo):
-    """
+    '''
     Carrega um arquivo CSS externo para personalização do tema.
 
     Args:
         nome_arquivo (str): Caminho relativo do arquivo .css
-    """
+    '''
     try:
-        with open(nome_arquivo, encoding="utf-8") as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+        with open(nome_arquivo, encoding='utf-8') as f:
+            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
     except FileNotFoundError:
         st.warning(
-            "⚠️ Aviso: Arquivo style.css não encontrado. O tema padrão será aplicado."
+            '⚠️ Aviso: Arquivo style.css não encontrado. O tema padrão será aplicado.'
         )
 
 
 # Carrega o CSS global (cores da marca, fundos, etc.)
-carregar_css("style.css")
+carregar_css('style.css')
 
 # Injeção de CSS Específico (Tweaks de Interface)
 # Foco: Melhorar a UX de inputs numéricos e botões de ação (CTA)
 st.markdown(
-    """
+    '''
 <style>
     /* Input: Fonte monoespaçada para alinhamento numérico e centralização */
     .stTextInput input {
@@ -59,7 +59,7 @@ st.markdown(
     /* UX: Remove labels pequenos padrão para utilizar títulos H3 personalizados */
     .stTextInput label { display: none; }
 </style>
-""",
+''',
     unsafe_allow_html=True,
 )
 
@@ -69,7 +69,7 @@ st.markdown(
 
 
 def parse_horario(valor):
-    """
+    '''
     Interpreta entradas de horário em diversos formatos (HHMM, HMM, HH)
     e converte para objeto datetime.time e string formatada.
 
@@ -78,12 +78,12 @@ def parse_horario(valor):
 
     Returns:
         tuple: (objeto time, string 'HH:MM') ou (None, valor_original) em caso de erro.
-    """
+    '''
     if not valor:
-        return None, ""
+        return None, ''
 
     # Sanitização: Remove qualquer caractere não numérico
-    nums = "".join(filter(str.isdigit, str(valor)))
+    nums = ''.join(filter(str.isdigit, str(valor)))
 
     try:
         # Lógica de Parsing Inteligente
@@ -91,14 +91,14 @@ def parse_horario(valor):
             h, m = int(nums[:2]), int(nums[2:])
         elif len(nums) == 3:  # Formato HMM (ex: 830)
             h, m = int(nums[:1]), int(nums[1:])
-        elif len(nums) <= 2 and nums != "":  # Formato HH (ex: 14)
+        elif len(nums) <= 2 and nums != '':  # Formato HH (ex: 14)
             h, m = int(nums), 0
         else:
             return None, valor
 
         # Validação de limites de hora/minuto
         if 0 <= h <= 23 and 0 <= m <= 59:
-            return time(h, m), f"{h:02d}:{m:02d}"
+            return time(h, m), f'{h:02d}:{m:02d}'
 
         return None, valor
     except:
@@ -109,8 +109,8 @@ def parse_horario(valor):
 # 4. INTERFACE DO USUÁRIO (FRONTEND)
 # ============================================================================
 
-st.title("🏭 Controle de Parada")
-st.markdown("Digite os horários e processe o cálculo de **Downtime**.")
+st.title('🏭 Controle de Parada')
+st.markdown('Digite os horários e processe o cálculo de **Downtime**.')
 st.divider()
 
 # Container Principal - Área de Inputs
@@ -118,37 +118,37 @@ st.divider()
 with st.container():
 
     # Layout: Grid de 2 colunas para distribuição uniforme (Full Width)
-    col_input_esq, col_input_dir = st.columns(2, gap="large")
+    col_input_esq, col_input_dir = st.columns(2, gap='large')
 
     # --- Coluna Esquerda: INÍCIO ---
     with col_input_esq:
-        st.markdown("### 🔴 Início")
+        st.markdown('### 🔴 Início')
         d_ini = st.date_input(
-            "Data Início", datetime.now(), format="DD/MM/YYYY", key="d_ini"
+            'Data Início', datetime.now(), format='DD/MM/YYYY', key='d_ini'
         )
         t_ini_str = st.text_input(
-            "Hora Início", placeholder="08:00", max_chars=5, key="input_ini"
+            'Hora Início', placeholder='08:00', max_chars=5, key='input_ini'
         )
 
     # --- Coluna Direita: FIM ---
     with col_input_dir:
-        st.markdown("### 🟢 Fim")
+        st.markdown('### 🟢 Fim')
         d_fim = st.date_input(
-            "Data Fim", datetime.now(), format="DD/MM/YYYY", key="d_fim"
+            'Data Fim', datetime.now(), format='DD/MM/YYYY', key='d_fim'
         )
         t_fim_str = st.text_input(
-            "Hora Fim", placeholder="17:30", max_chars=5, key="input_fim"
+            'Hora Fim', placeholder='17:30', max_chars=5, key='input_fim'
         )
 
-    st.write("")  # Espaçador visual
+    st.write('')  # Espaçador visual
 
     # Área do Botão de Ação
     # Cria novas colunas para alinhar o botão com a coluna esquerda acima
-    c_btn_esq, c_btn_dir = st.columns(2, gap="large")
+    c_btn_esq, c_btn_dir = st.columns(2, gap='large')
 
     with c_btn_esq:
         # Botão Primário (Action)
-        calcular = st.button("⚙️ PROCESSAR DADOS", type="primary")
+        calcular = st.button('⚙️ PROCESSAR DADOS', type='primary')
 
 # ============================================================================
 # 5. PROCESSAMENTO E EXIBIÇÃO DE RESULTADOS
@@ -161,7 +161,7 @@ if calcular:
 
     # 2. Validação de Integridade
     if not obj_t_ini or not obj_t_fim:
-        st.error("❌ Formato inválido. Utilize o padrão HHMM (ex: 14:30 ou 08:00).")
+        st.error('❌ Formato inválido. Utilize o padrão HHMM (ex: 14:30 ou 08:00).')
     else:
         # Combinação de Data + Hora para cálculo preciso (timestamps)
         dt_ini = datetime.combine(d_ini, obj_t_ini)
@@ -169,7 +169,7 @@ if calcular:
 
         # Validação Cronológica
         if dt_fim < dt_ini:
-            st.warning("⚠️ Erro: A Data Final é anterior à Data Inicial.")
+            st.warning('⚠️ Erro: A Data Final é anterior à Data Inicial.')
         else:
             # 3. Cálculo Matemático
             duracao = dt_fim - dt_ini
@@ -182,21 +182,21 @@ if calcular:
             # 4. Regras de Negócio (Matriz de Escalabilidade)
             # Define cores e ações baseadas na severidade da parada
             if horas_decimais > 1.5:
-                cor_borda = "#ef5350"  # Vermelho (Crítico)
-                texto_status = "REALIZAR ANÁLISE DE FALHA"
+                cor_borda = '#ef5350'  # Vermelho (Crítico)
+                texto_status = 'REALIZAR ANÁLISE DE FALHA'
             elif horas_decimais > 1:
-                cor_borda = "#ffa726"  # Laranja (Atenção)
-                texto_status = "REALIZAR ANÁLISE FCA"
+                cor_borda = '#ffa726'  # Laranja (Atenção)
+                texto_status = 'REALIZAR ANÁLISE FCA'
             else:
-                cor_borda = "#66bb6a"  # Verde (Rotina)
-                texto_status = "APONTAMENTO NO RELATÓRIO DE TURNO"
+                cor_borda = '#66bb6a'  # Verde (Rotina)
+                texto_status = 'APONTAMENTO NO RELATÓRIO DE TURNO'
 
-            st.write("")
+            st.write('')
 
             # 5. Renderização do Relatório (Card HTML Customizado)
             # Utiliza HTML/CSS injetado para criar um visual de Dashboard
             st.markdown(
-                f"""
+                f'''
             <div style='
                 border: 1px solid #ddd;
                 border-radius: 12px;
@@ -232,16 +232,16 @@ if calcular:
                     Período Registrado: {str_t_ini} às {str_t_fim}
                 </div>
             </div>
-            """,
+            ''',
                 unsafe_allow_html=True,
             )
 
             # Feedback Tátil/Visual
-            st.toast("Cálculo realizado e validado com sucesso.", icon="✅")
+            st.toast('Cálculo realizado e validado com sucesso.', icon='✅')
 
 # ============================================================================
 # 6. RODAPÉ E NOTAS
 # ============================================================================
 st.space()
 # Imagem de fundo (certifique-se que a pasta assets existe)
-st.image("./assets/fundo.jpg", use_container_width=True)
+st.image('./assets/fundo.jpg', use_container_width=True)
