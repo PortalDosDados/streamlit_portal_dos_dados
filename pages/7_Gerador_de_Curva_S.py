@@ -234,9 +234,9 @@ if uploaded_file:
     total_duracao_planejada = df["Duração Planejada"].sum()
 
     # Geração da Curva S Planejada (Baseline Acumulada)
-    df["% Avanço Planejado Acumulado"] = (
+    df["% Avanço Planejado Acumulado"] = ((
         df["Duração Planejada"].cumsum() / total_duracao_planejada * 100
-    )
+    )).round(2)
 
     # ------------------------------------------------------------------------
     # 5.2. CÁLCULO DE PROGRESSO FÍSICO (REALIZADO)
@@ -254,8 +254,8 @@ if uploaded_file:
 
     # Geração da Curva S Realizada (Normalizada pela Baseline)
     df["% Avanço Real Acumulado"] = (
-        df["Progresso Computado"].cumsum() / total_duracao_planejada
-    ) * 100
+        (df["Progresso Computado"].cumsum() / total_duracao_planejada
+    ) * 100).round(2)
 
     # Tratamento de visualização: Mascaramento de dados futuros (Null Handling)
     # Identificação de registros sem apontamento (Forecast Area)
