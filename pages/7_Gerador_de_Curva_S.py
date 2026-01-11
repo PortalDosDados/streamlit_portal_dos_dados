@@ -206,7 +206,7 @@ with st.expander("🎓 Como interpretar este Painel Inteligente?"):
 st.divider()
 
 # ============================================================================
-# 5. PROCESSAMENTO DE DADOS E REGRAS DE NEGÓCIO
+# 5. PROCESSAMENTO E VISUALIZAÇÃO (UNIFICADOS)
 # ============================================================================
 
 if uploaded_file:
@@ -234,9 +234,9 @@ if uploaded_file:
     total_duracao_planejada = df["Duração Planejada"].sum()
 
     # Geração da Curva S Planejada (Baseline Acumulada)
-    df["% Avanço Planejado Acumulado"] = ((
-        df["Duração Planejada"].cumsum() / total_duracao_planejada * 100
-    )).round(2)
+    df["% Avanço Planejado Acumulado"] = (
+        (df["Duração Planejada"].cumsum() / total_duracao_planejada * 100)
+    ).round(2)
 
     # ------------------------------------------------------------------------
     # 5.2. CÁLCULO DE PROGRESSO FÍSICO (REALIZADO)
@@ -254,8 +254,8 @@ if uploaded_file:
 
     # Geração da Curva S Realizada (Normalizada pela Baseline)
     df["% Avanço Real Acumulado"] = (
-        (df["Progresso Computado"].cumsum() / total_duracao_planejada
-    ) * 100).round(2)
+        (df["Progresso Computado"].cumsum() / total_duracao_planejada) * 100
+    ).round(2)
 
     # Tratamento de visualização: Mascaramento de dados futuros (Null Handling)
     # Identificação de registros sem apontamento (Forecast Area)
@@ -329,6 +329,59 @@ if uploaded_file:
     st.markdown("#### Visualização dos Dados Brutos")
     st.dataframe(df.drop(columns=["Progresso Computado"]))
 
+    # ------------------------------------------------------------------------
+    # 7. GRAFICO INTERATIVO DE CURVA S
+    # ------------------------------------------------------------------------
+    # Renderização Condicional do Gráfico (Agora dentro do bloco principal)
+
+    if pd.notnull(ultimo_idx_valid):
+        st.markdown("### 📊 Gráfico Interativo de Curva S")
+
+        fig = go.Figure()
+
+        # Linha Planejada
+        fig.add_trace(
+            go.Scatter(
+                x=df["Início Planejado"],
+                y=df["% Avanço Planejado Acumulado"],
+                mode="lines+markers",
+                name="Planejado",
+                line=dict(color="green", width=2),
+                marker=dict(size=6),
+            )
+        )
+
+        # Linha Realizada
+        fig.add_trace(
+            go.Scatter(
+                x=df["Início Planejado"],
+                y=df["% Avanço Real Acumulado"],
+                mode="lines+markers",
+                name="Realizado",
+                line=dict(color="red", width=2),
+                marker=dict(size=6),
+            )
+        )
+
+        # Layout do gráfico
+        fig.update_layout(
+            title="Curva S - Planejado vs Realizado",
+            xaxis_title="Atividades",
+            yaxis_title="% Avanço Acumulado",
+            yaxis=dict(range=[0, 110]),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1,
+            ),
+            hovermode="x unified",
+            template="seaborn",
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
 
 # ============================================================================
 # 6. TRATAMENTO DE EXCEÇÕES E UX
@@ -337,60 +390,6 @@ if uploaded_file:
 # Feedback caso nenhum arquivo tenha sido carregado
 else:
     st.info("💡 Realize o upload para iniciar a análise.")
-
-# ============================================================================
-# 7. GRAFICO INTERATIVO DE CURVA S
-# ============================================================================
-
-# Renderização condicional do gráfico
-if uploaded_file and pd.notnull(ultimo_idx_valid):
-    st.markdown("### 📊 Gráfico Interativo de Curva S")
-
-    fig = go.Figure()
-
-    # Linha Planejada
-    fig.add_trace(
-        go.Scatter(
-            x=df["Início Planejado"],
-            y=df["% Avanço Planejado Acumulado"],
-            mode="lines+markers",
-            name="Planejado",
-            line=dict(color="green", width=2),
-            marker=dict(size=6),
-        )
-    )
-
-    # Linha Realizada
-    fig.add_trace(
-        go.Scatter(
-            x=df["Início Planejado"],
-            y=df["% Avanço Real Acumulado"],
-            mode="lines+markers",
-            name="Realizado",
-            line=dict(color="red", width=2),
-            marker=dict(size=6),
-        )
-    )
-
-    # Layout do gráfico
-    fig.update_layout(
-        title="Curva S - Planejado vs Realizado",
-        xaxis_title="Atividades",
-        yaxis_title="% Avanço Acumulado",
-        yaxis=dict(range=[0, 110]),
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1,
-        ),
-        hovermode="x unified",
-        template="seaborn",
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-
 
 # ============================================================================
 # 8. COMPONENTES DE RODAPÉ
