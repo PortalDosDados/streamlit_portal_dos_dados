@@ -286,7 +286,7 @@ if uploaded_file:
         # Planejado
         fig.add_trace(
             go.Scatter(
-                x=df["Atividade"],
+                x=df["Início Planejado"],
                 y=df["% Pl Acum"],
                 name="Planejado (Baseline)",
                 line=dict(color="#1f77b4", dash="dash"),
@@ -297,7 +297,7 @@ if uploaded_file:
         # Realizado
         fig.add_trace(
             go.Scatter(
-                x=df["Atividade"],  # Plota todos os eixos X
+                x=df["Início Planejado"],  # Plota todos os eixos X
                 y=df["% Re Acum"],  # Onde é None, o Plotly não desenha a linha
                 name="Realizado (Físico)",
                 mode="lines+markers",
