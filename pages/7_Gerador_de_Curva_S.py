@@ -5,7 +5,7 @@ from io import BytesIO
 from datetime import datetime
 
 # ============================================================================
-# 1. CONFIGURAÇÃO GERAL DA PÁGINA
+# 1. SETUP INICIAL DA APLICAÇÃO
 # ============================================================================
 st.set_page_config(
     page_title="Portal dos Dados - Curva S & Tendência",
@@ -15,7 +15,7 @@ st.set_page_config(
 
 
 # ============================================================================
-# 2. ESTILIZAÇÃO E ASSETS
+# 2. ESTILIZAÇÃO E RECURSOS VISUAIS
 # ============================================================================
 def carregar_css(nome_arquivo):
     try:
@@ -54,10 +54,10 @@ st.markdown(
 
 
 # ============================================================================
-# 3. AUXILIARES (Template Excel)
+# 3. FUNÇÕES AUXILIARES E GERAÇÃO DE TEMPLATE
 # ============================================================================
 def generate_excel_template():
-    # Estrutura padrão para download
+    # Definição do schema do DataFrame para exportação
     df_template = pd.DataFrame(
         {
             "Atividade": [
@@ -101,7 +101,7 @@ def generate_excel_template():
     )
 
     output = BytesIO()
-    # Requer: pip install xlsxwriter
+    # Dependência: pip install xlsxwriter
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
         df_template.to_excel(writer, index=False, sheet_name="Cronograma")
 
@@ -114,27 +114,27 @@ def generate_excel_template():
 
 
 # ============================================================================
-# 4. INTERFACE DO USUÁRIO
+# 4. INTERFACE DE USUÁRIO (FRONTEND)
 # ============================================================================
 st.title("📈 Acompanhamento de Projetos (Curva S)")
 st.markdown("Transformando dados de engenharia em **Inteligência Preditiva**.")
 st.divider()
 
-# LAYOUT VERTICAL: Botão acima do Upload
+# Componentes de interação: Download e Upload
 st.download_button(
     "📥 Baixar Modelo em Excel",
     data=generate_excel_template(),
     file_name="modelo_curva_s.xlsx",
 )
 
-# Indicação para clicar e carregar o arquivo
+# Instrução para carga de dados
 st.markdown("### Clique aqui 👇 para carregar seu cronograma")
 
-# Carrega o arquivo
+# Widget de Upload
 uploaded_file = st.file_uploader("", type=["xlsx"], label_visibility="visible")
 
 
-# --- EXPANDER EXPLICATIVO (MANTIDO) ---
+# --- SEÇÃO EDUCACIONAL (DOCUMENTAÇÃO INTEGRADA) ---
 with st.expander("🎓 Como interpretar este Painel Inteligente?"):
     st.markdown(
         """
@@ -151,7 +151,7 @@ with st.expander("🎓 Como interpretar este Painel Inteligente?"):
         unsafe_allow_html=True,
     )
 
-    # 1. O GRÁFICO
+    # 1. DOCUMENTAÇÃO DO GRÁFICO
     st.markdown("### 📉 1. O Gráfico (A Corrida)")
     st.info(
         """
@@ -165,7 +165,7 @@ with st.expander("🎓 Como interpretar este Painel Inteligente?"):
 
     st.divider()
 
-    # 2. OS INDICADORES
+    # 2. DOCUMENTAÇÃO DOS INDICADORES
     st.markdown("### 🧭 2. O que dizem os Indicadores (Cards)?")
     k1, k2, k3 = st.columns(3)
 
@@ -206,16 +206,18 @@ with st.expander("🎓 Como interpretar este Painel Inteligente?"):
 st.divider()
 
 # ============================================================================
-# 5. LÓGICA DE DADOS E VISUALIZAÇÃO
+# 5. PROCESSAMENTO DE DADOS E REGRAS DE NEGÓCIO
 # ============================================================================
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
     st.toast("Arquivo carregado! Iniciando processamento...", icon="🚀")
 
-    # 1. Tratamento e Ordenação
+    # ------------------------------------------------------------------------
+    # 5.1. ETL: TRATAMENTO E NORMALIZAÇÃO DE DADOS
+    # ------------------------------------------------------------------------
 
-    # Transformação das colunas de Data em DataTime
+    # Conversão de tipagem temporal (Datetime)
     date_columns = [
         "Início Planejado",
         "Término Planejado",
@@ -224,57 +226,74 @@ if uploaded_file:
     ]
     for col in date_columns:
         df[col] = pd.to_datetime(df[col], format="%d/%m/%Y - %H:%M", errors="coerce")
+
+    # Ordenação Cronológica (Essencial para cálculo acumulativo)
     df = df.sort_values(by="Início Planejado").reset_index(drop=True)
 
-    # Calculo da duração total planejada
+    # Cálculo da Baseline (Total Planejado)
     total_duracao_planejada = df["Duração Planejada"].sum()
 
-    # Cálculo do % Avanço Planejado Acumulado
-    df["% Avanço Planejado Acumulado"] = df["Duração Planejada"].cumsum() / total_duracao_planejada * 100
-
-    # 2. Calcula o progresso real "físico"
-    df["Progresso Computado"] = df.apply(
-        lambda x: min(x["Duração Realizada"], x["Duração Planejada"])
-        if pd.notnull(x["Duração Realizada"]) else 0,
-        axis=1
+    # Geração da Curva S Planejada (Baseline Acumulada)
+    df["% Avanço Planejado Acumulado"] = (
+        df["Duração Planejada"].cumsum() / total_duracao_planejada * 100
     )
 
-    # 3. Acumulado sobre a base PLANEJADA
+    # ------------------------------------------------------------------------
+    # 5.2. CÁLCULO DE PROGRESSO FÍSICO (REALIZADO)
+    # ------------------------------------------------------------------------
+
+    # Aplicação de regra de negócio: Trava de Eficiência (Realizado <= Planejado)
+    df["Progresso Computado"] = df.apply(
+        lambda x: (
+            min(x["Duração Realizada"], x["Duração Planejada"])
+            if pd.notnull(x["Duração Realizada"])
+            else 0
+        ),
+        axis=1,
+    )
+
+    # Geração da Curva S Realizada (Normalizada pela Baseline)
     df["% Avanço Real Acumulado"] = (
         df["Progresso Computado"].cumsum() / total_duracao_planejada
     ) * 100
 
-    # AJUSTE: Mascarar o futuro para o gráfico cortar a linha
-    # Identifica onde NÃO temos input de realização (tarefas futuras)
+    # Tratamento de visualização: Mascaramento de dados futuros (Null Handling)
+    # Identificação de registros sem apontamento (Forecast Area)
     mask_futuro = df["Duração Realizada"].isna()
 
-    # Substitui o valor acumulado por None nessas linhas
+    # Aplicação de máscara para interrupção gráfica
     df.loc[mask_futuro, "% Avanço Real Acumulado"] = None
 
-    # 3. Definição de KPIs e Visualização
+    # ------------------------------------------------------------------------
+    # 5.3. CÁLCULO DE KPIS E INDICADORES DE DESEMPENHO
+    # ------------------------------------------------------------------------
 
-    # Encontra a última linha que possui apontamento realizado (Data de Status)
+    # Determinação da Data de Status (Data de Corte)
     ultimo_idx_valid = df[df["Duração Realizada"].notnull()].index.max()
 
     if pd.notnull(ultimo_idx_valid):
-        # Busca os percentuais acumulados exatos naquele momento
+        # Extração de métricas na Data de Status
         percentual_realizado = df.loc[ultimo_idx_valid, "% Avanço Real Acumulado"]
         percentual_planejado = df.loc[ultimo_idx_valid, "% Avanço Planejado Acumulado"]
 
-        # Cálculo do SPI (Eficiência)
-        # Evita divisão por zero se for o primeiro dia
-        spi = (percentual_realizado / percentual_planejado) if percentual_planejado > 0 else 1.0
+        # Cálculo do SPI (Schedule Performance Index)
+        # Tratamento para evitar divisão por zero
+        spi = (
+            (percentual_realizado / percentual_planejado)
+            if percentual_planejado > 0
+            else 1.0
+        )
 
-        # Cálculo do Desvio Estimado (Forecast)
-        # Se SPI < 1, o prazo tende a estourar (valor positivo)
+        # Projeção de Tendência (Forecast)
+        # Se SPI < 1, projeta-se extensão do prazo (valor positivo)
         desvio_estimado = (100 / spi) - 100 if spi > 0 else 0
 
     else:
-        # Caso a planilha esteja vazia de realizados
+        # Fallback para cenário sem apontamentos
         spi = 1.0
         desvio_estimado = 0.0
 
-    # Formatação visual de Status
+    # Lógica condicional para alertas visuais (Thresholds)
     if desvio_estimado > 5:
         status_text, cor_status = "⚠️ POTENCIAL ATRASO", "#ffa726"
         if desvio_estimado > 15:
@@ -282,7 +301,7 @@ if uploaded_file:
     else:
         status_text, cor_status = "✅ NO PRAZO", "#66bb6a"
 
-    # Visualização dos Cards (KPIs)
+    # Renderização dos Cards de Métricas
     k1, k2, k3 = st.columns(3)
 
     with k1:
@@ -306,22 +325,22 @@ if uploaded_file:
 
         st.divider()
 
-    # Visualização provisória apenas para checagem
+    # Exibição tabular para auditoria de dados
     st.markdown("#### Visualização dos Dados Brutos")
     st.dataframe(df.drop(columns=["Progresso Computado"]))
 
 
 # ============================================================================
-# 6. VISUALIZAÇÃO
+# 6. TRATAMENTO DE EXCEÇÕES E UX
 # ============================================================================
 
 
-# Mensagem caso nenhum arquivo tenha sido carregado
+# Feedback caso nenhum arquivo tenha sido carregado
 else:
     st.info("💡 Realize o upload para iniciar a análise.")
 
 # ============================================================================
-# 7. RODAPÉ
+# 7. COMPONENTES DE RODAPÉ
 # ============================================================================
 st.divider()
 try:
