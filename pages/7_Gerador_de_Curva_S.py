@@ -323,7 +323,7 @@ if uploaded_file:
             unsafe_allow_html=True,
         )
 
-        st.divider()
+    st.divider()
 
     # Exibição tabular para auditoria de dados
     st.markdown("#### Visualização dos Dados Brutos")
@@ -334,13 +334,60 @@ if uploaded_file:
 # 6. TRATAMENTO DE EXCEÇÕES E UX
 # ============================================================================
 
-
 # Feedback caso nenhum arquivo tenha sido carregado
 else:
     st.info("💡 Realize o upload para iniciar a análise.")
 
 # ============================================================================
-# 7. COMPONENTES DE RODAPÉ
+# 7. GRAFICO INTERATIVO DE CURVA S
+# ============================================================================
+
+# Renderização condicional do gráfico
+if uploaded_file and pd.notnull(ultimo_idx_valid):
+    st.markdown("### 📊 Gráfico Interativo de Curva S")
+
+    fig = go.Figure()
+
+    # Linha Planejada
+    fig.add_trace(
+        go.Scatter(
+            x=df.index,
+            y=df["% Avanço Planejado Acumulado"],
+            mode="lines+markers",
+            name="Planejado",
+            line=dict(color="green", width=2),
+            marker=dict(size=6),
+        )
+    )
+
+    # Linha Realizada
+    fig.add_trace(
+        go.Scatter(
+            x=df.index,
+            y=df["% Avanço Real Acumulado"],
+            mode="lines+markers",
+            name="Realizado",
+            line=dict(color="red", width=2),
+            marker=dict(size=6),
+        )
+    )
+
+    # Layout do gráfico
+    fig.update_layout(
+        title="Curva S - Planejado vs Realizado",
+        xaxis_title="Atividades",
+        yaxis_title="% Avanço Acumulado",
+        yaxis=dict(range=[0, 110]),
+        legend=dict(x=0.01, y=0.99),
+        hovermode="x unified",
+        template="seaborn",
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
+# ============================================================================
+# 8. COMPONENTES DE RODAPÉ
 # ============================================================================
 st.divider()
 try:
