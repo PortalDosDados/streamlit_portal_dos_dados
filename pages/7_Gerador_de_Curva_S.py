@@ -206,7 +206,7 @@ with st.expander("🎓 Como interpretar este Painel Inteligente?"):
 st.divider()
 
 # ============================================================================
-# 5. LÓGICA DE DADOS E VISUALIZAÇÃO (SEU CÓDIGO AQUI)
+# 5. LÓGICA DE DADOS E VISUALIZAÇÃO
 # ============================================================================
 
 if uploaded_file:
@@ -251,21 +251,77 @@ if uploaded_file:
     # Substitui o valor acumulado por None nessas linhas
     df.loc[mask_futuro, "% Avanço Real Acumulado"] = None
 
-    # 2. Cálculos de Acumulado e SPI
-    # ...
-
     # 3. Definição de KPIs e Visualização
-    # ...
+
+    # Encontra a última linha que possui apontamento realizado (Data de Status)
+    ultimo_idx_valid = df[df["Duração Realizada"].notnull()].index.max()
+
+    if pd.notnull(ultimo_idx_valid):
+        # Busca os percentuais acumulados exatos naquele momento
+        percentual_realizado = df.loc[ultimo_idx_valid, "% Avanço Real Acumulado"]
+        percentual_planejado = df.loc[ultimo_idx_valid, "% Avanço Planejado Acumulado"]
+
+        # Cálculo do SPI (Eficiência)
+        # Evita divisão por zero se for o primeiro dia
+        spi = (percentual_realizado / percentual_planejado) if percentual_planejado > 0 else 1.0
+
+        # Cálculo do Desvio Estimado (Forecast)
+        # Se SPI < 1, o prazo tende a estourar (valor positivo)
+        desvio_estimado = (100 / spi) - 100 if spi > 0 else 0
+
+    else:
+        # Caso a planilha esteja vazia de realizados
+        spi = 1.0
+        desvio_estimado = 0.0
+
+    # Formatação visual de Status
+    if desvio_estimado > 5:
+        status_text, cor_status = "⚠️ POTENCIAL ATRASO", "#ffa726"
+        if desvio_estimado > 15:
+            status_text, cor_status = "🔴 CRÍTICO / ATRASO", "#ef5350"
+    else:
+        status_text, cor_status = "✅ NO PRAZO", "#66bb6a"
+
+    # Visualização dos Cards (KPIs)
+    k1, k2, k3 = st.columns(3)
+
+    with k1:
+        st.markdown(
+            f"""<div class="metric-card"><b>Eficiência (SPI)</b><br><h2>{spi:.2f}</h2></div>""",
+            unsafe_allow_html=True,
+        )
+
+    with k2:
+        cor_borda = "#ef5350" if desvio_estimado > 0 else "#66bb6a"
+        st.markdown(
+            f"""<div class="metric-card" style="border-left-color:{cor_borda}"><b>Desvio Estimado</b><br><h2>{desvio_estimado:+.2f}%</h2></div>""",
+            unsafe_allow_html=True,
+        )
+
+    with k3:
+        st.markdown(
+            f"""<div class="metric-card" style="border-left-color:{cor_status}"><b>Status Geral</b><br><h2>{status_text}</h2></div>""",
+            unsafe_allow_html=True,
+        )
+
+        st.divider()
 
     # Visualização provisória apenas para checagem
     st.markdown("#### Visualização dos Dados Brutos")
     st.dataframe(df.drop(columns=["Progresso Computado"]))
 
+
+# ============================================================================
+# 6. VISUALIZAÇÃO
+# ============================================================================
+
+
+# Mensagem caso nenhum arquivo tenha sido carregado
 else:
     st.info("💡 Realize o upload para iniciar a análise.")
 
 # ============================================================================
-# 6. RODAPÉ
+# 7. RODAPÉ
 # ============================================================================
 st.divider()
 try:
