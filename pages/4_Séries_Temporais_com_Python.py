@@ -87,13 +87,13 @@ if st.button('Gerar gráfico', key='grafico-btn'):
     )
 
     fig.update_layout(
-        title=f"Preço e Médias Móveis de {ticker}",
-        xaxis_title="",
-        yaxis_title="Preço",
-        template="plotly_white",
-        plot_bgcolor="#0B1933",
-        paper_bgcolor="#0B1933",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        title=f'Preço e Médias Móveis de {ticker}',
+        xaxis_title='',
+        yaxis_title='Preço',
+        template='plotly_white',
+        plot_bgcolor='#0B1933',
+        paper_bgcolor='#0B1933',
+        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
         margin=dict(l=40, r=40, t=60, b=40)
     )
 
