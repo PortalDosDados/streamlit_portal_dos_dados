@@ -378,7 +378,13 @@ if uploaded_file and pd.notnull(ultimo_idx_valid):
         xaxis_title="Atividades",
         yaxis_title="% Avanço Acumulado",
         yaxis=dict(range=[0, 110]),
-        legend=dict(x=0.01, y=0.99),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
         hovermode="x unified",
         template="seaborn",
     )
