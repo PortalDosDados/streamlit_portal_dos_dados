@@ -351,7 +351,7 @@ if uploaded_file and pd.notnull(ultimo_idx_valid):
     # Linha Planejada
     fig.add_trace(
         go.Scatter(
-            x=df.index,
+            x=df["Início Planejado"],
             y=df["% Avanço Planejado Acumulado"],
             mode="lines+markers",
             name="Planejado",
@@ -363,7 +363,7 @@ if uploaded_file and pd.notnull(ultimo_idx_valid):
     # Linha Realizada
     fig.add_trace(
         go.Scatter(
-            x=df.index,
+            x=df["Início Planejado"],
             y=df["% Avanço Real Acumulado"],
             mode="lines+markers",
             name="Realizado",
@@ -383,7 +383,7 @@ if uploaded_file and pd.notnull(ultimo_idx_valid):
             yanchor="bottom",
             y=1.02,
             xanchor="right",
-            x=1
+            x=1,
         ),
         hovermode="x unified",
         template="seaborn",
