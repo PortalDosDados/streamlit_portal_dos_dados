@@ -54,10 +54,8 @@ st.markdown(
 
 
 # ============================================================================
-# 3. LÓGICA DE NEGÓCIO (AUXILIARES)
+# 3. AUXILIARES (Template Excel)
 # ============================================================================
-
-
 def generate_excel_template():
     # Estrutura padrão para download
     df_template = pd.DataFrame(
@@ -70,13 +68,7 @@ def generate_excel_template():
                 "Desbloqueio",
             ],
             "Duração Planejada": [1.0, 2.0, 4.0, 10.0, 1.0],
-            "Duração Realizada": [
-                0.5,
-                1.0,
-                4.2,
-                12.0,
-                None,
-            ],
+            "Duração Realizada": [0.5, 1.0, 4.2, 12.0, None],
             "Início Planejado": [
                 "10/01/2025 - 08:00",
                 "10/01/2025 - 09:00",
@@ -126,20 +118,23 @@ def generate_excel_template():
 # ============================================================================
 st.title("📈 Acompanhamento de Projetos (Curva S)")
 st.markdown("Transformando dados de engenharia em **Inteligência Preditiva**.")
-st.markdown("---")
+st.divider()
 
 # LAYOUT VERTICAL: Botão acima do Upload
 st.download_button(
-    "📥 Baixar Modelo Excel",
+    "📥 Baixar Modelo em Excel",
     data=generate_excel_template(),
     file_name="modelo_curva_s.xlsx",
 )
 
-uploaded_file = st.file_uploader(
-    "Upload do Cronograma", type=["xlsx"], label_visibility="visible"
-)
+# Indicação para clicar e carregar o arquivo
+st.markdown("### Clique aqui 👇 para carregar seu cronograma")
 
-# --- EXPANDER EXPLICATIVO ---
+# Carrega o arquivo
+uploaded_file = st.file_uploader("", type=["xlsx"], label_visibility="visible")
+
+
+# --- EXPANDER EXPLICATIVO (MANTIDO) ---
 with st.expander("🎓 Como interpretar este Painel Inteligente?"):
     st.markdown(
         """
@@ -210,171 +205,36 @@ with st.expander("🎓 Como interpretar este Painel Inteligente?"):
 
 st.divider()
 
+# ============================================================================
+# 5. LÓGICA DE DADOS E VISUALIZAÇÃO (SEU CÓDIGO AQUI)
+# ============================================================================
+
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
+    st.toast("Arquivo carregado! Iniciando processamento...", icon="🚀")
+
+    # ------------------------------------------------------------------------
+    # ESPAÇO RESERVADO PARA SUA LÓGICA (DIONE)
+    # ------------------------------------------------------------------------
 
     # 1. Tratamento e Ordenação
-    # Converter para datetime
-    df["Início Planejado"] = pd.to_datetime(
-        df["Início Planejado"], format="%d/%m/%Y - %H:%M", errors="coerce"
-    )
-    # Se houver erro no formato específico, tenta genérico
-    mask_nat = df["Início Planejado"].isna()
-    if mask_nat.any():
-        df.loc[mask_nat, "Início Planejado"] = pd.to_datetime(
-            df.loc[mask_nat, "Início Planejado"], errors="coerce", dayfirst=True
-        )
+    # ...
 
-    # ORDENAÇÃO: Para Curva de Aderência, usamos o Eixo do Planejado
-    df.sort_values(by="Início Planejado", inplace=True)
-    df.reset_index(drop=True, inplace=True)
+    # 2. Cálculos de Acumulado e SPI
+    # ...
 
-    # 2. Conversão Numérica
-    df["Duração Planejada"] = pd.to_numeric(
-        df["Duração Planejada"], errors="coerce"
-    ).fillna(0)
-    df["Duração Realizada"] = pd.to_numeric(df["Duração Realizada"], errors="coerce")
+    # 3. Definição de KPIs e Visualização
+    # ...
 
-    # 3. Cálculo dos Pesos (Weight)
-    total_pl = df["Duração Planejada"].sum()
+    # Visualização provisória apenas para checagem
+    st.markdown("#### Visualização dos Dados Brutos")
+    st.dataframe(df)
 
-    # 4. Acumulado Planejado (Baseline)
-    df["% Pl Acum"] = (df["Duração Planejada"] / total_pl).cumsum() * 100
-
-    # 5. Acumulado Realizado (Com trava de Overburn)
-    df["Progresso Computado"] = df.apply(
-        lambda x: (
-            min(x["Duração Realizada"], x["Duração Planejada"])
-            if pd.notnull(x["Duração Realizada"])
-            else 0
-        ),
-        axis=1,
-    )
-
-    df["% Re Acum"] = (df["Progresso Computado"] / total_pl).cumsum() * 100
-
-    # Mascarar futuro
-    mask_realizado = df["Duração Realizada"].notnull()
-    df.loc[~mask_realizado, "% Re Acum"] = None
-
-    # Último índice válido
-    ultimo_idx_valid = df[mask_realizado].index.max()
-
-    if pd.notnull(ultimo_idx_valid):
-        # Valores de Referência
-        valor_real_atual = df.loc[ultimo_idx_valid, "% Re Acum"]
-        valor_plan_atual = df.loc[ultimo_idx_valid, "% Pl Acum"]
-
-        # SPI
-        spi = (valor_real_atual / valor_plan_atual) if valor_plan_atual > 0 else 1
-
-        # Estimativas (Forecast)
-        previsao_termino_teorico = 100 / spi if spi > 0 else 100
-        desvio_final = previsao_termino_teorico - 100
-
-        # --- CÁLCULO DE HORAS (GAP) ---
-        estimativa_horas_total = total_pl / spi if spi > 0 else total_pl
-        gap_horas = estimativa_horas_total - total_pl
-        # ----------------------------
-
-        # Regras de Status
-        if desvio_final > 5:
-            status_text, cor_status = "⚠️ POTENCIAL ATRASO", "#ffa726"
-            if desvio_final > 15:
-                status_text, cor_status = "🔴 CRÍTICO / ATRASO", "#ef5350"
-        else:
-            status_text, cor_status = "✅ NO PRAZO", "#66bb6a"
-
-        # KPIs
-        m1, m2, m3 = st.columns(3)
-        with m1:
-            st.markdown(
-                f"""<div class="metric-card"><b>Eficiência (SPI)</b><br><h2>{spi:.2f}</h2></div>""",
-                unsafe_allow_html=True,
-            )
-        with m2:
-            cor_borda = "#ef5350" if desvio_final > 0 else "#66bb6a"
-            # Exibe % e Horas
-            st.markdown(
-                f"""<div class="metric-card" style="border-left-color:{cor_borda}"><b>Desvio Estimado (Prazo)</b><br><h2>{desvio_final:+.1f}% <span style="font-size:0.6em; color:#555">({gap_horas:+.1f}h)</span></h2></div>""",
-                unsafe_allow_html=True,
-            )
-        with m3:
-            st.markdown(
-                f"""<div class="metric-card" style="border-left-color:{cor_status}"><b>Status Geral</b><br><h2>{status_text}</h2></div>""",
-                unsafe_allow_html=True,
-            )
-
-        # GRÁFICO
-        fig = go.Figure()
-
-        # Planejado
-        fig.add_trace(
-            go.Scatter(
-                x=df["Início Planejado"],
-                y=df["% Pl Acum"],
-                name="Planejado (Baseline)",
-                line=dict(color="#1f77b4", dash="dash"),
-                hovertemplate="Planejado: %{y:.2f}%<extra></extra>",
-            )
-        )
-
-        # Realizado
-        fig.add_trace(
-            go.Scatter(
-                x=df["Início Planejado"],
-                y=df["% Re Acum"],
-                name="Realizado (Físico)",
-                mode="lines+markers",
-                line=dict(color="#00CC96", width=4),
-                hovertemplate="Realizado: %{y:.2f}%<extra></extra>",
-            )
-        )
-
-        fig.update_layout(
-            template="plotly_white",
-            height=500,
-            title="Curva S de Aderência (Físico vs Planejado)",
-            hovermode="x unified",
-            legend=dict(
-                orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
-            ),
-            yaxis=dict(title="% Avanço Acumulado", ticksuffix="%", range=[0, 110]),
-            xaxis=dict(title="Cronograma (Data Planejada)"),
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-        # Auditoria
-        with st.expander("🔍 Auditoria de Dados (Processado)"):
-            cols_view = [
-                "Atividade",
-                "Duração Planejada",
-                "Duração Realizada",
-                "Progresso Computado",
-                "% Pl Acum",
-                "% Re Acum",
-            ]
-            st.dataframe(
-                df[cols_view].style.format(
-                    "{:.2f}",
-                    subset=[
-                        "Duração Planejada",
-                        "Duração Realizada",
-                        "Progresso Computado",
-                        "% Pl Acum",
-                        "% Re Acum",
-                    ],
-                    na_rep="-",
-                )
-            )
-
-    else:
-        st.warning('⚠️ Planilha carregada, mas sem dados na coluna "Duração Realizada".')
 else:
     st.info("💡 Realize o upload para iniciar a análise.")
 
 # ============================================================================
-# 5. RODAPÉ
+# 6. RODAPÉ
 # ============================================================================
 st.divider()
 try:
