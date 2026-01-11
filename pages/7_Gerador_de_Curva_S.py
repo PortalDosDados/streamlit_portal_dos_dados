@@ -163,7 +163,7 @@ with st.expander("🎓 Como interpretar este Painel Inteligente?"):
     """
     )
 
-    st.markdown("---")
+    st.divider()
 
     # 2. OS INDICADORES
     st.markdown("### 🧭 2. O que dizem os Indicadores (Cards)?")
@@ -213,12 +213,43 @@ if uploaded_file:
     df = pd.read_excel(uploaded_file)
     st.toast("Arquivo carregado! Iniciando processamento...", icon="🚀")
 
-    # ------------------------------------------------------------------------
-    # ESPAÇO RESERVADO PARA SUA LÓGICA (DIONE)
-    # ------------------------------------------------------------------------
-
     # 1. Tratamento e Ordenação
-    # ...
+
+    # Transformação das colunas de Data em DataTime
+    date_columns = [
+        "Início Planejado",
+        "Término Planejado",
+        "Inicio Real",
+        "Término Real",
+    ]
+    for col in date_columns:
+        df[col] = pd.to_datetime(df[col], format="%d/%m/%Y - %H:%M", errors="coerce")
+    df = df.sort_values(by="Início Planejado").reset_index(drop=True)
+
+    # Calculo da duração total planejada
+    total_duracao_planejada = df["Duração Planejada"].sum()
+
+    # Cálculo do % Avanço Planejado Acumulado
+    df["% Avanço Planejado Acumulado"] = df["Duração Planejada"].cumsum() / total_duracao_planejada * 100
+
+    # 2. Calcula o progresso real "físico"
+    df["Progresso Computado"] = df.apply(
+        lambda x: min(x["Duração Realizada"], x["Duração Planejada"])
+        if pd.notnull(x["Duração Realizada"]) else 0,
+        axis=1
+    )
+
+    # 3. Acumulado sobre a base PLANEJADA
+    df["% Avanço Real Acumulado"] = (
+        df["Progresso Computado"].cumsum() / total_duracao_planejada
+    ) * 100
+
+    # AJUSTE: Mascarar o futuro para o gráfico cortar a linha
+    # Identifica onde NÃO temos input de realização (tarefas futuras)
+    mask_futuro = df["Duração Realizada"].isna()
+
+    # Substitui o valor acumulado por None nessas linhas
+    df.loc[mask_futuro, "% Avanço Real Acumulado"] = None
 
     # 2. Cálculos de Acumulado e SPI
     # ...
@@ -228,7 +259,7 @@ if uploaded_file:
 
     # Visualização provisória apenas para checagem
     st.markdown("#### Visualização dos Dados Brutos")
-    st.dataframe(df)
+    st.dataframe(df.drop(columns=["Progresso Computado"]))
 
 else:
     st.info("💡 Realize o upload para iniciar a análise.")
