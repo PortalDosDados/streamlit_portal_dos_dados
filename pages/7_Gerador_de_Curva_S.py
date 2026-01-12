@@ -126,12 +126,12 @@ st.download_button(
 st.markdown("### Clique aqui 👇 para carregar seu cronograma")
 uploaded_file = st.file_uploader("", type=["xlsx"], label_visibility="visible")
 
-# Painel Educacional (Versão Premium)
+# Painel Educacional (Versão Premium com Explicação Matemática)
 with st.expander("🎓 Guia de Interpretação e Tomada de Decisão"):
 
-    # Organização em Abas para melhor experiência do usuário
+    # Organização em Abas
     tab_conceito, tab_kpi, tab_estrategia = st.tabs(
-        ["📖 Leitura da Curva S", "🧭 Indicadores (KPIs)", "🧠 Estratégia"]
+        ["📖 Leitura da Curva S", "🧭 Indicadores & Cálculo", "🧠 Estratégia"]
     )
 
     with tab_conceito:
@@ -140,12 +140,11 @@ with st.expander("🎓 Guia de Interpretação e Tomada de Decisão"):
         ### O que o gráfico está dizendo?
         A Curva S é a representação visual da "saúde" física do seu projeto.
 
-        * 🟢 **Linha Verde (Planejado/Baseline):** É o seu compromisso contratual. Representa como o trabalho *deveria* ser entregue ao longo do tempo.
-        * 🔴 **Linha Vermelha (Realizado):** É a realidade do chão de fábrica. Representa o trabalho *efetivamente* concluído e medido.
+        * 🟢 **Linha Verde (Planejado/Baseline)**
+        * 🔴 **Linha Vermelha (Realizado)**
 
         **Regra de Ouro:**
         Se a 🔴 **Vermelha** estiver **ABAIXO** da 🟢 **Verde** $\\rightarrow$ **O Projeto está ATRASADO.**
-        Se a 🔴 **Vermelha** estiver **ACIMA** da 🟢 **Verde** $\\rightarrow$ **O Projeto está ADIANTADO.**
         """
         )
 
@@ -153,35 +152,51 @@ with st.expander("🎓 Guia de Interpretação e Tomada de Decisão"):
         col_spi, col_forecast = st.columns(2)
 
         with col_spi:
-            st.markdown("#### ⚡ SPI (Índice de Desempenho de Prazo)")
-            st.caption("Fórmula: % Realizado / % Planejado")
+            st.markdown("#### ⚡ SPI (Índice de Desempenho)")
             st.markdown(
                 """
-            * 🟢 **SPI $\ge$ 1.00:** Eficiência Excelente. A equipe entrega mais ou igual ao planejado.
-            * 🟡 **SPI 0.90 - 0.99:** Atenção. Pequenos desvios que podem ser recuperados.
-            * 🔴 **SPI < 0.90:** Crítico. A velocidade da equipe é insuficiente para entregar no prazo.
+            * 🟢 **SPI $\ge$ 1.00:** Eficiência Excelente.
+            * 🟡 **SPI 0.90 - 0.99:** Atenção.
+            * 🔴 **SPI < 0.90:** Crítico.
             """
             )
 
         with col_forecast:
             st.markdown("#### 🔮 Desvio Estimado (Forecast)")
-            st.caption("Projeção linear baseada no ritmo atual")
             st.markdown(
                 """
-            Este indicador responde: *"Se continuarmos nesse ritmo, quando terminaremos?"*
-            * Um valor **Positivo (+10%)** indica que você precisará de 10% mais tempo além da data fim.
-            * Um valor **Negativo** indica término antecipado.
+            Responde: *"Quando terminaremos se mantivermos esse ritmo?"*
+            * **Valor Positivo:** Tempo extra necessário (Atraso).
+            * **Valor Negativo:** Término antecipado.
             """
             )
+
+        st.divider()
+        st.markdown("### 🧮 Entenda a Matemática (Engenharia de Custos)")
+        st.markdown(
+            r"""
+        O cálculo utiliza a metodologia de **Valor Agregado (EVM)** para projeção linear:
+
+        $$
+        SPI = \frac{\% \text{ Realizado}}{\% \text{ Planejado}}
+        $$
+
+        $$
+        \text{Desvio Estimado \%} = \left( \frac{100}{SPI} \right) - 100
+        $$
+
+        **Exemplo:** Se você planejou 50% mas fez 40% ($SPI=0.8$), precisará de **+25%** de tempo extra para concluir os 100% do escopo.
+        """
+        )
 
     with tab_estrategia:
         st.markdown(
             """
         ### Como agir baseada nos dados?
 
-        1.  **Analise o "Degrau":** Se a linha realizada (Vermelha) ficar horizontal (reta) por muito tempo, houve improdutividade ou bloqueio.
-        2.  **Ajuste de Recursos:** Se o SPI estiver baixo (< 0.8), apenas adicionar hora extra não resolve. Revise o método construtivo ou aumente a frente de trabalho.
-        3.  **Confiabilidade:** O cálculo ignora "futuro". Se uma tarefa não foi concluída na data do report, ela não soma progresso, evitando a falsa sensação de avanço.
+        1.  **Analise o "Degrau":** Se a linha realizada ficar reta por muito tempo, houve bloqueio.
+        2.  **Ajuste de Recursos:** Se SPI < 0.8, apenas hora extra não resolve. Revise o método.
+        3.  **Confiabilidade:** O cálculo ignora "futuro". Tarefas não finalizadas não somam progresso.
 
         *Lembre-se: "Quando não se agrega valor, se agrega custo."*
         """
