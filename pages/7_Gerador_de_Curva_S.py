@@ -28,6 +28,8 @@ def carregar_css(nome_arquivo):
 
 # Carrega CSS externo e aplica estilos inline para KPIs e Botões
 carregar_css("style.css")
+
+# AJUSTE RESPONSIVO: Adicionado 'margin-bottom' para separar cards no mobile
 st.markdown(
     """
     <style>
@@ -39,6 +41,7 @@ st.markdown(
             border-left: 5px solid #00CC96;
             box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
             color: #333;
+            margin-bottom: 20px; /* Garante espaçamento no celular */
         }
     </style>
     """,
@@ -141,7 +144,8 @@ with st.expander("🎓 Guia de Interpretação e Tomada de Decisão"):
         * 🔴 **Linha Vermelha (Realizado):** É a realidade do chão de fábrica. Representa o trabalho *efetivamente* concluído e medido.
 
         **Regra de Ouro:**
-        Se a 🔴 **Vermelha** estiver **ABAIXO** da 🟢 **Verde** $\\rightarrow$ **O Projeto está ATRASADO.** > Se a 🔴 **Vermelha** estiver **ACIMA** da 🟢 **Verde** $\\rightarrow$ **O Projeto está ADIANTADO.**
+        Se a 🔴 **Vermelha** estiver **ABAIXO** da 🟢 **Verde** $\\rightarrow$ **O Projeto está ATRASADO.**
+        Se a 🔴 **Vermelha** estiver **ACIMA** da 🟢 **Verde** $\\rightarrow$ **O Projeto está ADIANTADO.**
         """
         )
 
@@ -289,8 +293,6 @@ if uploaded_file:
         desvio_estimado = (100 / spi) - 100 if spi > 0 else 0
 
         # Forecast (Horas)
-        # Estimativa Total = Total Planejado / SPI
-        # Gap = Estimativa Total - Total Planejado
         estimativa_horas_total = (
             total_duracao_planejada / spi if spi > 0 else total_duracao_planejada
         )
