@@ -278,15 +278,28 @@ if uploaded_file:
         percentual_realizado = df.loc[ultimo_idx_valid, "% Avanço Real Acumulado"]
         percentual_planejado = df.loc[ultimo_idx_valid, "% Avanço Planejado Acumulado"]
 
+        # SPI
         spi = (
             (percentual_realizado / percentual_planejado)
             if percentual_planejado > 0
             else 1.0
         )
+
+        # Forecast (%)
         desvio_estimado = (100 / spi) - 100 if spi > 0 else 0
+
+        # Forecast (Horas)
+        # Estimativa Total = Total Planejado / SPI
+        # Gap = Estimativa Total - Total Planejado
+        estimativa_horas_total = (
+            total_duracao_planejada / spi if spi > 0 else total_duracao_planejada
+        )
+        gap_horas = estimativa_horas_total - total_duracao_planejada
+
     else:
         spi = 1.0
         desvio_estimado = 0.0
+        gap_horas = 0.0
 
     # Definição de Cores e Status
     if desvio_estimado > 5:
@@ -304,8 +317,9 @@ if uploaded_file:
     )
 
     cor_borda = "#ef5350" if desvio_estimado > 0 else "#66bb6a"
+    # Exibição híbrida: Porcentagem + Horas
     c2.markdown(
-        f"""<div class="metric-card" style="border-left-color:{cor_borda}"><b>Desvio Estimado</b><br><h2>{desvio_estimado:+.2f}%</h2></div>""",
+        f"""<div class="metric-card" style="border-left-color:{cor_borda}"><b>Desvio Estimado</b><br><h2>{desvio_estimado:+.2f}% <span style="font-size:0.6em; color:#555">({gap_horas:+.1f}h)</span></h2></div>""",
         unsafe_allow_html=True,
     )
 
