@@ -327,13 +327,48 @@ if uploaded_file:
 
     # Exibição tabular para auditoria de dados
     st.markdown("#### Visualização dos Dados Brutos")
-    st.dataframe(df.drop(columns=["Progresso Computado"]))
+    # st.dataframe(df.drop(columns=["Progresso Computado"]))
+
+    # --------------------------------------------------------------------------
+    st.divider()
+
+    df_curva_s = df.drop(columns=["Progresso Computado", 'Duração Planejada', 'Duração Realizada']).copy()
+
+    # 1. Cria a coluna de texto para os marcos das atividades (Pontos 1 a N)
+    df["Marco Temporal"] = (
+        df["Início Planejado"].dt.strftime("%d/%m %H:%M")
+        + " - "
+        + df["Término Planejado"].dt.strftime("%H:%M")
+    )
+
+    # 2. Cria o "Ponto Zero" (Início do Projeto = 0%)
+    inicio_projeto = df["Início Planejado"].min()
+    label_zero = inicio_projeto.strftime("%d/%m %H:%M") + " (Início)"
+
+    # Cria um DataFrame de uma linha para o ponto zero
+    df_zero = pd.DataFrame(
+        {
+            "Marco Temporal": [label_zero],
+            "% Avanço Planejado Acumulado": [0.0],
+            "% Avanço Real Acumulado": [0.0],
+        }
+    )
+
+    # 3. Une o Ponto Zero com as Atividades
+    # Selecionamos apenas as colunas necessárias para o gráfico
+    cols_plot = [
+        "Marco Temporal",
+        "% Avanço Planejado Acumulado",
+        "% Avanço Real Acumulado",
+    ]
+
+    # Concatena: [Linha Zero] + [Linhas das Atividades]
+    df_plot = pd.concat([df_zero, df[cols_plot]], ignore_index=True)
+    st.dataframe(df_curva_s)
 
     # ------------------------------------------------------------------------
     # 7. GRAFICO INTERATIVO DE CURVA S
     # ------------------------------------------------------------------------
-    # Renderização Condicional do Gráfico (Agora dentro do bloco principal)
-
     if pd.notnull(ultimo_idx_valid):
         st.markdown("### 📊 Gráfico Interativo de Curva S")
 
@@ -342,8 +377,8 @@ if uploaded_file:
         # Linha Planejada
         fig.add_trace(
             go.Scatter(
-                x=df["Início Planejado"],
-                y=df["% Avanço Planejado Acumulado"],
+                x=df_plot["Marco Temporal"],  # Eixo X Categórico Personalizado
+                y=df_plot["% Avanço Planejado Acumulado"],
                 mode="lines+markers",
                 name="Planejado",
                 line=dict(color="green", width=2),
@@ -354,8 +389,8 @@ if uploaded_file:
         # Linha Realizada
         fig.add_trace(
             go.Scatter(
-                x=df["Início Planejado"],
-                y=df["% Avanço Real Acumulado"],
+                x=df_plot["Marco Temporal"],
+                y=df_plot["% Avanço Real Acumulado"],
                 mode="lines+markers",
                 name="Realizado",
                 line=dict(color="red", width=2),
@@ -363,10 +398,9 @@ if uploaded_file:
             )
         )
 
-        # Layout do gráfico
         fig.update_layout(
-            title="Curva S - Planejado vs Realizado",
-            xaxis_title="Atividades",
+            title="Curva S - Marcos de Entrega",
+            xaxis_title="Marcos Temporais (Início -> Entregas)",
             yaxis_title="% Avanço Acumulado",
             yaxis=dict(range=[0, 110]),
             legend=dict(
