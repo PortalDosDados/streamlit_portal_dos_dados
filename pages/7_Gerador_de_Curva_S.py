@@ -294,13 +294,10 @@ if uploaded_file:
     # ------------------------------------------------------------------------
     # 6. TABELA ANALÍTICA
     # ------------------------------------------------------------------------
-    st.markdown("#### Visualização dos Dados Brutos")
-
     # Prepara DF limpo para exibição
     df_curva_s = df.drop(
         columns=["Progresso Computado", "Duração Planejada", "Duração Realizada"]
     ).copy()
-    st.dataframe(df_curva_s)
 
     # ------------------------------------------------------------------------
     # 7. ENGENHARIA DE DADOS PARA O GRÁFICO (PONTO ZERO + MARCOS)
@@ -384,6 +381,12 @@ if uploaded_file:
         )
 
         st.plotly_chart(fig, use_container_width=True)
+
+    # ------------------------------------------------------------------------
+    # 9. EXIBIÇÃO DA TABELA DE DADOS
+    st.markdown("#### Tabela de Dados Processados")
+    st.dataframe(df_curva_s, use_container_width=True)
+
 
 # Feedback caso nenhum arquivo tenha sido carregado
 else:
