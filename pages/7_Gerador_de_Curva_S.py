@@ -123,34 +123,65 @@ st.download_button(
 st.markdown("### Clique aqui 👇 para carregar seu cronograma")
 uploaded_file = st.file_uploader("", type=["xlsx"], label_visibility="visible")
 
-# Painel Educacional
-with st.expander("🎓 Como interpretar este Painel Inteligente?"):
-    st.markdown(
+# Painel Educacional (Versão Premium)
+with st.expander("🎓 Guia de Interpretação e Tomada de Decisão"):
+
+    # Organização em Abas para melhor experiência do usuário
+    tab_conceito, tab_kpi, tab_estrategia = st.tabs(
+        ["📖 Leitura da Curva S", "🧭 Indicadores (KPIs)", "🧠 Estratégia"]
+    )
+
+    with tab_conceito:
+        st.markdown(
+            """
+        ### O que o gráfico está dizendo?
+        A Curva S é a representação visual da "saúde" física do seu projeto.
+
+        * 🟢 **Linha Verde (Planejado/Baseline):** É o seu compromisso contratual. Representa como o trabalho *deveria* ser entregue ao longo do tempo.
+        * 🔴 **Linha Vermelha (Realizado):** É a realidade do chão de fábrica. Representa o trabalho *efetivamente* concluído e medido.
+
+        **Regra de Ouro:**
+        Se a 🔴 **Vermelha** estiver **ABAIXO** da 🟢 **Verde** $\\rightarrow$ **O Projeto está ATRASADO.** > Se a 🔴 **Vermelha** estiver **ACIMA** da 🟢 **Verde** $\\rightarrow$ **O Projeto está ADIANTADO.**
         """
-        <div style="background-color: #f0f7ff; padding: 20px; border-radius: 10px; border: 1px solid #b3d7ff;">
-            <p style="color: #004085; font-weight: bold;">Bem-vindo ao GPS do seu Projeto.</p>
-            <p style="color: #333;">Esta ferramenta compara o Avanço Físico (Realizado) contra o Cronograma (Planejado).</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.info(
-        "Regra de Ouro: Linha Verde abaixo da Azul indica atraso. Acima, indica adiantamento."
-    )
-    st.divider()
-    k1, k2, k3 = st.columns(3)
-    k1.markdown(
-        "**Eficiência (SPI)**: <br>Velocímetro do projeto (1.0 = Pontual).",
-        unsafe_allow_html=True,
-    )
-    k2.markdown(
-        "**Desvio Estimado**: <br>Quanto % o projeto tende a atrasar ou adiantar.",
-        unsafe_allow_html=True,
-    )
-    k3.markdown(
-        "**Status Geral**: <br>Diagnóstico automático de criticidade.",
-        unsafe_allow_html=True,
-    )
+        )
+
+    with tab_kpi:
+        col_spi, col_forecast = st.columns(2)
+
+        with col_spi:
+            st.markdown("#### ⚡ SPI (Índice de Desempenho de Prazo)")
+            st.caption("Fórmula: % Realizado / % Planejado")
+            st.markdown(
+                """
+            * 🟢 **SPI $\ge$ 1.00:** Eficiência Excelente. A equipe entrega mais ou igual ao planejado.
+            * 🟡 **SPI 0.90 - 0.99:** Atenção. Pequenos desvios que podem ser recuperados.
+            * 🔴 **SPI < 0.90:** Crítico. A velocidade da equipe é insuficiente para entregar no prazo.
+            """
+            )
+
+        with col_forecast:
+            st.markdown("#### 🔮 Desvio Estimado (Forecast)")
+            st.caption("Projeção linear baseada no ritmo atual")
+            st.markdown(
+                """
+            Este indicador responde: *"Se continuarmos nesse ritmo, quando terminaremos?"*
+            * Um valor **Positivo (+10%)** indica que você precisará de 10% mais tempo além da data fim.
+            * Um valor **Negativo** indica término antecipado.
+            """
+            )
+
+    with tab_estrategia:
+        st.markdown(
+            """
+        ### Como agir baseada nos dados?
+
+        1.  **Analise o "Degrau":** Se a linha realizada (Vermelha) ficar horizontal (reta) por muito tempo, houve improdutividade ou bloqueio.
+        2.  **Ajuste de Recursos:** Se o SPI estiver baixo (< 0.8), apenas adicionar hora extra não resolve. Revise o método construtivo ou aumente a frente de trabalho.
+        3.  **Confiabilidade:** O cálculo ignora "futuro". Se uma tarefa não foi concluída na data do report, ela não soma progresso, evitando a falsa sensação de avanço.
+
+        *Lembre-se: "Quando não se agrega valor, se agrega custo."*
+        """
+        )
 
 st.divider()
 
@@ -165,10 +196,10 @@ if uploaded_file:
     # ------------------------------------------------------------------------
     # 5.0. HIGIENIZAÇÃO E VALIDAÇÃO DE ESTRUTURA (BLINDAGEM)
     # ------------------------------------------------------------------------
-    # Remove espaços em branco invisíveis nos nomes das colunas (ex: "Início " -> "Início")
+    # Remove espaços em branco invisíveis nos nomes das colunas
     df.columns = df.columns.str.strip()
 
-    # Definição das colunas obrigatórias para o algoritmo
+    # Definição das colunas obrigatórias
     required_cols = [
         "Início Planejado",
         "Término Planejado",
@@ -189,14 +220,13 @@ if uploaded_file:
         st.info(
             "💡 Dica: Verifique se os nomes estão idênticos ao modelo (inclusive acentos)."
         )
-        st.stop()  # Interrompe a execução imediatamente para evitar o crash (KeyError)
+        st.stop()
 
     st.toast("Arquivo validado com sucesso! Processando...", icon="🚀")
 
     # ------------------------------------------------------------------------
     # 5.1. ETL & NORMALIZAÇÃO
     # ------------------------------------------------------------------------
-    # Conversão de Strings para Datetime
     date_columns = [
         "Início Planejado",
         "Término Planejado",
@@ -220,7 +250,7 @@ if uploaded_file:
     # ------------------------------------------------------------------------
     # 5.2. CÁLCULO DE PROGRESSO FÍSICO (REALIZADO)
     # ------------------------------------------------------------------------
-    # Regra de Negócio: Trava de Eficiência (Realizado nunca excede o Planejado por tarefa)
+    # Regra de Negócio: Trava de Eficiência
     df["Progresso Computado"] = df.apply(
         lambda x: (
             min(x["Duração Realizada"], x["Duração Planejada"])
@@ -242,22 +272,17 @@ if uploaded_file:
     # ------------------------------------------------------------------------
     # 5.3. CÁLCULO DE KPIS E DASHBOARD
     # ------------------------------------------------------------------------
-    # Identifica a Data de Status (Corte)
     ultimo_idx_valid = df[df["Duração Realizada"].notnull()].index.max()
 
     if pd.notnull(ultimo_idx_valid):
-        # Captura snapshots na data de corte
         percentual_realizado = df.loc[ultimo_idx_valid, "% Avanço Real Acumulado"]
         percentual_planejado = df.loc[ultimo_idx_valid, "% Avanço Planejado Acumulado"]
 
-        # SPI (Schedule Performance Index)
         spi = (
             (percentual_realizado / percentual_planejado)
             if percentual_planejado > 0
             else 1.0
         )
-
-        # Forecast (Estimativa de Desvio Final)
         desvio_estimado = (100 / spi) - 100 if spi > 0 else 0
     else:
         spi = 1.0
@@ -292,26 +317,21 @@ if uploaded_file:
     st.divider()
 
     # ------------------------------------------------------------------------
-    # 6. TABELA ANALÍTICA
+    # 6. ENGENHARIA DE DADOS PARA O GRÁFICO
     # ------------------------------------------------------------------------
-    # Prepara DF limpo para exibição
+    # Preparação da Tabela para Exibição (Sem colunas de cálculo interno)
     df_curva_s = df.drop(
         columns=["Progresso Computado", "Duração Planejada", "Duração Realizada"]
     ).copy()
 
-    # ------------------------------------------------------------------------
-    # 7. ENGENHARIA DE DADOS PARA O GRÁFICO (PONTO ZERO + MARCOS)
-    # ------------------------------------------------------------------------
-
-    # 1. Cria rótulos legíveis para o Eixo X (Marcos: Início -> Fim)
+    # Cria rótulos legíveis para o Eixo X (Marcos)
     df["Marco Temporal"] = (
         df["Início Planejado"].dt.strftime("%d/%m %H:%M")
         + " - "
         + df["Término Planejado"].dt.strftime("%H:%M")
     )
 
-    # 2. Criação do "Ponto Zero" (Início do Projeto = 0%)
-    # Isso garante que o gráfico nasça na origem (0%) antes da primeira entrega
+    # Criação do "Ponto Zero" (Início do Projeto = 0%)
     inicio_projeto = df["Início Planejado"].min()
     label_zero = inicio_projeto.strftime("%d/%m %H:%M") + " (Início)"
 
@@ -323,7 +343,7 @@ if uploaded_file:
         }
     )
 
-    # 3. União dos Dados: [Ponto Zero] + [Dados do Projeto]
+    # União dos Dados: [Ponto Zero] + [Dados do Projeto]
     cols_plot = [
         "Marco Temporal",
         "% Avanço Planejado Acumulado",
@@ -332,7 +352,7 @@ if uploaded_file:
     df_plot = pd.concat([df_zero, df[cols_plot]], ignore_index=True)
 
     # ------------------------------------------------------------------------
-    # 8. PLOTAGEM DO GRÁFICO (PLOTLY)
+    # 7. VISUALIZAÇÃO GRÁFICA (PLOTLY)
     # ------------------------------------------------------------------------
     if pd.notnull(ultimo_idx_valid):
         st.markdown("### 📊 Gráfico Interativo de Curva S")
@@ -342,7 +362,7 @@ if uploaded_file:
         # Série Planejada
         fig.add_trace(
             go.Scatter(
-                x=df_plot["Marco Temporal"],  # Eixo X Categórico (Marcos)
+                x=df_plot["Marco Temporal"],
                 y=df_plot["% Avanço Planejado Acumulado"],
                 mode="lines+markers",
                 name="Planejado",
@@ -383,7 +403,9 @@ if uploaded_file:
         st.plotly_chart(fig, use_container_width=True)
 
     # ------------------------------------------------------------------------
-    # 9. EXIBIÇÃO DA TABELA DE DADOS
+    # 8. EXIBIÇÃO DA TABELA (POSICIONADA ABAIXO DO GRÁFICO)
+    # ------------------------------------------------------------------------
+    st.divider()
     st.markdown("#### Tabela de Dados Processados")
     st.dataframe(df_curva_s, use_container_width=True)
 
