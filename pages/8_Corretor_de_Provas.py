@@ -39,36 +39,32 @@ def ordenar_pontos(pontos):
 def processar_imagem_opencv(imagem_pil, gabarito_oficial):
     """
     Recebe a imagem, identifica o papel, aplica o recorte nas bolinhas e calcula a nota.
+    Atualizado com Recorte de Margens (ROI) para ignorar textos impressos.
     """
     try:
         # ETAPA 1: Preparação de Imagem
         img = np.array(imagem_pil)
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)  # Ajusta padrão de cor para o OpenCV
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-        # Padroniza dimensões para estabilizar o cálculo de área
         largura_img, altura_img = 700, 700
         img = cv2.resize(img, (largura_img, altura_img))
 
-        # Aplica filtros para destacar apenas as bordas do papel
         img_cinza = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         img_desfoque = cv2.GaussianBlur(img_cinza, (5, 5), 1)
         img_bordas = cv2.Canny(img_desfoque, 10, 50)
 
         # ETAPA 2: Detecção do Papel
-        # Encontra todos os contornos da imagem
         contornos, _ = cv2.findContours(
             img_bordas, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
         maior_contorno = np.array([])
         maior_area = 0
 
-        # Filtra os contornos para encontrar o maior retângulo (a folha)
         for c in contornos:
             area = cv2.contourArea(c)
-            if area > 5000:  # Filtro de ruído mínimo
+            if area > 5000:
                 perimetro = cv2.arcLength(c, True)
                 poligono = cv2.approxPolyDP(c, 0.02 * perimetro, True)
-                # Verifica se a forma geométrica tem 4 vértices
                 if len(poligono) == 4 and area > maior_area:
                     maior_contorno = poligono
                     maior_area = area
@@ -76,7 +72,7 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         if maior_contorno.size == 0:
             return {
                 "sucesso": False,
-                "mensagem": "Falha na leitura. O contorno da prova não foi identificado. Melhore o contraste entre o papel e a mesa.",
+                "mensagem": "O contorno da prova não foi identificado.",
             }
 
         # ETAPA 3: Alinhamento e Perspectiva
@@ -85,23 +81,41 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
             [[0, 0], [largura_img, 0], [0, altura_img], [largura_img, altura_img]]
         )
 
-        # Achata a imagem deixando-a no formato "escaneado"
         matriz = cv2.getPerspectiveTransform(np.float32(pontos_papel), pontos_destino)
         img_alinhada = cv2.warpPerspective(img, matriz, (largura_img, altura_img))
 
-        # ETAPA 4: Binarização e Isolação
+        # ETAPA 4: Binarização (Preto e Branco)
         img_alinhada_cinza = cv2.cvtColor(img_alinhada, cv2.COLOR_BGR2GRAY)
-        # Inverte as cores (Threshold Inverse): o fundo vira preto (0) e a tinta da caneta vira branco (255)
+        # Ajuste de sensibilidade: 150 costuma ser mais tolerante a sombras do celular do que 170
         img_binaria = cv2.threshold(
-            img_alinhada_cinza, 170, 255, cv2.THRESH_BINARY_INV
+            img_alinhada_cinza, 150, 255, cv2.THRESH_BINARY_INV
         )[1]
+
+        # =====================================================================
+        # ETAPA 4.1: RECORTE DA REGIÃO DE INTERESSE (NOVO)
+        # =====================================================================
+        # A imagem tem 700x700. Vamos cortar as bordas para eliminar textos.
+        # Ajuste estes valores se o seu PDF for alterado futuramente.
+        corte_topo = 70  # Arranca a faixa superior (letras A, B, C...)
+        corte_base = 20  # Arranca a margem inferior em branco
+        corte_esq = 80  # Arranca a faixa esquerda (textos Q01, Q02...)
+        corte_dir = 20  # Arranca a margem direita em branco
+
+        # Fatiamento de matriz (Array Slicing) no NumPy: [Y_inicio:Y_fim, X_inicio:X_fim]
+        img_grade_limpa = img_binaria[
+            corte_topo : 700 - corte_base, corte_esq : 700 - corte_dir
+        ]
+
+        # Redimensiona a grade limpa para 500x500.
+        # Isso é crucial para que a divisão por 10 e por 5 dê números inteiros exatos.
+        img_grade_limpa = cv2.resize(img_grade_limpa, (500, 500))
 
         # ETAPA 5: Divisão da Grade
         qtd_questoes = len(gabarito_oficial)
-        qtd_alternativas = 5  # Representa as opções de A até E
+        qtd_alternativas = 5
 
-        # Fatiamento vetorial da imagem por eixo Y (linhas) e eixo X (colunas)
-        linhas = np.vsplit(img_binaria, qtd_questoes)
+        # Fatiamento da imagem limpa (agora sem textos que atrapalham)
+        linhas = np.vsplit(img_grade_limpa, qtd_questoes)
         caixas_alternativas = []
         for linha in linhas:
             colunas = np.hsplit(linha, qtd_alternativas)
@@ -115,12 +129,11 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         for i in range(qtd_questoes):
             pixels_por_alternativa = []
             for j in range(qtd_alternativas):
-                # Conta a densidade da marcação. Quanto mais pixels brancos, mais preenchida a bolinha.
+                # Conta a densidade apenas dentro do círculo preenchido
                 total_pixels = cv2.countNonZero(caixas_alternativas[indice_caixa])
                 pixels_por_alternativa.append(total_pixels)
                 indice_caixa += 1
 
-            # Localiza o índice (0 a 4) da bolinha com mais densidade
             indice_marcado = pixels_por_alternativa.index(max(pixels_por_alternativa))
             respostas_aluno_indices.append(indice_marcado)
 
@@ -151,7 +164,7 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
     except Exception as e:
         return {
             "sucesso": False,
-            "mensagem": f"Erro técnico no processamento da grade. Verifique se o recorte físico da prova corresponde ao número de questões. Log: {str(e)}",
+            "mensagem": f"Erro técnico no processamento da grade. Log: {str(e)}",
         }
 
 
