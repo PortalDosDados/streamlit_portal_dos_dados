@@ -11,22 +11,19 @@ from PIL import Image
 def ordenar_pontos(pontos):
     """
     Ordena os 4 pontos do contorno do papel detectado pela câmera.
-    A ordem estrita (Top-Left, Top-Right, Bottom-Left, Bottom-Right) é necessária
+    A ordem (Top-Left, Top-Right, Bottom-Left, Bottom-Right) é necessária
     para que o cálculo de perspectiva não rotacione a imagem indevidamente.
     """
-    # Remodela o array para garantir a leitura de pares de coordenadas (x, y)
     pontos = pontos.reshape((4, 2))
     pontos_novos = np.zeros((4, 1, 2), np.int32)
 
-    # A soma das coordenadas X e Y identifica o ponto superior esquerdo e inferior direito
     soma = pontos.sum(1)
-    pontos_novos[0] = pontos[np.argmin(soma)]  # Menor soma: Top-Left
-    pontos_novos[3] = pontos[np.argmax(soma)]  # Maior soma: Bottom-Right
+    pontos_novos[0] = pontos[np.argmin(soma)]
+    pontos_novos[3] = pontos[np.argmax(soma)]
 
-    # A diferença das coordenadas Y e X identifica o ponto superior direito e inferior esquerdo
     diferenca = np.diff(pontos, axis=1)
-    pontos_novos[1] = pontos[np.argmin(diferenca)]  # Menor diferença: Top-Right
-    pontos_novos[2] = pontos[np.argmax(diferenca)]  # Maior diferença: Bottom-Left
+    pontos_novos[1] = pontos[np.argmin(diferenca)]
+    pontos_novos[2] = pontos[np.argmax(diferenca)]
 
     return pontos_novos
 
@@ -38,8 +35,7 @@ def ordenar_pontos(pontos):
 
 def processar_imagem_opencv(imagem_pil, gabarito_oficial):
     """
-    Recebe a imagem, identifica o papel, aplica o recorte nas bolinhas e calcula a nota.
-    Atualizado com Recorte de Margens (ROI) para ignorar textos impressos.
+    Recebe a imagem, identifica o papel, corrige iluminação, recorta as bolinhas e calcula a nota.
     """
     try:
         # ETAPA 1: Preparação de Imagem
@@ -84,37 +80,36 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         matriz = cv2.getPerspectiveTransform(np.float32(pontos_papel), pontos_destino)
         img_alinhada = cv2.warpPerspective(img, matriz, (largura_img, altura_img))
 
-        # ETAPA 4: Binarização (Preto e Branco)
+        # ETAPA 4: Binarização Adaptativa (Ignora Sombras)
         img_alinhada_cinza = cv2.cvtColor(img_alinhada, cv2.COLOR_BGR2GRAY)
-        # Ajuste de sensibilidade: 150 costuma ser mais tolerante a sombras do celular do que 170
-        img_binaria = cv2.threshold(
-            img_alinhada_cinza, 150, 255, cv2.THRESH_BINARY_INV
-        )[1]
+        img_alinhada_suave = cv2.GaussianBlur(img_alinhada_cinza, (5, 5), 0)
 
-        # =====================================================================
-        # ETAPA 4.1: RECORTE DA REGIÃO DE INTERESSE (NOVO)
-        # =====================================================================
-        # A imagem tem 700x700. Vamos cortar as bordas para eliminar textos.
-        # Ajuste estes valores se o seu PDF for alterado futuramente.
-        corte_topo = 70  # Arranca a faixa superior (letras A, B, C...)
-        corte_base = 20  # Arranca a margem inferior em branco
-        corte_esq = 80  # Arranca a faixa esquerda (textos Q01, Q02...)
-        corte_dir = 20  # Arranca a margem direita em branco
+        # Analisa blocos de 11x11 pixels para decidir o contraste, isolando a tinta da sombra
+        img_binaria = cv2.adaptiveThreshold(
+            img_alinhada_suave,
+            255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV,
+            11,
+            2,
+        )
 
-        # Fatiamento de matriz (Array Slicing) no NumPy: [Y_inicio:Y_fim, X_inicio:X_fim]
+        # ETAPA 4.1: Recorte da Região de Interesse (ROI)
+        # Arranca as margens para eliminar textos (Q01, A, B, C...) e evitar falsos positivos
+        corte_topo = 70
+        corte_base = 20
+        corte_esq = 80
+        corte_dir = 20
+
         img_grade_limpa = img_binaria[
             corte_topo : 700 - corte_base, corte_esq : 700 - corte_dir
         ]
-
-        # Redimensiona a grade limpa para 500x500.
-        # Isso é crucial para que a divisão por 10 e por 5 dê números inteiros exatos.
         img_grade_limpa = cv2.resize(img_grade_limpa, (500, 500))
 
-        # ETAPA 5: Divisão da Grade
+        # ETAPA 5: Divisão da Grade Matemática
         qtd_questoes = len(gabarito_oficial)
         qtd_alternativas = 5
 
-        # Fatiamento da imagem limpa (agora sem textos que atrapalham)
         linhas = np.vsplit(img_grade_limpa, qtd_questoes)
         caixas_alternativas = []
         for linha in linhas:
@@ -129,7 +124,7 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         for i in range(qtd_questoes):
             pixels_por_alternativa = []
             for j in range(qtd_alternativas):
-                # Conta a densidade apenas dentro do círculo preenchido
+                # Mede a densidade do preenchimento a caneta
                 total_pixels = cv2.countNonZero(caixas_alternativas[indice_caixa])
                 pixels_por_alternativa.append(total_pixels)
                 indice_caixa += 1
@@ -137,7 +132,7 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
             indice_marcado = pixels_por_alternativa.index(max(pixels_por_alternativa))
             respostas_aluno_indices.append(indice_marcado)
 
-        # ETAPA 7: Auditoria e Resultado
+        # ETAPA 7: Auditoria e Resultado Final
         mapa_letras = {0: "A", 1: "B", 2: "C", 3: "D", 4: "E"}
         nota = 0
         detalhes_correcao = []
@@ -177,19 +172,17 @@ st.markdown(
     "Utilize a câmera do celular ou envie uma foto para corrigir provas instantaneamente."
 )
 
-# Variáveis isoladas com o prefixo 'corretor_'
+# Variáveis isoladas com o prefixo 'corretor_' para evitar conflito com outras abas
 if "corretor_gabarito_salvo" not in st.session_state:
     st.session_state.corretor_gabarito_salvo = []
 if "corretor_qtd_questoes" not in st.session_state:
     st.session_state.corretor_qtd_questoes = 10
 
-# Organização do grid na tela
 col_config, col_captura = st.columns([1, 2])
 
 with col_config:
     st.subheader("1. Configuração")
 
-    # Campo para definição da grade de linhas (questões)
     st.session_state.corretor_qtd_questoes = st.number_input(
         "Quantidade de Questões",
         min_value=1,
@@ -198,7 +191,6 @@ with col_config:
         key="input_corretor_qtd",
     )
 
-    # Campo para definição do vetor de respostas
     gabarito_input = st.text_input(
         "Gabarito Oficial (Ex: ABCDE)",
         max_chars=st.session_state.corretor_qtd_questoes,
@@ -208,7 +200,6 @@ with col_config:
     if st.button("Salvar Gabarito", type="primary", key="btn_salvar_gabarito"):
         gabarito_limpo = "".join([c for c in gabarito_input if c in "ABCDE"])
 
-        # Validação do preenchimento e armazenamento em memória
         if len(gabarito_limpo) == st.session_state.corretor_qtd_questoes:
             st.session_state.corretor_gabarito_salvo = list(gabarito_limpo)
             st.success("Gabarito salvo no sistema!")
@@ -217,7 +208,6 @@ with col_config:
                 f"Erro: O gabarito exige exatamente {st.session_state.corretor_qtd_questoes} alternativas válidas."
             )
 
-    # Apresentação do status operacional
     if st.session_state.corretor_gabarito_salvo:
         st.info(f"**Ativo:** {' - '.join(st.session_state.corretor_gabarito_salvo)}")
         if st.button("Resetar Memória", key="btn_reset_gabarito"):
@@ -227,7 +217,6 @@ with col_config:
 with col_captura:
     st.subheader("2. Correção")
 
-    # Trava de segurança: impede processamento de imagem sem um gabarito matriz
     if not st.session_state.corretor_gabarito_salvo:
         st.warning(
             "Gere o gabarito oficial na coluna de configuração antes de prosseguir."
@@ -242,7 +231,6 @@ with col_captura:
 
         imagem_carregada = None
 
-        # Direcionamento do input
         if metodo_entrada == "Câmera":
             imagem_carregada = st.camera_input(
                 "Alinhe os 4 cantos do gabarito na tela", key="camera_corretor"
@@ -254,7 +242,6 @@ with col_captura:
                 key="upload_corretor",
             )
 
-        # Acionamento do pipeline
         if imagem_carregada is not None:
             if st.button(
                 "Executar Correção da Prova",
@@ -271,7 +258,6 @@ with col_captura:
                         img, st.session_state.corretor_gabarito_salvo
                     )
 
-                    # Interface de saída e relatórios
                     if resultado["sucesso"]:
                         st.success("Operação concluída com sucesso!")
                         st.metric(
