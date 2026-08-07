@@ -3,80 +3,189 @@ from datetime import datetime
 import smtplib
 from email.message import EmailMessage
 
-# Configuração da página e título da disciplina
-st.title("SENAI | Exercício de Fixação")
-st.markdown("### Preparação para os Processos de Corte e Soldagem")
-st.info(
-    "**Atenção Turma:** Esta atividade não possui caráter de nota. O objetivo é testar os seus conhecimentos em Elementos de Chanfro e Simbologia AWS!"
+# ==========================================
+# 1. Configuração Visual (Injeção de CSS)
+# ==========================================
+st.set_page_config(page_title="Portal de Atividades", layout="centered")
+
+st.markdown(
+    """
+<style>
+    /* Estilo idêntico à imagem de referência */
+    .card-container {
+        background-color: #f1f3f4;
+        border-left: 6px solid #005088;
+        padding: 15px 20px;
+        margin-top: 15px;
+        margin-bottom: 5px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .card-title {
+        color: #005088;
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .card-desc {
+        color: #555555;
+        font-size: 14px;
+    }
+</style>
+""",
+    unsafe_allow_html=True,
 )
 
-st.divider()
-
-# Banco de Dados do Quiz (Pode adicionar as demais questões aqui)
-quiz_data = [
-    {
-        "eixo": "Geometria de Juntas",
-        "contexto": "Elementos Básicos",
-        "comando": "O que define o 'Ângulo de Bisel'?",
-        "options": [
-            "O ângulo total formado entre as duas peças a serem soldadas.",
-            "O ângulo preparado na borda de uma única peça.",
-            "A distância entre as duas peças na raiz da junta.",
-            "A face plana não chanfrada na raiz da junta.",
+# ==========================================
+# 2. Banco de Dados Estruturado
+# ==========================================
+# Estrutura atualizada: cada chave principal é o Título do Card
+banco_provas = {
+    "Simbologia AWS - Exercício 01": {
+        "descricao": "Avaliação técnica sobre os fundamentos de soldagem e interpretação de símbolos básicos.",
+        "questoes": [
+            {
+                "eixo": "Geometria de Juntas",
+                "contexto": "Elementos Básicos",
+                "comando": "O que define o 'Ângulo de Bisel'?",
+                "options": [
+                    "O ângulo total formado entre as duas peças a serem soldadas.",
+                    "O ângulo preparado na borda de uma única peça.",
+                    "A distância entre as duas peças na raiz da junta.",
+                    "A face plana não chanfrada na raiz da junta.",
+                ],
+                "correct": 1,
+                "just": "O ângulo de bisel refere-se à inclinação usinada ou cortada na borda de apenas uma das chapas.",
+            }
+            # Adicione as demais questões de AWS aqui
         ],
-        "correct": 1,
-        "just": "O ângulo de bisel refere-se à inclinação usinada ou cortada na borda de apenas uma das chapas. O ângulo de chanfro representa a abertura angular total.",
     },
-    {
-        "eixo": "Geometria de Juntas",
-        "contexto": "Relação de Ângulos",
-        "comando": "Em uma junta com chanfro em V simétrico onde ambas as chapas foram preparadas, a relação entre o ângulo do bisel e o ângulo do chanfro é:",
-        "options": [
-            "O ângulo do chanfro é a metade do ângulo do bisel.",
-            "O ângulo do chanfro é igual ao ângulo do bisel.",
-            "O ângulo do chanfro é o dobro do ângulo do bisel.",
-            "Não há relação direta entre eles.",
+    "Metrologia - Exercício 01": {
+        "descricao": "Avaliação técnica sobre os fundamentos e conversões de sistemas de medidas.",
+        "questoes": [
+            {
+                "eixo": "Fundamentos",
+                "contexto": "Calibração",
+                "comando": "Qual é o principal objetivo da calibração de um instrumento?",
+                "options": [
+                    "Ajustar o instrumento para erro zero.",
+                    "Estabelecer a relação com um padrão de referência.",
+                    "Consertar peças internas desgastadas.",
+                    "Aumentar o tempo de vida útil do equipamento.",
+                ],
+                "correct": 1,
+                "just": "A calibração não conserta o erro, apenas estabelece o desvio em relação a um padrão conhecido.",
+            }
+            # Adicione as demais questões de Metrologia aqui
         ],
-        "correct": 2,
-        "just": "Como o chanfro é simétrico em V, ambas as peças receberam o mesmo ângulo de bisel. Portanto, o ângulo total do chanfro é o dobro do ângulo de bisel.",
     },
-]
+    "Desenho Técnico - Exercício 01": {
+        "descricao": "Leitura e interpretação de vistas ortográficas e tipos de linhas mecânicas.",
+        "questoes": [
+            {
+                "eixo": "Leitura e Interpretação",
+                "contexto": "Tipos de Linhas",
+                "comando": "O que indica uma linha tracejada em um desenho técnico mecânico?",
+                "options": [
+                    "Arestas e contornos visíveis.",
+                    "Linhas de centro e simetria.",
+                    "Arestas e contornos não visíveis (ocultos).",
+                    "Indicação de corte na peça.",
+                ],
+                "correct": 2,
+                "just": "Linhas tracejadas representam arestas e contornos que não podem ser vistos diretamente na vista atual do observador.",
+            }
+            # Adicione as demais questões de Desenho Técnico aqui
+        ],
+    },
+}
 
-# Inicialização das Variáveis de Controle no Session State
+# ==========================================
+# 3. Inicialização de Variáveis de Estado
+# ==========================================
 if "etapa" not in st.session_state:
-    st.session_state.etapa = "identificacao"  # Pode ser: identificacao, quiz, resultado
+    st.session_state.etapa = "menu"  # Alterado para iniciar no novo Menu de Cards
+if "disciplina_atual" not in st.session_state:
+    st.session_state.disciplina_atual = None
 if "questao_atual" not in st.session_state:
     st.session_state.questao_atual = 0
 if "respostas_usuario" not in st.session_state:
-    st.session_state.respostas_usuario = [None] * len(quiz_data)
+    st.session_state.respostas_usuario = []
 if "nome_aluno" not in st.session_state:
     st.session_state.nome_aluno = ""
+
+
+# Função auxiliar para resetar o teste ao trocar ou iniciar disciplina
+def preparar_teste(titulo_disciplina):
+    st.session_state.disciplina_atual = titulo_disciplina
+    st.session_state.etapa = "identificacao"
+    st.session_state.questao_atual = 0
+    st.session_state.respostas_usuario = [None] * len(
+        banco_provas[titulo_disciplina]["questoes"]
+    )
+    st.session_state.nome_aluno = ""
+
+
+# ==========================================
+# TELA 0: Portal de Atividades (Dashboard)
+# ==========================================
+if st.session_state.etapa == "menu":
+    st.markdown(
+        "<h2 style='text-align: center; color: #555;'>Portal de Atividades - Prof. Dione Nascimento</h2>",
+        unsafe_allow_html=True,
+    )
+    st.write("")  # Espaçamento
+
+    # Loop para renderizar os cards visualmente baseados no dicionário
+    for titulo, dados in banco_provas.items():
+        st.markdown(
+            f"""
+        <div class="card-container">
+            <div class="card-title">{titulo}</div>
+            <div class="card-desc">{dados['descricao']}</div>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+        # O botão nativo fica anexado logo abaixo do card para processar o clique no Python
+        if st.button(
+            f"Iniciar {titulo}", key=f"btn_{titulo}", use_container_width=True
+        ):
+            preparar_teste(titulo)
+            st.rerun()
 
 # ==========================================
 # TELA 1: Identificação do Aluno
 # ==========================================
-if st.session_state.etapa == "identificacao":
-    st.subheader("Identificação do Aluno")
+elif st.session_state.etapa == "identificacao":
+    if st.button("⬅ Voltar ao Menu Principal"):
+        st.session_state.etapa = "menu"
+        st.rerun()
+
+    st.divider()
+    st.subheader(f"Módulo Selecionado: {st.session_state.disciplina_atual}")
     nome_input = st.text_input(
-        "Nome Completo:", placeholder="Digite seu nome completo aqui..."
+        "Nome Completo:",
+        placeholder="Digite seu nome completo aqui para o relatório...",
     )
 
-    if st.button("Iniciar Exercício", type="primary"):
+    if st.button("Avançar para a Prova", type="primary"):
         if nome_input.strip() == "":
-            st.warning("Por favor, preencha o seu nome para continuar.")
+            st.warning("O preenchimento do nome é obrigatório.")
         else:
             st.session_state.nome_aluno = nome_input
             st.session_state.etapa = "quiz"
             st.rerun()
 
 # ==========================================
-# TELA 2: Navegação das Questões (Paginação)
+# TELA 2: Navegação das Questões
 # ==========================================
 elif st.session_state.etapa == "quiz":
+    quiz_data = banco_provas[st.session_state.disciplina_atual]["questoes"]
     idx = st.session_state.questao_atual
     q = quiz_data[idx]
 
-    # Cabeçalho da questão
     st.markdown(
         f"<span style='color:#005088;font-size:14px;font-weight:bold;'>[{q['eixo']}] Questão {idx + 1} de {len(quiz_data)}</span>",
         unsafe_allow_html=True,
@@ -84,7 +193,6 @@ elif st.session_state.etapa == "quiz":
     st.markdown(f"*{q['contexto']}*")
     st.markdown(f"**{q['comando']}**")
 
-    # Exibição das alternativas
     resposta_selecionada = st.radio(
         "Selecione uma alternativa:",
         options=q["options"],
@@ -94,32 +202,28 @@ elif st.session_state.etapa == "quiz":
 
     st.divider()
 
-    # Controle de botões (Avançar ou Finalizar)
     if st.button(
         "Confirmar e Avançar" if idx < len(quiz_data) - 1 else "Finalizar Exercício"
     ):
         if resposta_selecionada is None:
             st.warning("Selecione uma alternativa antes de avançar.")
         else:
-            # Salva o índice da resposta escolhida
             indice_resposta = q["options"].index(resposta_selecionada)
             st.session_state.respostas_usuario[idx] = indice_resposta
 
-            # Vai para a próxima ou encerra
             if idx < len(quiz_data) - 1:
                 st.session_state.questao_atual += 1
             else:
                 st.session_state.etapa = "resultado"
-
             st.rerun()
 
 # ==========================================
-# TELA 3: Resultados, Justificativas e Envio Nativo
+# TELA 3: Resultados e Envio de E-mail
 # ==========================================
 elif st.session_state.etapa == "resultado":
     st.header("Relatório do Exercício de Fixação")
+    quiz_data = banco_provas[st.session_state.disciplina_atual]["questoes"]
 
-    # Cálculo da Nota
     acertos = 0
     for i, q in enumerate(quiz_data):
         if st.session_state.respostas_usuario[i] == q["correct"]:
@@ -129,7 +233,9 @@ elif st.session_state.etapa == "resultado":
     pct = (acertos / total) * 100
     data_atual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
-    st.success(f"**Aluno:** {st.session_state.nome_aluno} | **Data:** {data_atual}")
+    st.success(
+        f"**Aluno:** {st.session_state.nome_aluno} | **Disciplina:** {st.session_state.disciplina_atual} | **Data:** {data_atual}"
+    )
     st.markdown(f"### Acertos: {acertos} / {total} ({pct:.1f}%)")
 
     if pct >= 80:
@@ -137,12 +243,11 @@ elif st.session_state.etapa == "resultado":
     elif pct >= 60:
         st.warning("Bom trabalho. Revise as justificativas das questões que errou.")
     else:
-        st.error("Atenção: Revise os conceitos fundamentais de simbologia AWS.")
+        st.error("Atenção: Revise os conceitos fundamentais desta disciplina.")
 
     st.divider()
     st.subheader("Revisão das Questões")
 
-    # Exibe o feedback visual de cada questão para o aluno
     for i, q in enumerate(quiz_data):
         resposta_usuario = st.session_state.respostas_usuario[i]
         esta_correto = resposta_usuario == q["correct"]
@@ -151,7 +256,6 @@ elif st.session_state.etapa == "resultado":
             chr(65 + resposta_usuario) if resposta_usuario is not None else "N/A"
         )
         letra_correta = chr(65 + q["correct"])
-
         cor_borda = "#10b981" if esta_correto else "#ef4444"
 
         st.markdown(
@@ -167,45 +271,50 @@ elif st.session_state.etapa == "resultado":
 
     st.write("")
 
-    # Lógica de Envio Nativo via Python (smtplib)
-    if st.button("Enviar Exercício ao Professor", type="primary"):
-        with st.spinner("Conectando ao servidor de e-mail..."):
-            try:
-                # 1. Resgata as credenciais do gerenciador de segredos do Streamlit
-                email_remetente = st.secrets["EMAIL_REMETENTE"]
-                email_senha = st.secrets["EMAIL_SENHA"]
-                email_destino = st.secrets["EMAIL_DESTINO"]
+    col1, col2 = st.columns(2)
 
-                # 2. Constrói o e-mail
-                msg = EmailMessage()
-                msg["Subject"] = f"Resultado Exercício - {st.session_state.nome_aluno}"
-                msg["From"] = email_remetente
-                msg["To"] = email_destino
+    with col1:
+        if st.button(
+            "Enviar Exercício ao Professor", type="primary", use_container_width=True
+        ):
+            with st.spinner("Conectando ao servidor..."):
+                try:
+                    email_remetente = st.secrets["EMAIL_REMETENTE"]
+                    email_senha = st.secrets["EMAIL_SENHA"]
+                    email_destino = st.secrets["EMAIL_DESTINO"]
 
-                # Corpo do e-mail
-                conteudo_email = f"""
+                    msg = EmailMessage()
+                    msg["Subject"] = (
+                        f"Resultado: {st.session_state.disciplina_atual} - {st.session_state.nome_aluno}"
+                    )
+                    msg["From"] = email_remetente
+                    msg["To"] = email_destino
+
+                    conteudo_email = f"""
 Relatório de Exercício de Fixação
 
 Aluno: {st.session_state.nome_aluno}
-Disciplina: Preparação para Processos de Corte e Soldagem
+Módulo: {st.session_state.disciplina_atual}
 Data: {data_atual}
 
 Nota: {acertos} de {total} ({pct:.1f}%)
-                """
-                msg.set_content(conteudo_email)
+                    """
+                    msg.set_content(conteudo_email)
 
-                # 3. Conexão com o servidor SMTP (Configurado para Gmail)
-                servidor_smtp = "smtp.gmail.com"
-                porta = 587
+                    servidor_smtp = "smtp.gmail.com"
+                    porta = 587
 
-                with smtplib.SMTP(servidor_smtp, porta) as server:
-                    server.starttls()  # Inicia criptografia TLS
-                    server.login(email_remetente, email_senha)
-                    server.send_message(msg)
+                    with smtplib.SMTP(servidor_smtp, porta) as server:
+                        server.starttls()
+                        server.login(email_remetente, email_senha)
+                        server.send_message(msg)
 
-                st.success(
-                    "✅ E-mail enviado com sucesso diretamente para sua caixa de entrada!"
-                )
+                    st.success("✅ E-mail enviado com sucesso!")
 
-            except Exception as e:
-                st.error(f"❌ Ocorreu um erro técnico ao tentar enviar o e-mail: {e}")
+                except Exception as e:
+                    st.error(f"❌ Ocorreu um erro técnico: {e}")
+
+    with col2:
+        if st.button("Voltar ao Menu Principal", use_container_width=True):
+            st.session_state.etapa = "menu"
+            st.rerun()
