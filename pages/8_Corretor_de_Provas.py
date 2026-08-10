@@ -21,14 +21,10 @@ def ordenar_pontos(pontos):
     pontos = pontos.reshape((4, 2))
     pontos_novos = np.zeros((4, 2), dtype=np.float32)
 
-    # O ponto com a menor soma (x+y) é o canto superior esquerdo
-    # O ponto com a maior soma é o canto inferior direito
     soma = pontos.sum(axis=1)
     pontos_novos[0] = pontos[np.argmin(soma)]
     pontos_novos[3] = pontos[np.argmax(soma)]
 
-    # O ponto com a menor diferença (y-x) é o canto superior direito
-    # O ponto com a maior diferença é o canto inferior esquerdo
     diferenca = np.diff(pontos, axis=1)
     pontos_novos[1] = pontos[np.argmin(diferenca)]
     pontos_novos[2] = pontos[np.argmax(diferenca)]
@@ -42,16 +38,11 @@ def ordenar_pontos(pontos):
 
 
 def processar_imagem_opencv(imagem_pil, gabarito_oficial):
-    """
-    Identifica os 4 quadrados pretos do gabarito, corrige a perspectiva através
-    de seus centroides, extrai as marcações e calcula a nota final.
-    """
     try:
         # ETAPA 1: Preparação de Imagem
         img = np.array(imagem_pil)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-        # Redimensionamento Proporcional (Evita distorcer retângulos em quadrados)
         h_orig, w_orig = img.shape[:2]
         largura_img = 700
         proporcao = largura_img / float(w_orig)
@@ -63,7 +54,6 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         # ETAPA 2: Detecção dos Marcadores Fiduciários
         img_desfoque = cv2.GaussianBlur(img_cinza, (5, 5), 0)
 
-        # Binarização Inteligente de Otsu (Adapta-se à iluminação da foto)
         _, img_bin_marcadores = cv2.threshold(
             img_desfoque, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
         )
@@ -76,20 +66,14 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
 
         for c in contornos:
             area = cv2.contourArea(c)
-            # Filtro 1: Margem de área ampliada para tolerar diferentes distâncias de câmera
             if 50 < area < 15000:
                 x, y, w, h = cv2.boundingRect(c)
                 aspect_ratio = float(w) / h
-
-                # Filtro 2: A forma deve ser quadrada
                 if 0.7 <= aspect_ratio <= 1.3:
                     solidez = area / float(w * h)
-
-                    # Filtro 3: Deve ser sólido (não vazado)
                     if solidez > 0.7:
                         marcadores_validos.append((area, c))
 
-        # Ordena os quadrados encontrados pela área (do maior para o menor)
         marcadores_validos.sort(key=lambda x: x[0], reverse=True)
         quatro_maiores = [item[1] for item in marcadores_validos[:4]]
 
@@ -113,21 +97,17 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
             [[0, 0], [largura_img, 0], [0, altura_img], [largura_img, altura_img]]
         )
 
-        # Mapeia a imagem ancorando os 4 centros dos quadrados
         matriz = cv2.getPerspectiveTransform(pontos_papel, pontos_destino)
         img_alinhada = cv2.warpPerspective(img, matriz, (largura_img, altura_img))
 
-        # ETAPA 4: Binarização Adaptativa para Leitura da Tinta
+        # ETAPA 4: Binarização Global para Leitura da Tinta (CORRIGIDO)
+        # Ao invés do adaptiveThreshold que cria "rosquinhas", usamos o Otsu
+        # para garantir que as bolinhas pintadas fiquem sólidas.
         img_alinhada_cinza = cv2.cvtColor(img_alinhada, cv2.COLOR_BGR2GRAY)
         img_alinhada_suave = cv2.GaussianBlur(img_alinhada_cinza, (5, 5), 0)
 
-        img_binaria = cv2.adaptiveThreshold(
-            img_alinhada_suave,
-            255,
-            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-            cv2.THRESH_BINARY_INV,
-            11,
-            2,
+        _, img_binaria = cv2.threshold(
+            img_alinhada_suave, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
         )
 
         # ETAPA 4.1: Recorte da Região de Interesse (ROI)
@@ -181,14 +161,17 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
                 for caixa in alternativas:
                     caixas_alternativas.append(caixa)
 
-        # ETAPA 7: Contagem de Pixels e Auditoria
+        # ETAPA 7: Contagem de Pixels e Auditoria (CORRIGIDO)
         respostas_aluno_indices = []
         indice_caixa = 0
 
         area_caixa = (altura_ideal // max_linhas_coluna) * (
             largura_ideal // n_colunas // qtd_alternativas
         )
-        limite_pixels = area_caixa * 0.15
+
+        # O limite caiu de 15% (0.15) para 5% (0.05).
+        # Fica mais sensível a marcações mais fracas ou marcações em "X".
+        limite_pixels = area_caixa * 0.05
 
         for i in range(qtd_questoes):
             pixels_por_alternativa = []
@@ -199,6 +182,7 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
 
             max_pixels = max(pixels_por_alternativa)
 
+            # Só considera "em branco" se nenhuma alternativa atingir os 5% de tinta
             if max_pixels < limite_pixels:
                 respostas_aluno_indices.append(-1)
             else:
@@ -249,15 +233,11 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
 
 
 def gerar_gabarito_pdf(qtd_questoes):
-    """
-    Gera um arquivo PDF contendo um template de gabarito em uma única página A4.
-    """
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     largura, altura = A4
     margem_externa = 30
 
-    # --- CABEÇALHO E IDENTIFICAÇÃO ---
     c.setFont("Helvetica-Bold", 14)
     c.drawCentredString(
         largura / 2, altura - 30, "Gabarito Padrão - Correção Automática"
@@ -271,7 +251,6 @@ def gerar_gabarito_pdf(qtd_questoes):
     )
     c.drawString(largura - margem_externa - 130, altura - 60, "Data: ___/___/20__")
 
-    # --- MARCADORES FIDUCIÁRIOS ---
     margem_sup_marcadores = 90
     tamanho_marcador = 25
     c.setFillColor(colors.black)
@@ -299,7 +278,6 @@ def gerar_gabarito_pdf(qtd_questoes):
         fill=1,
     )
 
-    # --- GRADE DE QUESTÕES ---
     max_linhas_coluna = 25
     n_colunas = math.ceil(qtd_questoes / max_linhas_coluna)
     if n_colunas < 1:
@@ -464,11 +442,14 @@ with col_captura:
 
                         st.markdown("### Auditoria Visual do Algoritmo")
                         col_debug1, col_debug2 = st.columns(2)
+
                         with col_debug1:
+                            st.markdown("**Imagem Alinhada**")
                             st.image(
                                 resultado["img_alinhada"], use_container_width=True
                             )
                         with col_debug2:
+                            st.markdown("**Visão do Robô (Pixels Brancos = Tinta)**")
                             st.image(
                                 resultado["img_grade"],
                                 use_container_width=True,
