@@ -100,14 +100,19 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         matriz = cv2.getPerspectiveTransform(pontos_papel, pontos_destino)
         img_alinhada = cv2.warpPerspective(img, matriz, (largura_img, altura_img))
 
-        # ETAPA 4: Binarização Global para Leitura da Tinta (CORRIGIDO)
-        # Ao invés do adaptiveThreshold que cria "rosquinhas", usamos o Otsu
-        # para garantir que as bolinhas pintadas fiquem sólidas.
+        # ETAPA 4: Binarização Adaptativa Robusta (CORRIGIDA)
+        # Ao invés de um bloco pequeno que cria "rosquinhas" (11), usamos um bloco grande (51).
+        # Isto ignora as sombras da foto e mantém o preenchimento da caneta sólido.
         img_alinhada_cinza = cv2.cvtColor(img_alinhada, cv2.COLOR_BGR2GRAY)
         img_alinhada_suave = cv2.GaussianBlur(img_alinhada_cinza, (5, 5), 0)
 
-        _, img_binaria = cv2.threshold(
-            img_alinhada_suave, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
+        img_binaria = cv2.adaptiveThreshold(
+            img_alinhada_suave,
+            255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV,
+            51,  # Tamanho do bloco aumentado significativamente
+            10,  # Constante de subtração para filtrar ruídos finos
         )
 
         # ETAPA 4.1: Recorte da Região de Interesse (ROI)
@@ -152,6 +157,7 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         caixas_alternativas = []
 
         for coluna in colunas:
+            # Corta os primeiros 20% da esquerda para eliminar os números ("01.", "02.", etc)
             margem_esquerda = int(coluna.shape[1] * 0.2)
             coluna_sem_numeros = coluna[:, margem_esquerda:]
 
@@ -161,28 +167,42 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
                 for caixa in alternativas:
                     caixas_alternativas.append(caixa)
 
-        # ETAPA 7: Contagem de Pixels e Auditoria (CORRIGIDO)
+        # ETAPA 7: Contagem de Pixels e Auditoria (CORRIGIDA)
         respostas_aluno_indices = []
         indice_caixa = 0
 
-        area_caixa = (altura_ideal // max_linhas_coluna) * (
-            largura_ideal // n_colunas // qtd_alternativas
-        )
+        altura_caixa = altura_ideal // max_linhas_coluna
+        largura_caixa = largura_ideal // n_colunas // qtd_alternativas
 
-        # O limite caiu de 15% (0.15) para 5% (0.05).
-        # Fica mais sensível a marcações mais fracas ou marcações em "X".
-        limite_pixels = area_caixa * 0.05
+        # Criação de uma "Margem de Segurança" interna (Miolo)
+        # Removemos 4 pixéis de cada borda para garantir que linhas pretas ou
+        # resíduos não caiam na contagem da caixa (especialmente na letra A).
+        margem_corte = 4
+
+        # Evita erro caso a caixa fique muito pequena para cortar
+        if altura_caixa <= 2 * margem_corte or largura_caixa <= 2 * margem_corte:
+            margem_corte = 1
+
+        area_util = (altura_caixa - 2 * margem_corte) * (
+            largura_caixa - 2 * margem_corte
+        )
+        limite_pixels = area_util * 0.10  # Pelo menos 10% do MIOLO deve ter tinta
 
         for i in range(qtd_questoes):
             pixels_por_alternativa = []
             for j in range(qtd_alternativas):
-                total_pixels = cv2.countNonZero(caixas_alternativas[indice_caixa])
+                caixa = caixas_alternativas[indice_caixa]
+
+                # Extrai apenas o centro da caixa, ignorando as bordas
+                miolo = caixa[margem_corte:-margem_corte, margem_corte:-margem_corte]
+
+                total_pixels = cv2.countNonZero(miolo)
                 pixels_por_alternativa.append(total_pixels)
                 indice_caixa += 1
 
             max_pixels = max(pixels_por_alternativa)
 
-            # Só considera "em branco" se nenhuma alternativa atingir os 5% de tinta
+            # Só considera "em branco" se nenhuma alternativa atingir os 10% de tinta no miolo
             if max_pixels < limite_pixels:
                 respostas_aluno_indices.append(-1)
             else:
@@ -449,7 +469,9 @@ with col_captura:
                                 resultado["img_alinhada"], use_container_width=True
                             )
                         with col_debug2:
-                            st.markdown("**Visão do Robô (Pixels Brancos = Tinta)**")
+                            st.markdown(
+                                "**Visão do Robô (Ignorando sombras e bordas)**"
+                            )
                             st.image(
                                 resultado["img_grade"],
                                 use_container_width=True,
