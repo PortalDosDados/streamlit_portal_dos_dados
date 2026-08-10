@@ -1,380 +1,182 @@
 import streamlit as st
 import cv2
 import numpy as np
+from scipy.signal import find_peaks
 from PIL import Image
-import io
-import math
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-
-# =============================================================================
-# 1. FUNÇÕES AUXILIARES (GEOMETRIA E ORDENAÇÃO)
-# =============================================================================
 
 
-def ordenar_pontos(pontos):
-    """Ordena 4 pontos na ordem: Top-Left, Top-Right, Bottom-Right, Bottom-Left."""
-    pontos = pontos.reshape((4, 2))
-    pontos_novos = np.zeros((4, 2), dtype=np.float32)
-    soma = pontos.sum(axis=1)
-    pontos_novos[0] = pontos[np.argmin(soma)]
-    pontos_novos[2] = pontos[np.argmax(soma)]  # Bottom-Right
-    diferenca = np.diff(pontos, axis=1)
-    pontos_novos[1] = pontos[np.argmin(diferenca)]  # Top-Right
-    pontos_novos[3] = pontos[np.argmax(diferenca)]  # Bottom-Left
-    return pontos_novos
-
-
-def ordenar_contornos(cnts, method="esquerda-para-direita"):
-    """
-    Ordena uma lista de contornos espacialmente.
-    Baseado na implementação clássica do imutils.
-    """
-    reverse = False
-    i = 0
-    if method == "direita-para-esquerda" or method == "baixo-para-cima":
-        reverse = True
-    if method == "cima-para-baixo" or method == "baixo-para-cima":
-        i = 1
-
-    caixas = [cv2.boundingRect(c) for c in cnts]
-    cnts, caixas = zip(
-        *sorted(zip(cnts, caixas), key=lambda b: b[1][i], reverse=reverse)
-    )
-    return list(cnts)
-
-
-# =============================================================================
-# 2. LÓGICA DE VISÃO COMPUTACIONAL (PIPELINE OMR CLÁSSICO)
-# =============================================================================
-
-
-def processar_imagem_opencv(imagem_pil, gabarito_oficial):
+# ==========================================
+# MOTOR DE VISÃO COMPUTACIONAL E MATEMÁTICA
+# ==========================================
+def processar_gabarito_por_picos(imagem_pil, gabarito_oficial):
     try:
         # 1. Preparação da Imagem
         img = np.array(imagem_pil)
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        if len(img.shape) == 3:
+            img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        else:
+            img_gray = img
 
-        # Redimensionamento para padronizar o processamento
-        r = 800.0 / img.shape[1]
-        dim = (800, int(img.shape[0] * r))
-        img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
-        img_original = img.copy()
+        # 2. Pré-processamento exato do notebook
+        # Binarização com limite estático em 127
+        _, img_bin = cv2.threshold(img_gray, 127, 255, cv2.THRESH_BINARY)
 
-        # 2. Detecção de Bordas (Canny)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        edged = cv2.Canny(blurred, 75, 200)
+        # Operação morfológica (Fechamento) para aglutinar formas
+        kernel = np.ones((8, 8), np.uint8)
+        img_eroded = cv2.morphologyEx(img_bin, cv2.MORPH_CLOSE, kernel)
 
-        # 3. Encontrar o contorno principal (Retângulo da grade de questões)
-        contornos, _ = cv2.findContours(
-            edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-        )
-        if not contornos:
+        # Inversão: O fundo branco fica 0 e a tinta preta vira 255 para permitir a soma
+        img_inverted = cv2.bitwise_not(img_eroded)
+
+        # 3. Deteção das Âncoras via Projeção
+        # Soma ao longo do eixo X (colunas) e Y (linhas)
+        sum_vertical = img_inverted.sum(axis=0)
+        sum_horizontal = img_inverted.sum(axis=1)
+
+        # O parâmetro 'height' é usado para filtrar pequenos ruídos que não são margens reais
+        limite_pico_v = img_inverted.shape[0] * 255 * 0.05
+        limite_pico_h = img_inverted.shape[1] * 255 * 0.05
+
+        vertical_peaks, _ = find_peaks(sum_vertical, height=limite_pico_v)
+        horizontal_peaks, _ = find_peaks(sum_horizontal, height=limite_pico_h)
+
+        # Validação de segurança: Precisamos de pelo menos 2 picos (início e fim) por eixo
+        if len(vertical_peaks) < 2 or len(horizontal_peaks) < 2:
             return {
                 "sucesso": False,
-                "mensagem": "Nenhum contorno encontrado na imagem.",
+                "mensagem": "Falha na deteção de margens. O documento pode estar torto ou com muito ruído no fundo.",
             }
 
-        # Ordena pelos maiores contornos
-        contornos = sorted(contornos, key=cv2.contourArea, reverse=True)
-        contorno_documento = None
+        # 4. Definir Coordenadas de Recorte
+        # O primeiro e último pico de cada eixo definem a caixa delimitadora do gabarito
+        x_inicio, x_fim = vertical_peaks[0], vertical_peaks[-1]
+        y_inicio, y_fim = horizontal_peaks[0], horizontal_peaks[-1]
 
-        for c in contornos:
-            perimetro = cv2.arcLength(c, True)
-            aproximacao = cv2.approxPolyDP(c, 0.02 * perimetro, True)
+        # Recorte da Região de Interesse (ROI)
+        grade = img_inverted[y_inicio:y_fim, x_inicio:x_fim]
 
-            # Se o contorno tem 4 pontas, assumimos que é o retângulo da prova
-            if len(aproximacao) == 4:
-                contorno_documento = aproximacao
-                break
-
-        if contorno_documento is None:
-            return {
-                "sucesso": False,
-                "mensagem": "Erro: Não foi possível identificar o quadro delimitador da prova. Certifique-se de que o retângulo impresso está totalmente visível.",
-            }
-
-        # 4. Alinhamento (Bird's Eye View)
-        pontos_papel = ordenar_pontos(contorno_documento)
-
-        # Define o tamanho do documento planificado (600x800)
-        largura_doc, altura_doc = 600, 800
-        pontos_destino = np.float32(
-            [[0, 0], [largura_doc, 0], [largura_doc, altura_doc], [0, altura_doc]]
-        )
-
-        matriz = cv2.getPerspectiveTransform(pontos_papel, pontos_destino)
-        warped = cv2.warpPerspective(gray, matriz, (largura_doc, altura_doc))
-        warped_color = cv2.warpPerspective(
-            img_original, matriz, (largura_doc, altura_doc)
-        )
-
-        # 5. Binarização (Destacar a tinta da caneta)
-        _, thresh = cv2.threshold(
-            warped, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
-        )
-
-        # 6. Filtragem geométrica: Encontrar apenas os Círculos (Bolinhas)
-        cnts, _ = cv2.findContours(
-            thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-        )
-        bolinhas = []
-
-        for c in cnts:
-            x, y, w, h = cv2.boundingRect(c)
-            aspect_ratio = w / float(h)
-
-            # Uma bolinha deve ter largura e altura adequadas e proporção próxima de 1.0 (quadrado/círculo)
-            if w >= 15 and h >= 15 and 0.8 <= aspect_ratio <= 1.2:
-                bolinhas.append(c)
-
+        # 5. Fatiamento Matemático e Extração
         qtd_questoes = len(gabarito_oficial)
-        total_bolinhas_esperadas = qtd_questoes * 5
+        qtd_alternativas = 5
 
-        # Verificação de segurança estrutural da abordagem
-        if len(bolinhas) != total_bolinhas_esperadas:
-            return {
-                "sucesso": False,
-                "mensagem": f"Erro de leitura OMR: Esperadas {total_bolinhas_esperadas} bolinhas, mas o algoritmo encontrou {len(bolinhas)}. A foto pode estar desfocada ou mal iluminada, impedindo a detecção de alguns círculos.",
-            }
+        # Redimensionamento para forçar a matriz a ser perfeitamente divisível pelo número de questões/alternativas
+        altura_grade = (grade.shape[0] // qtd_questoes) * qtd_questoes
+        largura_grade = (grade.shape[1] // qtd_alternativas) * qtd_alternativas
+        grade_redimensionada = cv2.resize(grade, (largura_grade, altura_grade))
 
-        # 7. Avaliação e Correção
-        bolinhas = ordenar_contornos(bolinhas, method="cima-para-baixo")
+        # Fatiar a grade em linhas (Questões)
+        linhas = np.vsplit(grade_redimensionada, qtd_questoes)
+
+        respostas_aluno = []
         mapa_letras = {0: "A", 1: "B", 2: "C", 3: "D", 4: "E"}
         nota = 0
-        detalhes_correcao = []
+        detalhes = []
 
-        for q, i in enumerate(np.arange(0, len(bolinhas), 5)):
-            # Pega as 5 bolinhas da questão e ordena da esquerda para a direita
-            cnts_questao = ordenar_contornos(
-                bolinhas[i : i + 5], method="esquerda-para-direita"
+        # Analisar cada questão
+        for i, linha in enumerate(linhas):
+            # Fatiar a linha em colunas (Alternativas A, B, C, D, E)
+            alternativas = np.hsplit(linha, qtd_alternativas)
+
+            # Contabilizar os pixels de tinta (brancos na imagem invertida) em cada alternativa
+            pixels_por_alt = [cv2.countNonZero(alt) for alt in alternativas]
+            max_pixels = max(pixels_por_alt)
+
+            # Definir um limite mínimo de tinta (10% da área da célula) para ignorar rabiscos leves
+            area_celula = (altura_grade // qtd_questoes) * (
+                largura_grade // qtd_alternativas
             )
-            pixels_marcados = []
-
-            letra_gabarito = gabarito_oficial[q]
-
-            for j, c in enumerate(cnts_questao):
-                # Cria uma máscara que contém apenas a bolinha atual
-                mask = np.zeros(thresh.shape, dtype="uint8")
-                cv2.drawContours(mask, [c], -1, 255, -1)
-
-                # Conta quantos pixels brancos (tinta preta do papel) existem dentro da bolinha
-                mask = cv2.bitwise_and(thresh, thresh, mask=mask)
-                total_pixels = cv2.countNonZero(mask)
-                pixels_marcados.append(total_pixels)
-
-            max_pixels = max(pixels_marcados)
-
-            # Se a alternativa com mais pixels não atingir um limiar mínimo, considera em branco
-            if max_pixels < 50:
-                detalhes_correcao.append(
-                    f"Q{q+1}: Incorreta (Em branco, correta era {letra_gabarito})"
-                )
+            if max_pixels < (area_celula * 0.10):
+                respostas_aluno.append(-1)
+                detalhes.append(f"Q{i+1}: Em branco (Gabarito: {gabarito_oficial[i]})")
             else:
-                indice_marcado = pixels_marcados.index(max_pixels)
-                letra_aluno = mapa_letras[indice_marcado]
+                indice_marcado = pixels_por_alt.index(max_pixels)
+                letra_marcada = mapa_letras[indice_marcado]
+                respostas_aluno.append(letra_marcada)
 
-                # Desenha o resultado na imagem para auditoria
-                cor = (0, 255, 0) if letra_aluno == letra_gabarito else (0, 0, 255)
-                cv2.drawContours(
-                    warped_color, [cnts_questao[indice_marcado]], -1, cor, 2
-                )
-
-                if letra_aluno == letra_gabarito:
+                # Corrigir a resposta
+                if letra_marcada == gabarito_oficial[i]:
                     nota += 1
-                    detalhes_correcao.append(f"Q{q+1}: Correta (Marcou {letra_aluno})")
+                    detalhes.append(f"Q{i+1}: Correta ({letra_marcada})")
                 else:
-                    detalhes_correcao.append(
-                        f"Q{q+1}: Incorreta (Marcou {letra_aluno}, correta era {letra_gabarito})"
+                    detalhes.append(
+                        f"Q{i+1}: Incorreta (Marcou {letra_marcada}, Gabarito: {gabarito_oficial[i]})"
                     )
+
+        # 6. Preparação da Imagem de Auditoria
+        # Converte de volta para cor para desenhar as linhas de corte em evidência
+        img_auditoria = cv2.cvtColor(img_inverted, cv2.COLOR_GRAY2RGB)
+
+        # Desenhar margens verticais (Azul) e horizontais (Verde) encontradas pelos picos
+        cv2.line(
+            img_auditoria,
+            (x_inicio, 0),
+            (x_inicio, img_inverted.shape[0]),
+            (255, 0, 0),
+            3,
+        )
+        cv2.line(
+            img_auditoria, (x_fim, 0), (x_fim, img_inverted.shape[0]), (255, 0, 0), 3
+        )
+        cv2.line(
+            img_auditoria,
+            (0, y_inicio),
+            (img_inverted.shape[1], y_inicio),
+            (0, 255, 0),
+            3,
+        )
+        cv2.line(
+            img_auditoria, (0, y_fim), (img_inverted.shape[1], y_fim), (0, 255, 0), 3
+        )
 
         return {
             "sucesso": True,
             "nota": nota,
             "total": qtd_questoes,
-            "detalhes": "\n".join(detalhes_correcao),
-            "img_alinhada": cv2.cvtColor(warped_color, cv2.COLOR_BGR2RGB),
+            "detalhes": "\n".join(detalhes),
+            "auditoria": img_auditoria,
         }
 
     except Exception as e:
         return {
             "sucesso": False,
-            "mensagem": f"Erro técnico no processamento: {str(e)}",
+            "mensagem": f"Erro interno de processamento de matriz: {str(e)}",
         }
 
 
-# =============================================================================
-# 3. GERAÇÃO DE GABARITO (REPORTLAB - ADAPTADO PARA OMR CLÁSSICO)
-# =============================================================================
-
-
-def gerar_gabarito_pdf(qtd_questoes):
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
-    largura, altura = A4
-    margem = 40
-
-    c.setFont("Helvetica-Bold", 14)
-    c.drawCentredString(largura / 2, altura - 30, "Gabarito - Padrão OMR")
-
-    c.setFont("Helvetica", 11)
-    c.drawString(
-        margem,
-        altura - 60,
-        "Nome: ___________________________________________________________",
-    )
-
-    # ---------------------------------------------------------
-    # A ÂNCORA DO ALGORITMO: O Retângulo Delimitador
-    # O OpenCV vai procurar exatamente este quadrado para alinhar a imagem
-    # ---------------------------------------------------------
-    topo_retangulo = altura - 90
-    base_retangulo = margem
-    c.setLineWidth(2)
-    c.rect(
-        margem,
-        base_retangulo,
-        largura - (2 * margem),
-        topo_retangulo - base_retangulo,
-        stroke=1,
-        fill=0,
-    )
-    # ---------------------------------------------------------
-
-    c.setLineWidth(1)
-    x_inicio = margem + 20
-    y_atual = topo_retangulo - 30
-
-    alternativas = ["A", "B", "C", "D", "E"]
-
-    for q in range(qtd_questoes):
-        c.setFont("Helvetica", 10)
-        c.drawString(x_inicio, y_atual - 4, f"{q+1:02d}.")
-
-        for alt_idx, letra in enumerate(alternativas):
-            # Espaçamento fixo garantido
-            x_bolinha = x_inicio + 40 + (alt_idx * 30)
-
-            # Círculos com linha levemente mais grossa (1.5) ajudam o algoritmo Canny
-            c.setLineWidth(1.5)
-            c.circle(x_bolinha, y_atual, 8, stroke=1, fill=0)
-
-            c.setFont("Helvetica", 8)
-            c.drawCentredString(x_bolinha, y_atual - 3, letra)
-
-        y_atual -= 30
-
-        # Controle simples de coluna (cria nova coluna se faltar espaço)
-        if y_atual < base_retangulo + 30:
-            y_atual = topo_retangulo - 30
-            x_inicio += 200
-
-    c.save()
-    buffer.seek(0)
-    return buffer
-
-
-# =============================================================================
-# 4. INTERFACE DO USUÁRIO (FRONT-END STREAMLIT)
-# =============================================================================
-
-st.title("🎯 Corretor OMR Clássico")
+# ==========================================
+# INTERFACE GRÁFICA STREAMLIT
+# ==========================================
+st.title("Corretor via Projeção de Perfis (SciPy)")
 st.markdown(
-    "Implementação baseada no pipeline clássico (Extração de Borda + Filtro de Contorno)."
+    "Implementação baseada no rastreamento de picos de densidade da matriz da imagem."
 )
 
-if "corretor_gabarito_salvo" not in st.session_state:
-    st.session_state.corretor_gabarito_salvo = []
-if "corretor_qtd_questoes" not in st.session_state:
-    st.session_state.corretor_qtd_questoes = 10
+gabarito_input = st.text_input("Gabarito Oficial (Ex: ABCDE)", "ABCDE").upper()
+gabarito_limpo = "".join([c for c in gabarito_input if c in "ABCDE"])
 
-col_config, col_captura = st.columns([1, 2])
+upload = st.file_uploader("Faça o upload do documento", type=["png", "jpg", "jpeg"])
+st.warning("O documento digitalizado deve estar reto, sem rotação.")
 
-with col_config:
-    st.subheader("1. Configuração")
-    st.session_state.corretor_qtd_questoes = st.number_input(
-        "Quantidade de Questões",
-        min_value=1,
-        max_value=50,
-        value=st.session_state.corretor_qtd_questoes,
-    )
-
-    gabarito_input = st.text_input(
-        "Gabarito (Ex: ABCDE)", max_chars=st.session_state.corretor_qtd_questoes
-    ).upper()
-
-    if st.button("Salvar Gabarito", type="primary"):
-        gabarito_limpo = "".join([c for c in gabarito_input if c in "ABCDE"])
-        if len(gabarito_limpo) == st.session_state.corretor_qtd_questoes:
-            st.session_state.corretor_gabarito_salvo = list(gabarito_limpo)
-            st.success("Gabarito salvo!")
-        else:
-            st.error(
-                f"Erro: Digite exatamente {st.session_state.corretor_qtd_questoes} letras válidas."
-            )
-
-    if st.session_state.corretor_gabarito_salvo:
-        st.info(f"**Ativo:** {' - '.join(st.session_state.corretor_gabarito_salvo)}")
-        if st.button("Resetar Memória"):
-            st.session_state.corretor_gabarito_salvo = []
-            st.rerun()
-
-    st.markdown("---")
-    st.subheader("2. Gerar Folha Padrão")
-    st.warning(
-        "Gere e utilize este NOVO PDF. O retângulo delimitador é exigência deste algoritmo."
-    )
-    pdf_buffer = gerar_gabarito_pdf(st.session_state.corretor_qtd_questoes)
-    st.download_button(
-        label="📄 Baixar Novo PDF",
-        data=pdf_buffer,
-        file_name="gabarito_omr_classico.pdf",
-        mime="application/pdf",
-        type="primary",
-        use_container_width=True,
-    )
-
-with col_captura:
-    st.subheader("3. Correção")
-    if not st.session_state.corretor_gabarito_salvo:
-        st.warning("Configure o gabarito oficial na coluna lateral.")
+if upload is not None and st.button("Executar Correção"):
+    if len(gabarito_limpo) == 0:
+        st.error("Por favor, insira um gabarito válido.")
     else:
-        metodo_entrada = st.radio(
-            "Método de Entrada:", ["Câmera", "Arquivo"], horizontal=True
-        )
+        with st.spinner("Processando..."):
+            imagem = Image.open(upload)
+            resultado = processar_gabarito_por_picos(imagem, gabarito_limpo)
 
-        imagem_carregada = None
-        if metodo_entrada == "Câmera":
-            imagem_carregada = st.camera_input(
-                "Fotografe garantindo que o retângulo preto da folha esteja totalmente visível"
-            )
-        else:
-            imagem_carregada = st.file_uploader(
-                "Upload da foto (.jpg/.png)", type=["jpg", "png"]
-            )
+            if resultado["sucesso"]:
+                st.success(f"Nota Final: {resultado['nota']} / {resultado['total']}")
 
-        if imagem_carregada and st.button(
-            "Executar Correção", type="primary", use_container_width=True
-        ):
-            with st.spinner("Aplicando filtros OMR..."):
-                img = Image.open(imagem_carregada)
-                resultado = processar_imagem_opencv(
-                    img, st.session_state.corretor_gabarito_salvo
-                )
-
-                if resultado.get("sucesso"):
-                    st.success("Operação concluída!")
-                    st.metric(
-                        label="Nota Calculada",
-                        value=f"{resultado['nota']} / {resultado['total']}",
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.text("Detalhes da Correção:")
+                    st.text(resultado["detalhes"])
+                with col2:
+                    st.image(
+                        resultado["auditoria"],
+                        caption="Linhas de Corte Identificadas",
+                        use_container_width=True,
                     )
-
-                    with st.expander("Log Analítico", expanded=True):
-                        st.text(resultado["detalhes"])
-
-                    st.markdown("### Auditoria OMR")
-                    st.image(resultado["img_alinhada"], use_container_width=True)
-                else:
-                    st.error(resultado["mensagem"])
+            else:
+                st.error(resultado["mensagem"])
