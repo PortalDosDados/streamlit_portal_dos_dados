@@ -14,10 +14,6 @@ from reportlab.lib import colors
 
 
 def ordenar_pontos(pontos):
-    """
-    Ordena 4 pontos (X, Y) na ordem: Top-Left, Top-Right, Bottom-Left, Bottom-Right.
-    Modificado para retornar float32, exigência da transformação de perspectiva do OpenCV.
-    """
     pontos = pontos.reshape((4, 2))
     pontos_novos = np.zeros((4, 2), dtype=np.float32)
 
@@ -32,14 +28,28 @@ def ordenar_pontos(pontos):
     return pontos_novos
 
 
+def ordenar_contornos_esquerda_direita(contornos):
+    """Ordena uma lista de contornos baseada na coordenada X (esquerda para a direita)."""
+    caixas = [cv2.boundingRect(c) for c in contornos]
+    contornos_ordenados, _ = zip(*sorted(zip(contornos, caixas), key=lambda b: b[1][0]))
+    return list(contornos_ordenados)
+
+
+def ordenar_contornos_cima_baixo(contornos):
+    """Ordena uma lista de contornos baseada na coordenada Y (cima para baixo)."""
+    caixas = [cv2.boundingRect(c) for c in contornos]
+    contornos_ordenados, _ = zip(*sorted(zip(contornos, caixas), key=lambda b: b[1][1]))
+    return list(contornos_ordenados)
+
+
 # =============================================================================
-# 2. LÓGICA DE VISÃO COMPUTACIONAL (BACK-END)
+# 2. LÓGICA DE VISÃO COMPUTACIONAL (BACK-END OMR ROBUSTO)
 # =============================================================================
 
 
 def processar_imagem_opencv(imagem_pil, gabarito_oficial):
     try:
-        # ETAPA 1: Preparação de Imagem
+        # ETAPA 1: Preparação
         img = np.array(imagem_pil)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
@@ -51,27 +61,22 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         img = cv2.resize(img, (largura_img, altura_img))
         img_cinza = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        # ETAPA 2: Detecção dos Marcadores Fiduciários
+        # ETAPA 2: Marcadores Fiduciários
         img_desfoque = cv2.GaussianBlur(img_cinza, (5, 5), 0)
-
         _, img_bin_marcadores = cv2.threshold(
             img_desfoque, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
         )
-
         contornos, _ = cv2.findContours(
             img_bin_marcadores, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
 
         marcadores_validos = []
-
         for c in contornos:
             area = cv2.contourArea(c)
             if 50 < area < 15000:
                 x, y, w, h = cv2.boundingRect(c)
-                aspect_ratio = float(w) / h
-                if 0.7 <= aspect_ratio <= 1.3:
-                    solidez = area / float(w * h)
-                    if solidez > 0.7:
+                if 0.7 <= float(w) / h <= 1.3:
+                    if (area / float(w * h)) > 0.7:
                         marcadores_validos.append((area, c))
 
         marcadores_validos.sort(key=lambda x: x[0], reverse=True)
@@ -80,175 +85,166 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         if len(quatro_maiores) < 4:
             return {
                 "sucesso": False,
-                "mensagem": f"Erro: Foram encontrados apenas {len(quatro_maiores)} quadrados marcadores. Certifique-se de que a foto está bem iluminada e os 4 cantos estão visíveis.",
+                "mensagem": "Erro: Os 4 cantos pretos não foram localizados.",
             }
 
-        # ETAPA 3: Cálculo dos Centroides e Alinhamento
+        # ETAPA 3: Alinhamento de Perspectiva
         centros = []
         for c in quatro_maiores:
             M = cv2.moments(c)
             if M["m00"] != 0:
-                cX = int(M["m10"] / M["m00"])
-                cY = int(M["m01"] / M["m00"])
-                centros.append([cX, cY])
+                centros.append([int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"])])
 
         pontos_papel = ordenar_pontos(np.array(centros))
         pontos_destino = np.float32(
             [[0, 0], [largura_img, 0], [0, altura_img], [largura_img, altura_img]]
         )
-
         matriz = cv2.getPerspectiveTransform(pontos_papel, pontos_destino)
         img_alinhada = cv2.warpPerspective(img, matriz, (largura_img, altura_img))
 
-        # ETAPA 4: Binarização Adaptativa Robusta (CORRIGIDA)
-        # Ao invés de um bloco pequeno que cria "rosquinhas" (11), usamos um bloco grande (51).
-        # Isto ignora as sombras da foto e mantém o preenchimento da caneta sólido.
+        # ETAPA 4: Binarização Global para Leitura
         img_alinhada_cinza = cv2.cvtColor(img_alinhada, cv2.COLOR_BGR2GRAY)
         img_alinhada_suave = cv2.GaussianBlur(img_alinhada_cinza, (5, 5), 0)
-
-        img_binaria = cv2.adaptiveThreshold(
-            img_alinhada_suave,
-            255,
-            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-            cv2.THRESH_BINARY_INV,
-            51,  # Tamanho do bloco aumentado significativamente
-            10,  # Constante de subtração para filtrar ruídos finos
+        _, img_binaria = cv2.threshold(
+            img_alinhada_suave, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
         )
 
-        # ETAPA 4.1: Recorte da Região de Interesse (ROI)
-        corte_topo = 40
-        corte_base = 20
-        corte_esq = 55
-        corte_dir = 20
+        # Remove cabeçalho e rodapé grosseiramente para focar na grade
+        img_grade_limpa = img_binaria[40 : altura_img - 20, 20 : largura_img - 20]
+        img_alinhada_debug = img_alinhada[
+            40 : altura_img - 20, 20 : largura_img - 20
+        ].copy()
 
-        if (
-            altura_img <= corte_topo + corte_base
-            or largura_img <= corte_esq + corte_dir
-        ):
-            raise ValueError(
-                "O tamanho da imagem alinhada é muito pequeno para os cortes definidos."
-            )
-
-        img_grade_limpa = img_binaria[
-            corte_topo : altura_img - corte_base, corte_esq : largura_img - corte_dir
-        ]
-
-        # ETAPA 5: Dimensionamento Preciso para grid de colunas
+        # ETAPA 5: Divisão em Macro-Colunas
         qtd_questoes = len(gabarito_oficial)
-        qtd_alternativas = 5
         max_linhas_coluna = 25
-
         n_colunas = math.ceil(qtd_questoes / max_linhas_coluna)
         if n_colunas < 1:
             n_colunas = 1
 
-        altura_ideal = (
-            img_grade_limpa.shape[0] // max_linhas_coluna
-        ) * max_linhas_coluna
-
-        largura_por_coluna = img_grade_limpa.shape[1] // n_colunas
-        largura_por_coluna = (largura_por_coluna // qtd_alternativas) * qtd_alternativas
-        largura_ideal = largura_por_coluna * n_colunas
-
-        img_grade_limpa = cv2.resize(img_grade_limpa, (largura_ideal, altura_ideal))
-
-        # ETAPA 6: Divisão da Grade em colunas e linhas
-        colunas = np.hsplit(img_grade_limpa, n_colunas)
-        caixas_alternativas = []
-
-        for coluna in colunas:
-            # Corta os primeiros 20% da esquerda para eliminar os números ("01.", "02.", etc)
-            margem_esquerda = int(coluna.shape[1] * 0.2)
-            coluna_sem_numeros = coluna[:, margem_esquerda:]
-
-            linhas_coluna = np.vsplit(coluna_sem_numeros, max_linhas_coluna)
-            for linha in linhas_coluna:
-                alternativas = np.hsplit(linha, qtd_alternativas)
-                for caixa in alternativas:
-                    caixas_alternativas.append(caixa)
-
-        # ETAPA 7: Contagem de Pixels e Auditoria (CORRIGIDA)
-        respostas_aluno_indices = []
-        indice_caixa = 0
-
-        altura_caixa = altura_ideal // max_linhas_coluna
-        largura_caixa = largura_ideal // n_colunas // qtd_alternativas
-
-        # Criação de uma "Margem de Segurança" interna (Miolo)
-        # Removemos 4 pixéis de cada borda para garantir que linhas pretas ou
-        # resíduos não caiam na contagem da caixa (especialmente na letra A).
-        margem_corte = 4
-
-        # Evita erro caso a caixa fique muito pequena para cortar
-        if altura_caixa <= 2 * margem_corte or largura_caixa <= 2 * margem_corte:
-            margem_corte = 1
-
-        area_util = (altura_caixa - 2 * margem_corte) * (
-            largura_caixa - 2 * margem_corte
-        )
-        limite_pixels = area_util * 0.10  # Pelo menos 10% do MIOLO deve ter tinta
-
-        for i in range(qtd_questoes):
-            pixels_por_alternativa = []
-            for j in range(qtd_alternativas):
-                caixa = caixas_alternativas[indice_caixa]
-
-                # Extrai apenas o centro da caixa, ignorando as bordas
-                miolo = caixa[margem_corte:-margem_corte, margem_corte:-margem_corte]
-
-                total_pixels = cv2.countNonZero(miolo)
-                pixels_por_alternativa.append(total_pixels)
-                indice_caixa += 1
-
-            max_pixels = max(pixels_por_alternativa)
-
-            # Só considera "em branco" se nenhuma alternativa atingir os 10% de tinta no miolo
-            if max_pixels < limite_pixels:
-                respostas_aluno_indices.append(-1)
-            else:
-                respostas_aluno_indices.append(pixels_por_alternativa.index(max_pixels))
+        largura_coluna = img_grade_limpa.shape[1] // n_colunas
 
         mapa_letras = {0: "A", 1: "B", 2: "C", 3: "D", 4: "E"}
         nota = 0
         detalhes_correcao = []
+        questao_atual_idx = 0
 
-        for i in range(qtd_questoes):
-            letra_gabarito = gabarito_oficial[i]
+        # Iteração sobre cada coluna da página
+        for i_col in range(n_colunas):
+            x_inicio = i_col * largura_coluna
+            x_fim = (i_col + 1) * largura_coluna
+            if i_col == n_colunas - 1:
+                x_fim = img_grade_limpa.shape[1]  # Garante pegar o resto
 
-            if respostas_aluno_indices[i] == -1:
-                detalhes_correcao.append(
-                    f"Q{i+1}: Incorreta (Em branco, correta era {letra_gabarito})"
-                )
-                continue
+            coluna_img = img_grade_limpa[:, x_inicio:x_fim]
 
-            letra_aluno = mapa_letras[respostas_aluno_indices[i]]
+            # ETAPA 6: Encontrar as Bolinhas na Coluna (Busca Ativa de Contornos)
+            contornos_coluna, _ = cv2.findContours(
+                coluna_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+            )
 
-            if letra_aluno == letra_gabarito:
-                nota += 1
-                detalhes_correcao.append(f"Q{i+1}: Correta (Marcou {letra_aluno})")
-            else:
-                detalhes_correcao.append(
-                    f"Q{i+1}: Incorreta (Marcou {letra_aluno}, correta era {letra_gabarito})"
-                )
+            bolinhas_validas = []
+            for c in contornos_coluna:
+                x, y, w, h = cv2.boundingRect(c)
+                aspect_ratio = w / float(h)
+
+                # Filtro: A forma deve ser aproximadamente um quadrado/círculo com tamanho razoável
+                if 12 <= w <= 50 and 12 <= h <= 50 and 0.7 <= aspect_ratio <= 1.3:
+                    bolinhas_validas.append(c)
+
+            # Ordena todas as bolinhas da coluna de cima para baixo
+            try:
+                bolinhas_validas = ordenar_contornos_cima_baixo(bolinhas_validas)
+            except ValueError:
+                return {
+                    "sucesso": False,
+                    "mensagem": f"Erro de leitura: Não foi possível identificar as alternativas na coluna {i_col+1}. O papel pode estar rasurado ou a foto sem nitidez.",
+                }
+
+            # Agrupa as bolinhas de 5 em 5 (cada grupo é uma questão)
+            for q in range(0, len(bolinhas_validas), 5):
+                if questao_atual_idx >= qtd_questoes:
+                    break
+
+                linha_contornos = bolinhas_validas[q : q + 5]
+
+                # Se o algoritmo encontrou menos de 5 alternativas, pula para evitar quebra
+                if len(linha_contornos) != 5:
+                    detalhes_correcao.append(
+                        f"Q{questao_atual_idx+1}: Erro de captura - alternativas ilegíveis."
+                    )
+                    questao_atual_idx += 1
+                    continue
+
+                # Ordena a questão da esquerda para a direita (A, B, C, D, E)
+                linha_contornos = ordenar_contornos_esquerda_direita(linha_contornos)
+
+                letra_gabarito = gabarito_oficial[questao_atual_idx]
+                pixels_marcados = []
+
+                # Conta a tinta de cada alternativa
+                for j, c in enumerate(linha_contornos):
+                    # Cria uma máscara vazia do tamanho da coluna
+                    mask = np.zeros(coluna_img.shape, dtype="uint8")
+                    cv2.drawContours(
+                        mask, [c], -1, 255, -1
+                    )  # Pinta a bolinha de branco na máscara
+
+                    # Faz um AND bit a bit (Avalia a tinta apenas dentro do círculo exato da bolinha)
+                    mask = cv2.bitwise_and(coluna_img, coluna_img, mask=mask)
+                    total_pixels = cv2.countNonZero(mask)
+                    pixels_marcados.append(total_pixels)
+
+                    # Desenha retângulos verdes no debug para você ver onde o robô leu
+                    bx, by, bw, bh = cv2.boundingRect(c)
+                    cv2.rectangle(
+                        img_alinhada_debug,
+                        (x_inicio + bx, by),
+                        (x_inicio + bx + bw, by + bh),
+                        (0, 255, 0),
+                        2,
+                    )
+
+                max_pixels = max(pixels_marcados)
+                # Para ser considerada preenchida, a marcação deve cobrir boa parte do círculo
+                if max_pixels < 50:
+                    detalhes_correcao.append(
+                        f"Q{questao_atual_idx+1}: Incorreta (Em branco, correta era {letra_gabarito})"
+                    )
+                else:
+                    indice_marcado = pixels_marcados.index(max_pixels)
+                    letra_aluno = mapa_letras[indice_marcado]
+
+                    if letra_aluno == letra_gabarito:
+                        nota += 1
+                        detalhes_correcao.append(
+                            f"Q{questao_atual_idx+1}: Correta (Marcou {letra_aluno})"
+                        )
+                    else:
+                        detalhes_correcao.append(
+                            f"Q{questao_atual_idx+1}: Incorreta (Marcou {letra_aluno}, correta era {letra_gabarito})"
+                        )
+
+                questao_atual_idx += 1
 
         return {
             "sucesso": True,
             "nota": nota,
             "total": qtd_questoes,
             "detalhes": "\n".join(detalhes_correcao),
-            "img_alinhada": cv2.cvtColor(img_alinhada, cv2.COLOR_BGR2RGB),
+            "img_alinhada": cv2.cvtColor(img_alinhada_debug, cv2.COLOR_BGR2RGB),
             "img_grade": img_grade_limpa,
         }
 
     except Exception as e:
         return {
             "sucesso": False,
-            "mensagem": f"Erro técnico no processamento. Log: {str(e)}",
+            "mensagem": f"Erro técnico no processamento: {str(e)}",
         }
 
 
 # =============================================================================
-# 3. GERAÇÃO DE GABARITO (REPORTLAB)
+# 3. GERAÇÃO DE GABARITO (REPORTLAB) - ATUALIZADO PARA LINHAS MAIS GROSSAS
 # =============================================================================
 
 
@@ -311,6 +307,9 @@ def gerar_gabarito_pdf(qtd_questoes):
     altura_linha = altura_util / max_linhas_coluna
     alternativas = ["A", "B", "C", "D", "E"]
 
+    # ATENÇÃO AQUI: Linhas mais grossas facilitam a identificação dos círculos pela câmera
+    c.setLineWidth(1.5)
+
     for coluna_idx in range(n_colunas):
         x_coluna = margem_externa + coluna_idx * largura_coluna
         espaco_numero = 30
@@ -334,6 +333,7 @@ def gerar_gabarito_pdf(qtd_questoes):
                     + passo_bolinha * alt_idx
                     + passo_bolinha / 2
                 )
+
                 c.circle(x_centro, y_centro, raio_bolinha, stroke=1, fill=0)
                 c.setFont("Helvetica", 8)
                 c.drawCentredString(x_centro, y_centro - 3, letra)
@@ -395,12 +395,13 @@ with col_config:
 
     st.markdown("---")
     st.subheader("2. Gerar Folha Padrão")
-    st.markdown("Imprima este arquivo e utilize-o para aplicar a prova.")
 
+    # ATENÇÃO: Se for testar, DEVE imprimir ou gerar um NOVO PDF após essa atualização.
+    # O novo PDF tem linhas mais grossas nos círculos para o OpenCV detectar corretamente.
     pdf_buffer = gerar_gabarito_pdf(st.session_state.corretor_qtd_questoes)
 
     st.download_button(
-        label="📄 Baixar PDF do Gabarito",
+        label="📄 Baixar Novo PDF do Gabarito",
         data=pdf_buffer,
         file_name=f"gabarito_oficial_{st.session_state.corretor_qtd_questoes}_questoes.pdf",
         mime="application/pdf",
@@ -417,33 +418,24 @@ with col_captura:
         )
     else:
         metodo_entrada = st.radio(
-            "Método de Entrada da Imagem:",
-            ["Câmera", "Arquivo"],
-            horizontal=True,
-            key="radio_metodo_captura",
+            "Método de Entrada:", ["Câmera", "Arquivo"], horizontal=True
         )
 
         imagem_carregada = None
-
         if metodo_entrada == "Câmera":
             imagem_carregada = st.camera_input(
-                "Alinhe os 4 cantos do gabarito na tela", key="camera_corretor"
+                "Alinhe os 4 cantos na tela", key="camera_corretor"
             )
         else:
             imagem_carregada = st.file_uploader(
-                "Realize o upload da prova (.jpg/.png)",
-                type=["jpg", "jpeg", "png"],
-                key="upload_corretor",
+                "Upload da prova (.jpg/.png)", type=["jpg", "png"], key="upload"
             )
 
         if imagem_carregada is not None:
             if st.button(
-                "Executar Correção da Prova",
-                type="primary",
-                use_container_width=True,
-                key="btn_processar_correcao",
+                "Executar Correção da Prova", type="primary", use_container_width=True
             ):
-                with st.spinner("Processando a imagem e extraindo respostas..."):
+                with st.spinner("Extraindo coordenadas dos contornos..."):
                     img = Image.open(imagem_carregada)
                     resultado = processar_imagem_opencv(
                         img, st.session_state.corretor_gabarito_salvo
@@ -455,23 +447,22 @@ with col_captura:
                             label="Nota Calculada",
                             value=f"{resultado['nota']} / {resultado['total']}",
                         )
+
                         with st.expander(
                             "Expandir Log de Correção Analítico", expanded=True
                         ):
                             st.text(resultado["detalhes"])
 
-                        st.markdown("### Auditoria Visual do Algoritmo")
+                        st.markdown("### Auditoria Visual (Contour Mapping)")
                         col_debug1, col_debug2 = st.columns(2)
 
                         with col_debug1:
-                            st.markdown("**Imagem Alinhada**")
+                            st.markdown("**Bolinhas Mapeadas (Verde)**")
                             st.image(
                                 resultado["img_alinhada"], use_container_width=True
                             )
                         with col_debug2:
-                            st.markdown(
-                                "**Visão do Robô (Ignorando sombras e bordas)**"
-                            )
+                            st.markdown("**Visão Binária Global**")
                             st.image(
                                 resultado["img_grade"],
                                 use_container_width=True,
