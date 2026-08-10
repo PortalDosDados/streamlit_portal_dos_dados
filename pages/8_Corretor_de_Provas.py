@@ -51,15 +51,21 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         img = np.array(imagem_pil)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-        largura_img, altura_img = 700, 700
+        # Redimensionamento Proporcional (Evita distorcer retângulos em quadrados)
+        h_orig, w_orig = img.shape[:2]
+        largura_img = 700
+        proporcao = largura_img / float(w_orig)
+        altura_img = int(h_orig * proporcao)
+
         img = cv2.resize(img, (largura_img, altura_img))
         img_cinza = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # ETAPA 2: Detecção dos Marcadores Fiduciários
-        # Suaviza a imagem e aplica binarização invertida (escuro vira branco)
         img_desfoque = cv2.GaussianBlur(img_cinza, (5, 5), 0)
+
+        # Binarização Inteligente de Otsu (Adapta-se à iluminação da foto)
         _, img_bin_marcadores = cv2.threshold(
-            img_desfoque, 120, 255, cv2.THRESH_BINARY_INV
+            img_desfoque, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
         )
 
         contornos, _ = cv2.findContours(
@@ -70,12 +76,12 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
 
         for c in contornos:
             area = cv2.contourArea(c)
-            # Filtro 1: Remove ruídos minúsculos e blocos gigantes
-            if 100 < area < 5000:
+            # Filtro 1: Margem de área ampliada para tolerar diferentes distâncias de câmera
+            if 50 < area < 15000:
                 x, y, w, h = cv2.boundingRect(c)
                 aspect_ratio = float(w) / h
 
-                # Filtro 2: A forma deve ser quadrada (margem de tolerância 0.7 a 1.3)
+                # Filtro 2: A forma deve ser quadrada
                 if 0.7 <= aspect_ratio <= 1.3:
                     solidez = area / float(w * h)
 
@@ -84,22 +90,19 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
                         marcadores_validos.append((area, c))
 
         # Ordena os quadrados encontrados pela área (do maior para o menor)
-        # e seleciona os 4 maiores. Isso previne falhas se a câmera pegar um
-        # botão preto de camisa ou algo semelhante no fundo.
         marcadores_validos.sort(key=lambda x: x[0], reverse=True)
         quatro_maiores = [item[1] for item in marcadores_validos[:4]]
 
         if len(quatro_maiores) < 4:
             return {
                 "sucesso": False,
-                "mensagem": f"Erro: Foram encontrados apenas {len(quatro_maiores)} quadrados marcadores. Posicione a câmera de modo que os 4 cantos fiquem visíveis.",
+                "mensagem": f"Erro: Foram encontrados apenas {len(quatro_maiores)} quadrados marcadores. Certifique-se de que a foto está bem iluminada e os 4 cantos estão visíveis.",
             }
 
         # ETAPA 3: Cálculo dos Centroides e Alinhamento
         centros = []
         for c in quatro_maiores:
             M = cv2.moments(c)
-            # Evita divisão por zero (segurança)
             if M["m00"] != 0:
                 cX = int(M["m10"] / M["m00"])
                 cY = int(M["m01"] / M["m00"])
@@ -110,7 +113,7 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
             [[0, 0], [largura_img, 0], [0, altura_img], [largura_img, altura_img]]
         )
 
-        # Mapeia a imagem ancorando os 4 centros dos quadrados nos 4 cantos da nova imagem
+        # Mapeia a imagem ancorando os 4 centros dos quadrados
         matriz = cv2.getPerspectiveTransform(pontos_papel, pontos_destino)
         img_alinhada = cv2.warpPerspective(img, matriz, (largura_img, altura_img))
 
@@ -128,13 +131,18 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         )
 
         # ETAPA 4.1: Recorte da Região de Interesse (ROI)
-        # Os novos cortes são menores pois a imagem alinhada já começa no centro dos marcadores
-        corte_topo = 40  # Remove cabeçalho e instrução
+        corte_topo = 40
         corte_base = 20
-        corte_esq = (
-            55  # Remove as numerações (01., 02.) para evitar leitura de tinta falsa
-        )
+        corte_esq = 55
         corte_dir = 20
+
+        if (
+            altura_img <= corte_topo + corte_base
+            or largura_img <= corte_esq + corte_dir
+        ):
+            raise ValueError(
+                "O tamanho da imagem alinhada é muito pequeno para os cortes definidos."
+            )
 
         img_grade_limpa = img_binaria[
             corte_topo : altura_img - corte_base, corte_esq : largura_img - corte_dir
@@ -149,12 +157,10 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         if n_colunas < 1:
             n_colunas = 1
 
-        # A altura precisa ser múltipla de 25 para dividir em 25 linhas exatas.
         altura_ideal = (
             img_grade_limpa.shape[0] // max_linhas_coluna
         ) * max_linhas_coluna
 
-        # Cada coluna deve ser um múltiplo de 5 para que as 5 alternativas sejam igualmente divididas.
         largura_por_coluna = img_grade_limpa.shape[1] // n_colunas
         largura_por_coluna = (largura_por_coluna // qtd_alternativas) * qtd_alternativas
         largura_ideal = largura_por_coluna * n_colunas
@@ -166,14 +172,11 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         caixas_alternativas = []
 
         for coluna in colunas:
-            # Descarrega 20% da margem esquerda da coluna para apagar números como "26.".
             margem_esquerda = int(coluna.shape[1] * 0.2)
             coluna_sem_numeros = coluna[:, margem_esquerda:]
 
-            # Cada coluna corresponde a até 25 questões; dividimos em 25 linhas exatas.
             linhas_coluna = np.vsplit(coluna_sem_numeros, max_linhas_coluna)
             for linha in linhas_coluna:
-                # Dentro de cada linha, existem 5 alternativas.
                 alternativas = np.hsplit(linha, qtd_alternativas)
                 for caixa in alternativas:
                     caixas_alternativas.append(caixa)
@@ -182,8 +185,8 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
         respostas_aluno_indices = []
         indice_caixa = 0
 
-        area_caixa = (altura_ideal // qtd_questoes) * (
-            largura_ideal // qtd_alternativas
+        area_caixa = (altura_ideal // max_linhas_coluna) * (
+            largura_ideal // n_colunas // qtd_alternativas
         )
         limite_pixels = area_caixa * 0.15
 
@@ -248,38 +251,31 @@ def processar_imagem_opencv(imagem_pil, gabarito_oficial):
 def gerar_gabarito_pdf(qtd_questoes):
     """
     Gera um arquivo PDF contendo um template de gabarito em uma única página A4.
-    Os campos de identificação (Nome/Data) estão fora da área dos marcadores
-    fiduciários para garantir que o OpenCV não capture a tinta da caneta do aluno.
     """
     buffer = io.BytesIO()
-
     c = canvas.Canvas(buffer, pagesize=A4)
     largura, altura = A4
     margem_externa = 30
 
-    # --- CABEÇALHO E IDENTIFICAÇÃO (AGORA FORA DA ZONA DE CAPTURA) ---
+    # --- CABEÇALHO E IDENTIFICAÇÃO ---
     c.setFont("Helvetica-Bold", 14)
     c.drawCentredString(
         largura / 2, altura - 30, "Gabarito Padrão - Correção Automática"
     )
 
     c.setFont("Helvetica", 11)
-    # Alinhado à margem esquerda
     c.drawString(
         margem_externa,
         altura - 60,
         "Nome: ___________________________________________________________",
     )
-    # Alinhado à direita
     c.drawString(largura - margem_externa - 130, altura - 60, "Data: ___/___/20__")
 
-    # --- MARCADORES FIDUCIÁRIOS (ÂNCORAS PARA O OPENCV) ---
-    # Os marcadores superiores foram rebaixados (Y = 90) para ficar abaixo do cabeçalho
+    # --- MARCADORES FIDUCIÁRIOS ---
     margem_sup_marcadores = 90
     tamanho_marcador = 25
     c.setFillColor(colors.black)
 
-    # Top-Left
     c.rect(
         margem_externa,
         altura - margem_sup_marcadores - tamanho_marcador,
@@ -287,7 +283,6 @@ def gerar_gabarito_pdf(qtd_questoes):
         tamanho_marcador,
         fill=1,
     )
-    # Top-Right
     c.rect(
         largura - margem_externa - tamanho_marcador,
         altura - margem_sup_marcadores - tamanho_marcador,
@@ -295,9 +290,7 @@ def gerar_gabarito_pdf(qtd_questoes):
         tamanho_marcador,
         fill=1,
     )
-    # Bottom-Left
     c.rect(margem_externa, margem_externa, tamanho_marcador, tamanho_marcador, fill=1)
-    # Bottom-Right
     c.rect(
         largura - margem_externa - tamanho_marcador,
         margem_externa,
@@ -314,18 +307,14 @@ def gerar_gabarito_pdf(qtd_questoes):
 
     largura_util = largura - 2 * margem_externa
     largura_coluna = largura_util / n_colunas
-
-    # O topo da grade acompanha os marcadores rebaixados
     topo_grade = altura - margem_sup_marcadores - 50
     base_grade = margem_externa + 20
     altura_util = topo_grade - base_grade
     altura_linha = altura_util / max_linhas_coluna
-
     alternativas = ["A", "B", "C", "D", "E"]
 
     for coluna_idx in range(n_colunas):
         x_coluna = margem_externa + coluna_idx * largura_coluna
-
         espaco_numero = 30
         espaco_bolinha = largura_coluna - espaco_numero - 10
         passo_bolinha = espaco_bolinha / len(alternativas)
@@ -337,7 +326,6 @@ def gerar_gabarito_pdf(qtd_questoes):
                 break
 
             y_centro = topo_grade - linha_idx * altura_linha - altura_linha / 2
-
             c.setFont("Helvetica", 10)
             c.drawString(x_coluna + 2, y_centro - 4, f"{questao_idx + 1:02d}.")
 
@@ -358,7 +346,7 @@ def gerar_gabarito_pdf(qtd_questoes):
 
 
 # =============================================================================
-# 4. INTERFACE DO USUÁRIO (FRONT-END STREAMLIT) - MOVIDO PARA BAIXO
+# 4. INTERFACE DO USUÁRIO (FRONT-END STREAMLIT)
 # =============================================================================
 
 st.title("🎯 Corretor Automático de Gabaritos")
@@ -409,11 +397,8 @@ with col_config:
 
     st.markdown("---")
     st.subheader("2. Gerar Folha Padrão")
-    st.markdown(
-        "Imprima este arquivo e utilize-o para aplicar a prova. Ele contém marcações para garantir a leitura precisa."
-    )
+    st.markdown("Imprima este arquivo e utilize-o para aplicar a prova.")
 
-    # Função agora é reconhecida pois foi declarada antes de ser chamada!
     pdf_buffer = gerar_gabarito_pdf(st.session_state.corretor_qtd_questoes)
 
     st.download_button(
