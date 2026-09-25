@@ -1,0 +1,76 @@
+import streamlit as st
+import pandas as pd
+
+# Configuração global da página
+st.set_page_config(page_title="Gestão de Alocação de Ativos", layout="wide")
+
+# 1. Carregamento dos Dados
+# Em produção, a conexão apontaria para a API do Supabase
+@st.cache_data
+def carregar_dados():
+    df_lotacao = pd.read_csv("DB_Alocacao_Escolar_Dione_Lotacao_Ambientes.csv")
+    df_ambientes = pd.read_csv("DB_Alocacao_Escolar_Dione_Ambientes.csv")
+    df_docentes = pd.read_csv("DB_Alocacao_Escolar_Dione_Docentes.csv")
+    return df_lotacao, df_ambientes, df_docentes
+
+df_lotacao, df_ambientes, df_docentes = carregar_dados()
+
+# 2. Navegação
+st.sidebar.title("Portal dos Dados")
+menu = st.sidebar.radio("Selecione a operação:", ["Acompanhamento de Ocupação", "Lançamento de Turma"])
+
+# 3. Interface de Acompanhamento
+if menu == "Acompanhamento de Ocupação":
+    st.header("Acompanhamento de Infraestrutura")
+
+    # KPIs Rápidos
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Ambientes Monitorados", len(df_ambientes))
+    col2.metric("Docentes Ativos", len(df_docentes))
+    col3.metric("Vagas Disponíveis (Média)", round(df_lotacao['Vagas Disponíveis'].mean(), 1))
+
+    st.markdown("---")
+
+    # Interação para análise de dados
+    st.subheader("Quadro de Lotação Atual")
+    dia_selecionado = st.selectbox("Filtrar por Dia da Semana", ["Todos"] + list(df_lotacao['Dia da Semana'].dropna().unique()))
+
+    if dia_selecionado != "Todos":
+        df_exibicao = df_lotacao[df_lotacao['Dia da Semana'] == dia_selecionado]
+    else:
+        df_exibicao = df_lotacao
+
+    st.dataframe(df_exibicao, use_container_width=True)
+
+# 4. Interface de Lançamento
+elif menu == "Lançamento de Turma":
+    st.header("Nova Alocação de Turma")
+
+    # Formulário para envio de dados
+    with st.form("form_nova_alocacao"):
+        st.subheader("Detalhes da Grade Curricular")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            dia = st.selectbox("Dia da Semana", ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"])
+            turno = st.selectbox("Turno", ["Manhã", "Tarde", "Noite"])
+            horario = st.time_input("Horário de Início")
+            turma_id = st.text_input("Identificação da Turma")
+
+        with col2:
+            ambiente = st.selectbox("Ambiente Destino", df_ambientes['Nome_Ambiente'].tolist())
+            docente = st.selectbox("Docente Designado", df_docentes['Nome'].tolist())
+            disciplina = st.text_input("Disciplina")
+            alunos_alocados = st.number_input("Quantidade de Alunos", min_value=1, step=1)
+
+        submitted = st.form_submit_button("Validar e Registrar Alocação")
+
+        # 5. Validação de Regras de Negócio
+        if submitted:
+            cap_maxima = df_ambientes[df_ambientes['Nome_Ambiente'] == ambiente]['Capacidade_Fisica'].values[0]
+
+            if alunos_alocados > cap_maxima:
+                st.error(f"Erro de Confiabilidade: O ambiente {ambiente} suporta um limite de {cap_maxima} alunos. Reduza o tamanho da turma ou aloque um laboratório maior.")
+            else:
+                st.success(f"Sucesso: Alocação da turma {turma_id} registrada no sistema!")
+                # Aqui as rotinas de DML entrariam para atualizar a base de dados
