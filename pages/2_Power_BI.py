@@ -1,158 +1,161 @@
 import streamlit as st
+from utils.ui import load_css, get_asset_path, render_footer
 
-# 1. CONFIGURAÇÃO (Sempre a primeira linha do Streamlit)
+# 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(
     page_title='Portal dos Dados - Power BI',
-    page_icon='assets/power_bi.png',
+    page_icon=get_asset_path('power_bi.png'),
     layout='wide',
 )
 
-# CSS
-with open('style.css', 'r', encoding='utf-8') as f:
-    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+# Carregamento de estilos globais
+load_css('style.css')
 
-st.image('assets/power_bi.png', width=160)
-st.title('Power BI')
+# Header com ícone e introdução
+col_icon, col_title = st.columns([1, 6], vertical_alignment="center")
+with col_icon:
+    st.image(get_asset_path('power_bi.png'), width=110)
+with col_title:
+    st.title('Power BI & Business Intelligence')
+    st.caption('Soluções analíticas de ponta a ponta: do ETL e modelagem dimensional aos dashboards executivos.')
 
 st.markdown(
     '''
 <div class='justificado'>
-O <b>Power BI</b> tem sido a minha principal ferramenta para visualização de dados.
-É simples de utilizar e amplamente adotado no mercado.
-Aqui apresento alguns projetos que posso compartilhar publicamente.
+O <b>Power BI</b> é uma das ferramentas centrais do meu ecossistema de dados.
+Aqui estão projetos públicos demonstrando modelagem dimensional (Star Schema),
+indicadores de performance (KPIs), visualizações interativas e integração com engenharia de dados.
 </div>
 ''',
     unsafe_allow_html=True,
 )
 
-# -----------------------------------------------------------
-# SEÇÃO 1 — ELEIÇÕES
-# -----------------------------------------------------------
-st.subheader('Dashboard Eleições Presidenciais')
-
-st.markdown(
-    '''
-<div class='justificado'>
-Análise completa das eleições presidenciais no Brasil, transformando dados dispersos
-em visualizações claras e úteis para entender o comportamento do eleitorado.
-</div>
-''',
-    unsafe_allow_html=True,
-)
-
-st.subheader('Visualização do Dashboard')
-st.video('https://www.youtube.com/watch?v=hQVrG6j-OMs')
-
-st.subheader('Principais recursos e análises')
-st.markdown(
-    '''
-- Visão nacional de votos
-- Comparação entre candidatos
-- Destaque automático do mais votado
-- Ranking detalhado
-- Treemap por estado
-- Filtros interativos (ano, turno, estado)
-'''
-)
+# Navegação organizada por abas temáticas
+tab_eleicoes, tab_logistica, tab_financeiro, tab_rh = st.tabs([
+    '🗳️ Eleições Presidenciais',
+    '🚚 Operações Logísticas',
+    '💰 Execução Orçamentária',
+    '👥 Folha de Pagamento',
+])
 
 # -----------------------------------------------------------
-# SEÇÃO 2 — LOGÍSTICA
+# ABA 1 — ELEIÇÕES
 # -----------------------------------------------------------
-st.subheader('Dashboard Logístico Interativo')
+with tab_eleicoes:
+    st.subheader('Dashboard de Análise Eleitoral Presidencial')
+    st.markdown(
+        '''
+        <div class='justificado'>
+        Análise exploratória e visual das eleições presidenciais brasileiras, consolidando milhões de registros
+        em uma interface rápida e intuitiva para acompanhamento da dinâmica dos votos em diferentes recortes federativos.
+        </div>
+        ''',
+        unsafe_allow_html=True,
+    )
 
-st.markdown(
-    '''
-<div class='justificado'>
-Análise consolidada do desempenho logístico e financeiro da operação de transporte.
-Inclui KPIs, custos, viagens, eficiência e manutenção por marca e tipo de veículo.
-</div>
-''',
-    unsafe_allow_html=True,
-)
-
-st.video('https://www.youtube.com/watch?v=V6D1s--n_oA&t=12s')
-
-st.subheader('Principais Análises')
-st.markdown(
-    '''
-- Visão Financeira Consolidada
-- Volume mensal de viagens
-- KPI de eficiência de entregas
-- Análise detalhada de custos de manutenção
-'''
-)
-
-# -----------------------------------------------------------
-# SEÇÃO 3 — EXECUÇÃO FINANCEIRA
-# -----------------------------------------------------------
-st.subheader('Dashboard de Execução Financeira (Setor Público)')
-
-st.markdown(
-    '''
-<div class='justificado'>
-Dashboard executivo para análise de empenho, pagamento e evolução histórica do orçamento.
-''',
-    unsafe_allow_html=True,
-)
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.image('assets/fin_01.png', width=700)
-
-with col2:
-    st.image('assets/fin_02.png', width=700)
-
-st.subheader('Principais Indicadores')
-st.markdown(
-    '''
-- Total Empenho
-- Total a Pagar
-- Total Pago
-- KPI de eficiência (% empenho pago)
-- Histórico anual
-'''
-)
+    col_vid, col_det = st.columns([3, 2], gap='large')
+    with col_vid:
+        st.video('https://www.youtube.com/watch?v=hQVrG6j-OMs')
+    with col_det:
+        st.markdown('#### 🎯 Destaques e Funcionalidades')
+        st.markdown(
+            '''
+            * **Visão Macro e Micro:** Distribuição nacional agregada e recorte granular por estado.
+            * **Comparação Direta:** Benchmark dinâmico entre candidatos com apuração percentual e absoluta.
+            * **Treemaps & Rankings:** Visualização proporcional da representatividade de votos.
+            * **Filtros Sincronizados:** Segmentação por ano eleitoral, turno e unidade federativa.
+            '''
+        )
 
 # -----------------------------------------------------------
-# SEÇÃO 4 — FOLHA DE PAGAMENTO
+# ABA 2 — LOGÍSTICA
 # -----------------------------------------------------------
-st.subheader('Dashboard Análise da Folha de Pagamento')
+with tab_logistica:
+    st.subheader('Painel de Gestão e Eficiência de Frotas')
+    st.markdown(
+        '''
+        <div class='justificado'>
+        Visão integrada para gestão de transporte e manutenção pesada. O painel correlaciona custos operacionais,
+        quilometragem rodada e paradas de manutenção para otimização do custo por quilômetro (R$/km) e disponibilidade da frota.
+        </div>
+        ''',
+        unsafe_allow_html=True,
+    )
 
-st.markdown(
-    '''
-<div class='justificado'>
-Pipeline completo de BI: ETL, modelagem em Data Warehouse e visualização interativa
-para análise da folha de pagamento da Prefeitura.
-</div>
-''',
-    unsafe_allow_html=True,
-)
+    col_vid, col_det = st.columns([3, 2], gap='large')
+    with col_vid:
+        st.video('https://www.youtube.com/watch?v=V6D1s--n_oA&t=12s')
+    with col_det:
+        st.markdown('#### 🎯 Indicadores Monitorados')
+        st.markdown(
+            '''
+            * **Custos de Manutenção:** Acompanhamento por fabricante, modelo e categoria de peça.
+            * **Volumetria Operacional:** Total de viagens expedidas e taxa de cumprimento de rotas.
+            * **Disponibilidade Física:** Ocorrências de paradas corretivas x preventivas.
+            * **KPI de Eficiência:** Cumprimento de prazos de entrega (On-Time Delivery).
+            '''
+        )
 
-col1, col2, col3 = st.columns(3)
+# -----------------------------------------------------------
+# ABA 3 — EXECUÇÃO FINANCEIRA
+# -----------------------------------------------------------
+with tab_financeiro:
+    st.subheader('Execução Orçamentária e Gestão de Despesas Públicas')
+    st.markdown(
+        '''
+        <div class='justificado'>
+        Painel executivo voltado para a transparência e fiscalização do ciclo orçamentário
+        (Fixação, Empenho, Liquidação e Pagamento). Permite acompanhar o ritmo de consumo dos recursos e restos a pagar.
+        </div>
+        ''',
+        unsafe_allow_html=True,
+    )
 
-with col1:
-    st.image('assets/pmf_01.png', width=700)
-with col2:
-    st.image('assets/pmf_02.jpg', width=700)
-with col3:
-    st.image('assets/pmf_03.jpg', width=700)
+    col1, col2 = st.columns(2, gap='medium')
+    with col1:
+        st.image(get_asset_path('fin_01.png'), caption='Visão Geral de Empenhos e Saldos', use_container_width=True)
+    with col2:
+        st.image(get_asset_path('fin_02.png'), caption='Evolução Histórica e Restos a Pagar', use_container_width=True)
 
-st.subheader('Principais Recursos do Painel')
-st.markdown(
-    '''
-- ETL com Pentaho
-- Modelo Estrela (DW)
-- Filtros interativos
-- KPIs macro
-- Análises por grau de instrução e cargo
-- Tabela detalhada por servidor
-'''
-)
+    st.markdown('#### 📊 Indicadores-Chave (KPIs)')
+    col_kpi1, col_kpi2, col_kpi3 = st.columns(3)
+    col_kpi1.info('**Total Empenhado:** Compromissos formalizados pelo órgão')
+    col_kpi2.warning('**Total a Liquidar/Pagar:** Passivo pendente de quitação')
+    col_kpi3.success('**Índice de Execução:** % de empenhos efetivamente liquidados')
 
-# ============================================================================
-# RODAPÉ E NOTAS
-# ============================================================================
-st.space()
-# Imagem de fundo (certifique-se que a pasta assets existe)
-st.image('./assets/fundo.jpg', use_container_width=True)
+# -----------------------------------------------------------
+# ABA 4 — FOLHA DE PAGAMENTO
+# -----------------------------------------------------------
+with tab_rh:
+    st.subheader('Data Warehouse & BI de Folha de Pagamento Municipal')
+    st.markdown(
+        '''
+        <div class='justificado'>
+        Arquitetura analítica completa: pipeline de ingestão e transformação via <b>Pentaho Data Integration (PDI)</b>,
+        modelagem em esquema estrela (Star Schema) e front-end com drill-down detalhado da folha funcional.
+        </div>
+        ''',
+        unsafe_allow_html=True,
+    )
+
+    col1, col2, col3 = st.columns(3, gap='small')
+    with col1:
+        st.image(get_asset_path('pmf_01.png'), caption='Visão Consolidada da Folha', use_container_width=True)
+    with col2:
+        st.image(get_asset_path('pmf_02.jpg'), caption='Distribuição por Grau de Instrução', use_container_width=True)
+    with col3:
+        st.image(get_asset_path('pmf_03.jpg'), caption='Detalhamento Individual e Lotação', use_container_width=True)
+
+    st.markdown('#### 🛠️ Pilha Tecnológica do Projeto')
+    st.markdown(
+        '''
+        * **Engenharia de Dados:** ETL automatizado com Pentaho Data Integration limpando bases legadas.
+        * **Modelagem Dimensional:** Fato Folha de Pagamento conectada a dimensões Cargo, Secretaria e Servidor.
+        * **Segurança e Governança:** Agregações seguras preservando a conformidade legal.
+        '''
+    )
+
+# -----------------------------------------------------------
+# RODAPÉ
+# -----------------------------------------------------------
+render_footer()

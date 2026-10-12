@@ -19,6 +19,6 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# --- Chaves
-.streamlit
-serecrets.toml
+# --- Chaves e Segredos do Streamlit ---
+.streamlit/secrets.toml
+*.bak
