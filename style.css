@@ -85,25 +85,19 @@
 
 /* Container da Métrica (O cartãozinho) */
 div[data-testid="stMetric"] {
-    background-color: #f0f2f6;
-    border: 1px solid rgba(128, 128, 128, 0.2);
+    background-color: #1e222a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
     text-align: center;
-}
-
-/* Adaptação para Modo Escuro */
-@media (prefers-color-scheme: dark) {
-    div[data-testid="stMetric"] {
-        background-color: #262730;
-    }
 }
 
 /* O Valor Numérico/Texto Principal */
 div[data-testid="stMetricValue"] {
     font-size: 1.8rem !important;
     font-weight: 700;
+    color: #FFFFFF !important;
 }
 
 /* O Rótulo (Label) acima do valor */
@@ -111,6 +105,55 @@ div[data-testid="stMetricLabel"] {
     display: flex;
     justify-content: center;
     width: 100%;
+    color: #A0AEC0 !important;
+}
+
+/* Card customizado para KPIs industriais e status */
+.metric-card {
+    background-color: #1e222a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 16px 20px;
+    border-radius: 10px;
+    border-left: 5px solid #00D4FF;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: #FAFAFA;
+    margin-bottom: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.metric-card-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #A0AEC0;
+    margin-bottom: 4px;
+}
+
+.metric-card-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    line-height: 1.2;
+}
+
+.metric-card-subtitle {
+    font-size: 0.85rem;
+    color: #CBD5E0;
+    margin-top: 4px;
+}
+
+/* Rodapé Padronizado */
+.portal-footer {
+    text-align: center;
+    padding: 16px 0 24px 0;
+    color: #A0AEC0;
+    font-size: 0.85rem;
 }
 
 /* ============================

@@ -1,8 +1,10 @@
-import streamlit as st
+from datetime import datetime
+from io import BytesIO
 import pandas as pd
 import plotly.graph_objects as go
-from io import BytesIO
-from datetime import datetime
+import streamlit as st
+from utils.ui import load_css, get_asset_path, render_footer, render_metric_card
+from utils.business_rules import calcular_metricas_curva_s
 
 # ============================================================================
 # 1. SETUP E CONFIGURAÇÕES GERAIS
@@ -13,47 +15,18 @@ st.set_page_config(
     layout="wide",
 )
 
-
 # ============================================================================
 # 2. ESTILIZAÇÃO (CSS) E ASSETS
 # ============================================================================
-def carregar_css(nome_arquivo):
-    """Carrega arquivo CSS externo para estilização personalizada."""
-    try:
-        with open(nome_arquivo, encoding="utf-8") as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    except FileNotFoundError:
-        pass
-
-
-# Carrega CSS externo e aplica estilos inline para KPIs e Botões
-carregar_css("style.css")
-
-# AJUSTE RESPONSIVO: Adicionado 'margin-bottom' para separar cards no mobile
-st.markdown(
-    """
-    <style>
-        .stButton button { width: 100%; height: 3.5rem; font-weight: bold; font-size: 1.1rem; }
-        .metric-card {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 5px solid #00CC96;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
-            color: #333;
-            margin-bottom: 20px; /* Garante espaçamento no celular */
-        }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+load_css("style.css")
 
 
 # ============================================================================
 # 3. FUNÇÕES DE APOIO (BACKEND)
 # ============================================================================
+@st.cache_data
 def generate_excel_template():
-    """Gera o binário do arquivo Excel modelo para download."""
+    """Gera o binário do arquivo Excel modelo para download com cache de performance."""
     df_template = pd.DataFrame(
         {
             "Atividade": [
@@ -97,13 +70,12 @@ def generate_excel_template():
     )
 
     output = BytesIO()
-    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
-        df_template.to_excel(writer, index=False, sheet_name="Cronograma")
-        # Ajuste automático de largura de colunas
-        worksheet = writer.sheets["Cronograma"]
-        for i, col in enumerate(df_template.columns):
-            column_len = max(df_template[col].astype(str).map(len).max(), len(col)) + 2
-            worksheet.set_column(i, i, column_len)
+    try:
+        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+            df_template.to_excel(writer, index=False, sheet_name="Cronograma")
+    except Exception:
+        with pd.ExcelWriter(output) as writer:
+            df_template.to_excel(writer, index=False, sheet_name="Cronograma")
 
     return output.getvalue()
 
@@ -253,7 +225,14 @@ if uploaded_file:
         "Término Real",
     ]
     for col in date_columns:
-        df[col] = pd.to_datetime(df[col], format="%d/%m/%Y - %H:%M", errors="coerce")
+        if not pd.api.types.is_datetime64_any_dtype(df[col]):
+            parsed = pd.to_datetime(df[col], format="%d/%m/%Y - %H:%M", errors="coerce")
+            mask_failed = parsed.isna() & df[col].notna()
+            if mask_failed.any():
+                parsed.loc[mask_failed] = pd.to_datetime(
+                    df.loc[mask_failed, col], dayfirst=True, errors="coerce"
+                )
+            df[col] = parsed
 
     # Ordenação Cronológica Fundamental
     df = df.sort_values(by="Início Planejado").reset_index(drop=True)
@@ -298,52 +277,28 @@ if uploaded_file:
         percentual_planejado = df.loc[ultimo_idx_valid, "% Avanço Planejado Acumulado"]
 
         # SPI
-        spi = (
-            (percentual_realizado / percentual_planejado)
-            if percentual_planejado > 0
-            else 1.0
+        metricas = calcular_metricas_curva_s(
+            percentual_realizado, percentual_planejado, total_duracao_planejada
         )
-
-        # Forecast (%)
-        desvio_estimado = (100 / spi) - 100 if spi > 0 else 0
-
-        # Forecast (Horas)
-        estimativa_horas_total = (
-            total_duracao_planejada / spi if spi > 0 else total_duracao_planejada
-        )
-        gap_horas = estimativa_horas_total - total_duracao_planejada
-
     else:
-        spi = 1.0
-        desvio_estimado = 0.0
-        gap_horas = 0.0
+        metricas = calcular_metricas_curva_s(0.0, 0.0, total_duracao_planejada)
 
-    # Definição de Cores e Status
-    if desvio_estimado > 5:
-        status_text, cor_status = "⚠️ POTENCIAL ATRASO", "#ffa726"
-        if desvio_estimado > 15:
-            status_text, cor_status = "🔴 CRÍTICO / ATRASO", "#ef5350"
-    else:
-        status_text, cor_status = "✅ NO PRAZO", "#66bb6a"
+    spi = metricas["spi"]
+    desvio_estimado = metricas["desvio_estimado"]
+    gap_horas = metricas["gap_horas"]
+    status_text = metricas["status_text"]
+    cor_status = metricas["cor_status"]
 
     # Renderização dos Cards (KPIs)
-    c1, c2, c3 = st.columns(3)
-    c1.markdown(
-        f"""<div class="metric-card"><b>Eficiência (SPI)</b><br><h2>{spi:.2f}</h2></div>""",
-        unsafe_allow_html=True,
-    )
-
     cor_borda = "#ef5350" if desvio_estimado > 0 else "#66bb6a"
-    # Exibição híbrida: Porcentagem + Horas
-    c2.markdown(
-        f"""<div class="metric-card" style="border-left-color:{cor_borda}"><b>Desvio Estimado</b><br><h2>{desvio_estimado:+.2f}% <span style="font-size:0.6em; color:#555">({gap_horas:+.1f}h)</span></h2></div>""",
-        unsafe_allow_html=True,
-    )
-
-    c3.markdown(
-        f"""<div class="metric-card" style="border-left-color:{cor_status}"><b>Status Geral</b><br><h2>{status_text}</h2></div>""",
-        unsafe_allow_html=True,
-    )
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        cor_spi = "#00CC96" if spi >= 1.0 else "#ffa726" if spi >= 0.9 else "#ef5350"
+        render_metric_card("Eficiência (SPI)", f"{spi:.2f}", subtitle="Índice de Prazo EVM", border_color=cor_spi)
+    with c2:
+        render_metric_card("Desvio Estimado", f"{desvio_estimado:+.2f}%", subtitle=f"Impacto: {gap_horas:+.1f}h", border_color=cor_borda)
+    with c3:
+        render_metric_card("Status Geral", status_text, subtitle="Classificação Preditiva", border_color=cor_status)
 
     st.divider()
 
@@ -428,7 +383,7 @@ if uploaded_file:
                 x=1,
             ),
             hovermode="x unified",
-            template="seaborn",
+            template="plotly_dark",
         )
 
         st.plotly_chart(fig, use_container_width=True)
@@ -445,11 +400,4 @@ if uploaded_file:
 else:
     st.info("💡 Realize o upload para iniciar a análise.")
 
-# ============================================================================
-# 9. RODAPÉ
-# ============================================================================
-st.divider()
-try:
-    st.image("./assets/fundo.jpg", use_container_width=True)
-except:
-    st.caption("Portal dos Dados | Confiabilidade Aplicada")
+render_footer()
